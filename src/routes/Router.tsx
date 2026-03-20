@@ -1,6 +1,6 @@
 import { lazy } from 'react';
 import { Navigate, createBrowserRouter } from "react-router";
-
+import { ProductCatalog } from "../components/products/ProductCatalog.tsx";
 /* ***Layouts**** */
 const FullLayout = lazy(() => import('../layouts/full/FullLayout'));
 const BlankLayout = lazy(() => import('../layouts/blank/BlankLayout'));
@@ -30,6 +30,7 @@ const Router = [
     element: <FullLayout />,
     children: [
       { path: '/', exact: true, element: <Dashboard /> },
+      { path: '/products', exact: true, element: <ProductCatalog /> },
       { path: '/ui/typography', exact: true, element: <Typography /> },
       { path: '/ui/table', exact: true, element: <Table /> },
       { path: '/ui/form', exact: true, element: <Form /> },
