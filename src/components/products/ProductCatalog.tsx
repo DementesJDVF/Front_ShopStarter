@@ -84,6 +84,9 @@ export function ProductCatalog() {
       <h2 className="catalog__title">Catálogo</h2>
 
       <div className="catalog__grid">
+
+
+
         {products.map((p) => (
           <article key={p.id} className="product-card">
             <div className="product-card__vendor">{p.vendor}</div>
