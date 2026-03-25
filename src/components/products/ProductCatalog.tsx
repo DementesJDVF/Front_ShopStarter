@@ -43,7 +43,7 @@ export function ProductCatalog() {
         setLoading(true);
         setError(null);
 
-        const res = await fetch("http://127.0.0.1:8000/api/products/read/");
+        const res = await fetch("http://127.0.0.1:8000/api/products");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const data: ApiProduct[] = await res.json();
@@ -55,7 +55,7 @@ export function ProductCatalog() {
           return {
             id: p.id,
             title: p.name,
-            price: Number(p.price), 
+            price: Number(p.price),
             category: p.category_name,
             image: mainImage ?? fallbackImage ?? "",
             vendor: p.vendor_name,
