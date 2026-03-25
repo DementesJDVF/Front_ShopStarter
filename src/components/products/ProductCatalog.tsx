@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import "./ProductCatalog.css";
 
 type ApiProductImage = {
@@ -34,6 +35,7 @@ export function ProductCatalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let cancelled = false;
@@ -71,9 +73,7 @@ export function ProductCatalog() {
     }
 
     load();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   if (loading) return <p className="catalog__status">Cargando catálogo...</p>;
@@ -84,12 +84,11 @@ export function ProductCatalog() {
       <h2 className="catalog__title">Catálogo</h2>
 
       <div className="catalog__grid">
-
-
-
         {products.map((p) => (
           <article key={p.id} className="product-card">
+
             <div className="product-card__vendor">{p.vendor}</div>
+
             <div className="product-card__imageWrap">
               {p.image ? (
                 <img
@@ -104,9 +103,35 @@ export function ProductCatalog() {
                 </div>
               )}
             </div>
+
             <div className="product-card__category">{p.category}</div>
             <div className="product-card__price">${p.price.toFixed(2)}</div>
             <div className="product-card__title">{p.title}</div>
+
+
+            <div className="product-card__footer">
+              <button
+                className="product-card__view-btn"
+                onClick={() => navigate(`/products/${p.id}`)}
+                title="Ver detalle">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                Ver
+              </button>
+            </div>
+
           </article>
         ))}
       </div>
