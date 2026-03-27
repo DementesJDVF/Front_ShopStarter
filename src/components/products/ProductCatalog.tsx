@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { AddProductButton } from "./AddProductButton";
 import "./ProductCatalog.css";
 
 type ApiProductImage = {
@@ -81,7 +82,12 @@ export function ProductCatalog() {
 
   return (
     <section className="catalog">
-      <h2 className="catalog__title">Catálogo</h2>
+
+      {/* ── Header: título + botón agregar ── */}
+      <div className="catalog__header">
+        <h2 className="catalog__title">Catálogo</h2>
+        <AddProductButton />
+      </div>
 
       <div className="catalog__grid">
         {products.map((p) => (
@@ -108,12 +114,12 @@ export function ProductCatalog() {
             <div className="product-card__price">${p.price.toFixed(2)}</div>
             <div className="product-card__title">{p.title}</div>
 
-
             <div className="product-card__footer">
               <button
                 className="product-card__view-btn"
                 onClick={() => navigate(`/products/${p.id}`)}
-                title="Ver detalle">
+                title="Ver detalle"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="18"
