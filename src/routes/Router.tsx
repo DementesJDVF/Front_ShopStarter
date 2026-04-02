@@ -13,7 +13,6 @@ const Shadow = lazy(() => import("../views/shadows/Shadow"));
 const Alert = lazy(() => import("../views/alerts/Alerts"));
 const Solar = lazy(() => import("../views/icons/Solar"));
 const Login = lazy(() => import('../views/auth/login/Login'));
-const Register = lazy(() => import('../views/auth/register/Register'));
 const SamplePage = lazy(() => import('../views/sample-page/SamplePage'));
 const Error = lazy(() => import('../views/auth/error/Error'));
 
@@ -44,7 +43,6 @@ const Router = [
     element: <BlankLayout />,
     children: [
       { path: '/auth/login', element: <Login /> },
-      { path: '/auth/register', element: <Register /> },
       { path: '404', element: <Error /> },
       { path: '/auth/404', element: <Error /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
