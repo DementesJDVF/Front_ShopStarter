@@ -36,8 +36,6 @@ export default function AddProduct() {
         image2_main: false,
     });
 
-
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -100,10 +98,9 @@ export default function AddProduct() {
             is_featured: form.is_featured,
             status: "ACTIVE",
         };
-        // Solo agrega images si hay imágenes 
         if (images.length) body.images = images;
 
-        console.log('BODY A ENVIAR:', body)
+        console.log('BODY A ENVIAR:', body);
         try {
             const res = await fetch("http://127.0.0.1:8000/api/products/create/", {
                 method: "POST",
@@ -114,14 +111,14 @@ export default function AddProduct() {
                 body: JSON.stringify(body),
             });
 
-
             if (!res.ok) {
                 const data = await res.json();
                 throw new Error(JSON.stringify(data, null, 2));
             }
 
             setSuccess(true);
-            setTimeout(() => navigate("/products/create/"), 1500);
+            // ✅ Redirige al catálogo y cierra el formulario
+            setTimeout(() => navigate("/products"), 1500);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Error desconocido");
         } finally {
@@ -141,7 +138,7 @@ export default function AddProduct() {
 
             {success && (
                 <div className="add-product__alert add-product__alert--success">
-                    Producto creado correctamente. Redirigiendo...
+                    Producto creado correctamente. Redirigiendo al catálogo...
                 </div>
             )}
             {error && (
@@ -160,7 +157,6 @@ export default function AddProduct() {
                         {loadingVendors ? (
                             <p className="add-product__loading-text">Cargando vendedores...</p>
                         ) : (
-
                             <select
                                 name="vendor"
                                 value={form.vendor}
