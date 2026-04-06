@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { AddProductButton } from "./AddProductButton";
 import "./ProductCatalog.css";
 
 type ApiProductImage = {
@@ -35,6 +36,7 @@ export function ProductCatalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -76,12 +78,39 @@ export function ProductCatalog() {
     return () => { cancelled = true; };
   }, []);
 
+  async function handleDelete(id: number) {
+    const token = localStorage.getItem("access_token");
+    const authHeaders: Record<string, string> = token
+      ? { Authorization: `Bearer ${token}` }
+      : {};
+
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/products/create/${id}/`, {
+        method: "DELETE",
+        headers: authHeaders,
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Error al eliminar el producto");
+    } finally {
+      setDeleteId(null);
+    }
+  }
+
   if (loading) return <p className="catalog__status">Cargando catálogo...</p>;
   if (error) return <p className="catalog__status catalog__status--error">Error: {error}</p>;
 
   return (
     <section className="catalog">
-      <h2 className="catalog__title">Catálogo</h2>
+
+      {/* ── Header: título + botón agregar ── */}
+      <div className="catalog__header">
+        <h2 className="catalog__title">Catálogo</h2>
+        <AddProductButton />
+      </div>
 
       <div className="catalog__grid">
         {products.map((p) => (
@@ -108,12 +137,37 @@ export function ProductCatalog() {
             <div className="product-card__price">${p.price.toFixed(2)}</div>
             <div className="product-card__title">{p.title}</div>
 
-
             <div className="product-card__footer">
+              <button
+                className="product-card__delete-btn"
+                onClick={() => setDeleteId(p.id)}
+                title="Eliminar producto"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                  <path d="M10 11v6" />
+                  <path d="M14 11v6" />
+                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                </svg>
+                Eliminar
+              </button>
+
               <button
                 className="product-card__view-btn"
                 onClick={() => navigate(`/products/${p.id}`)}
-                title="Ver detalle">
+                title="Ver detalle"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="18"
@@ -135,6 +189,30 @@ export function ProductCatalog() {
           </article>
         ))}
       </div>
+
+      {/* ── Modal de confirmación ── */}
+      {deleteId !== null && (
+        <div className="modal-overlay" onClick={() => setDeleteId(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <p className="modal__question">¿Quieres eliminar este producto?</p>
+            <div className="modal__actions">
+              <button
+                className="modal__btn modal__btn--yes"
+                onClick={() => handleDelete(deleteId)}
+              >
+                Sí
+              </button>
+              <button
+                className="modal__btn modal__btn--no"
+                onClick={() => setDeleteId(null)}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </section>
   );
 }
