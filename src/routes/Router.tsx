@@ -8,6 +8,7 @@ const BlankLayout = lazy(() => import('../layouts/blank/BlankLayout'));
 const Dashboard = lazy(() => import('../views/dashboards/Dashboard'));
 const Typography = lazy(() => import("../views/typography/Typography"));
 const Table = lazy(() => import("../views/tables/Table"));
+const Category = lazy(() => import("../views/categories/Category"));
 const Form = lazy(() => import("../views/forms/Form"));
 const Shadow = lazy(() => import("../views/shadows/Shadow"));
 const Alert = lazy(() => import("../views/alerts/Alerts"));
@@ -31,6 +32,7 @@ const Router = [
       { path: '/products/:id', exact: true, element: <ProductDetail /> },
       { path: '/ui/typography', exact: true, element: <Typography /> },
       { path: '/ui/table', exact: true, element: <Table /> },
+      { path: '/ui/category', exact: true, element: <Category /> },
       { path: '/ui/form', exact: true, element: <Form /> },
       { path: '/ui/alert', exact: true, element: <Alert /> },
       { path: '/ui/shadow', exact: true, element: <Shadow /> },

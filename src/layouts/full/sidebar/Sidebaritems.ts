@@ -111,10 +111,10 @@ const SidebarContent: MenuItem[] = [
     heading: "UTILITIES",
     children: [
       {
-        name: "Products",
-        icon: "solar:cart-outline", 
+        name: "Categorias",
+        icon: "solar:widget-5-outline",
         id: uniqueId(),
-        url: "/products",
+        url: "/ui/category",
         isPro: false,
       },
       {
