@@ -1,21 +1,19 @@
 import { lazy } from 'react';
 import { Navigate, createBrowserRouter } from "react-router";
 import { ProductCatalog } from "../components/products/ProductCatalog.tsx";
+import ProtectedRoute from './ProtectedRoute.tsx';
 
 const FullLayout = lazy(() => import('../layouts/full/FullLayout'));
 const BlankLayout = lazy(() => import('../layouts/blank/BlankLayout'));
 
 const Dashboard = lazy(() => import('../views/dashboards/Dashboard'));
-
 const Typography = lazy(() => import("../views/typography/Typography"));
 const Table = lazy(() => import("../views/tables/Table"));
 const Form = lazy(() => import("../views/forms/Form"));
 const Shadow = lazy(() => import("../views/shadows/Shadow"));
 const Alert = lazy(() => import("../views/alerts/Alerts"));
 
-
 const Solar = lazy(() => import("../views/icons/Solar"));
-
 const Login = lazy(() => import('../views/auth/login/Login'));
 const Register = lazy(() => import('../views/auth/register/Register'));
 const SamplePage = lazy(() => import('../views/sample-page/SamplePage'));
@@ -23,7 +21,43 @@ const Error = lazy(() => import('../views/auth/error/Error'));
 
 const ProductDetail = lazy(() => import('../components/products/ProductDetail'));
 
+// Vistas Específicas por Rol
+const ClienteHome = lazy(() => import('../views/cliente/Home.tsx'));
+const BrowseProducts = lazy(() => import('../views/cliente/BrowseProducts.tsx'));
+const VendedorDashboard = lazy(() => import('../views/vendedor/Dashboard.tsx'));
+const ManageProducts = lazy(() => import('../views/vendedor/ManageProducts.tsx'));
+
 const Router = [
+  // RUTAS PROTEGIDAS PARA EL CLIENTE (MÁXIMA PRIORIDAD)
+  {
+    path: '/cliente',
+    element: <ProtectedRoute allowedRoles={['CLIENTE']} />,
+    children: [
+      {
+        path: '',
+        element: <FullLayout />,
+        children: [
+          { path: 'home', element: <ClienteHome /> },
+          { path: 'productos', element: <BrowseProducts /> },
+        ]
+      }
+    ]
+  },
+  // RUTAS PROTEGIDAS PARA EL VENDEDOR
+  {
+    path: '/vendedor',
+    element: <ProtectedRoute allowedRoles={['VENDEDOR']} />,
+    children: [
+      {
+        path: '',
+        element: <FullLayout />,
+        children: [
+          { path: 'dashboard', element: <VendedorDashboard /> },
+          { path: 'productos', element: <ManageProducts /> },
+        ]
+      }
+    ]
+  },
   {
     path: '/',
     element: <FullLayout />,
@@ -38,22 +72,21 @@ const Router = [
       { path: '/ui/shadow', exact: true, element: <Shadow /> },
       { path: '/icons/solar', exact: true, element: <Solar /> },
       { path: '/sample-page', exact: true, element: <SamplePage /> },
-      { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
   {
-    path: '/',
+    path: '/auth',
     element: <BlankLayout />,
     children: [
-      { path: '/auth/login', element: <Login /> },
-      { path: '/auth/register', element: <Register /> },
+      { path: 'login', element: <Login /> },
+      { path: 'register', element: <Register /> },
       { path: '404', element: <Error /> },
-      { path: '/auth/404', element: <Error /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],
   },
+  { path: '*', element: <Navigate to="/auth/login" /> },
 ];
 
 const router = createBrowserRouter(Router);
 
-export default router;
+export default router;

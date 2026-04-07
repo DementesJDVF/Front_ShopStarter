@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import "./ProductCatalog.css";
+import api from "../../utils/axios";
 
 type ApiProductImage = {
   id: number;
@@ -22,119 +23,117 @@ type ApiProduct = {
   created_at: string;
 };
 
-type Product = {
-  id: number;
-  title: string;
-  price: number;
-  category: string;
-  image: string;
-  vendor: string;
-};
-
 export function ProductCatalog() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    let cancelled = false;
-
     async function load() {
       try {
         setLoading(true);
         setError(null);
-
-        const res = await fetch("http://127.0.0.1:8000/api/products");
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const data: ApiProduct[] = await res.json();
-
-        const mapped: Product[] = data.map((p) => {
-          const mainImage = p.images?.find((img) => img.is_main)?.url_image;
-          const fallbackImage = p.images?.[0]?.url_image;
-
-          return {
-            id: p.id,
-            title: p.name,
-            price: Number(p.price),
-            category: p.category_name,
-            image: mainImage ?? fallbackImage ?? "",
-            vendor: p.vendor_name,
-          };
-        });
-
-        if (!cancelled) setProducts(mapped);
-      } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Error desconocido");
+        const res = await api.get("/products/");
+        setProducts(res.data.results || res.data);
+      } catch (e: any) {
+        setError(e.response?.data?.message || e.message || "Error al conectar con el servidor.");
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
     }
-
     load();
-    return () => { cancelled = true; };
   }, []);
 
-  if (loading) return <p className="catalog__status">Cargando catálogo...</p>;
-  if (error) return <p className="catalog__status catalog__status--error">Error: {error}</p>;
+  if (loading) return (
+    <div className="flex justify-center p-20 font-[var(--main-font)]">
+       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="text-center p-20 text-red-500 font-[var(--main-font)]">
+      <p>Error: {error}</p>
+    </div>
+  );
 
   return (
-    <section className="catalog">
-      <h2 className="catalog__title">Catálogo</h2>
+    <section className="catalog font-[var(--main-font)]">
+      <div className="mb-8 border-b border-gray-100 pb-4">
+        <h2 className="text-3xl font-bold text-gray-800">Catálogo de Productos</h2>
+        <p className="text-gray-500 mt-2">Nuestros vendedores locales ofrecen lo mejor para ti.</p>
+      </div>
 
       <div className="catalog__grid">
-        {products.map((p) => (
-          <article key={p.id} className="product-card">
-
-            <div className="product-card__vendor">{p.vendor}</div>
-
-            <div className="product-card__imageWrap">
-              {p.image ? (
-                <img
-                  className="product-card__image"
-                  src={p.image}
-                  alt={p.title}
-                  loading="lazy"
-                />
-              ) : (
-                <div className="product-card__image product-card__image--empty">
-                  Sin imagen
+        {products.length === 0 ? (
+          <div className="col-span-full py-20 text-center text-gray-400 italic">
+            No se encontraron productos disponibles.
+          </div>
+        ) : (
+          products.map((p) => {
+            const mainImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
+            
+            return (
+              <article key={p.id} className="product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100 bg-white">
+                <div className="relative aspect-square overflow-hidden bg-gray-50">
+                  {mainImage ? (
+                    <img
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      src={mainImage}
+                      alt={p.name}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-300 italic text-sm">
+                      Sin imagen
+                    </div>
+                  )}
+                  {p.category_name && (
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm">
+                      {p.category_name}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <div className="product-card__category">{p.category}</div>
-            <div className="product-card__price">${p.price.toFixed(2)}</div>
-            <div className="product-card__title">{p.title}</div>
+                <div className="p-5 flex flex-col gap-2">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-bold text-gray-800 line-clamp-1 flex-1">{p.name}</h3>
+                  </div>
+                  
+                  <p className="text-gray-500 text-sm line-clamp-2 min-h-[40px]">
+                    {p.description}
+                  </p>
 
-
-            <div className="product-card__footer">
-              <button
-                className="product-card__view-btn"
-                onClick={() => navigate(`/products/${p.id}`)}
-                title="Ver detalle">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-                Ver
-              </button>
-            </div>
-
-          </article>
-        ))}
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
+                    <div className="text-xl font-black text-primary">
+                      ${parseFloat(p.price).toLocaleString()}
+                    </div>
+                    <button
+                      className="bg-primary text-white p-2 rounded-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2 text-sm font-bold"
+                      onClick={() => navigate(`/products/${p.id}`)}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                      Ver Detalles
+                    </button>
+                  </div>
+                </div>
+              </article>
+            );
+          })
+        )}
       </div>
     </section>
   );
-}
+}
