@@ -1,5 +1,6 @@
 import Footer from "./Footer";
 import TopBanner from "./TopBanner";
+import { Link } from "react-router";
 
 // En src/pages/Home.tsx - dentro del componente Hero
 const Hero = () => (
@@ -21,9 +22,12 @@ const Hero = () => (
           y llegar a más clientes sin complicaciones técnicas.
         </p>
         <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
-          <button className="bg-indigo-600 text-white px-8 py-4 rounded-xl text-lg font-bold hover:bg-indigo-700 transition">
+          <Link 
+            to="/auth/register"
+            className="bg-indigo-600 text-white px-8 py-4 rounded-xl text-lg font-bold hover:bg-indigo-700 transition text-center"
+          >
             Comenzar Gratis
-          </button>
+          </Link>
           <button className="bg-white text-gray-700 border border-gray-200 px-8 py-4 rounded-xl text-lg font-bold hover:bg-gray-50 transition">
             Ver Casos de Éxito
           </button>
@@ -167,9 +171,12 @@ const CTA = () => (
       </p>
       
       {/* Botón CTA */}
-      <button className="bg-white text-indigo-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition shadow-lg relative z-10 mb-10">
+      <Link 
+        to="/auth/register"
+        className="inline-block bg-white text-indigo-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition shadow-lg relative z-10 mb-10 text-center"
+      >
         Comenzar Gratis Ahora
-      </button>
+      </Link>
       
       {/* ✅ 3 Imágenes de Vendedores Ambulantes */}
       <div className="relative z-10">

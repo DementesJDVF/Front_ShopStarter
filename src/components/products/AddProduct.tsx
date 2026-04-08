@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import api from "../../utils/axios";
 import "./ProductCatalog.css";
 
 type Category = {
@@ -39,27 +40,21 @@ export default function AddProduct() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-    const token = localStorage.getItem("access_token");
-    const authHeaders: Record<string, string> = token
-        ? { Authorization: `Bearer ${token}` }
-        : {};
 
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/api/products/categories/create/", {
-            headers: authHeaders,
-        })
-            .then((r) => r.json())
-            .then((data) => setCategories(Array.isArray(data) ? data : data.results ?? []))
+        api.get("/products/categories/create/")
+            .then((res) => {
+                const data = res.data;
+                setCategories(Array.isArray(data) ? data : data.results ?? []);
+            })
             .catch(() => setCategories([]))
             .finally(() => setLoadingCats(false));
     }, []);
 
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/api/users/list/", {
-            headers: authHeaders,
-        })
-            .then((r) => r.json())
-            .then((data) => {
+        api.get("/users/list/")
+            .then((res) => {
+                const data = res.data;
                 const all: Vendor[] = Array.isArray(data) ? data : data.results ?? [];
                 setVendors(all.filter((u) => u.role === "VENDEDOR"));
             })
@@ -100,27 +95,17 @@ export default function AddProduct() {
         };
         if (images.length) body.images = images;
 
-        console.log('BODY A ENVIAR:', body);
         try {
-            const res = await fetch("http://127.0.0.1:8000/api/products/create/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    ...authHeaders,
-                },
-                body: JSON.stringify(body),
-            });
-
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(JSON.stringify(data, null, 2));
-            }
+            await api.post("/products/create/", body);
 
             setSuccess(true);
             // ✅ Redirige al catálogo y cierra el formulario
             setTimeout(() => navigate("/products"), 1500);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Error desconocido");
+        } catch (err: any) {
+            const errorMsg = err.response?.data 
+                ? JSON.stringify(err.response.data, null, 2) 
+                : (err.message || "Error desconocido");
+            setError(errorMsg);
         } finally {
             setLoading(false);
         }

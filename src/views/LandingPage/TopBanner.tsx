@@ -1,11 +1,12 @@
 // src/components/Navbar.tsx
 import { useState } from 'react';
+import { Link } from 'react-router';
 
 interface NavbarProps {
-  onMobileMenuOpen?: () => void;
+  // Props can be added here if needed in the future
 }
 
-const TopBanner: React.FC<NavbarProps> = ({ onMobileMenuOpen }) => {
+const TopBanner: React.FC<NavbarProps> = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
   const navLinks = [
@@ -41,19 +42,30 @@ const TopBanner: React.FC<NavbarProps> = ({ onMobileMenuOpen }) => {
                   {link.name}
                 </a>
               ))}
-              <button className="bg-indigo-600 text-white px-5 py-2 rounded-full font-medium hover:bg-indigo-700 transition shadow-md hover:shadow-lg">
+              
+              <Link 
+                to="/auth/login" 
+                className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 font-medium transition"
+              >
+                Log In
+              </Link>
+
+              <Link 
+                to="/auth/register" 
+                className="bg-indigo-600 text-white px-5 py-2 rounded-full font-medium hover:bg-indigo-700 transition shadow-md hover:shadow-lg text-center"
+              >
                 Empezar Ahora
-              </button>
+              </Link>
             </div>
 
             {/* 📱 Botón menú móvil (solo visible en móvil) */}
             <div className="md:hidden flex items-center gap-3">
-              <button 
+              <Link 
+                to="/auth/register"
                 className="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-indigo-700 transition"
-                onClick={() => {/* lógica de CTA */}}
               >
                 Empezar
-              </button>
+              </Link>
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
                 className="p-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition"
@@ -103,10 +115,21 @@ const TopBanner: React.FC<NavbarProps> = ({ onMobileMenuOpen }) => {
                   {link.name}
                 </a>
               ))}
-              <div className="pt-4 border-t dark:border-gray-800">
-                <button className="w-full bg-indigo-600 text-white px-5 py-3 rounded-lg font-medium hover:bg-indigo-700 transition">
+              <div className="pt-4 border-t dark:border-gray-800 space-y-3">
+                <Link 
+                  to="/auth/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block w-full text-center px-5 py-3 text-gray-700 dark:text-gray-200 font-medium hover:text-indigo-600 transition"
+                >
+                  Iniciar Sesión
+                </Link>
+                <Link 
+                  to="/auth/register"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block w-full bg-indigo-600 text-white px-5 py-3 rounded-lg font-medium hover:bg-indigo-700 transition text-center"
+                >
                   Empezar Ahora
-                </button>
+                </Link>
               </div>
             </nav>
           </div>

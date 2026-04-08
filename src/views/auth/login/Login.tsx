@@ -1,4 +1,5 @@
 import { useState } from "react";
+import api from "src/utils/axios";
 import FullLogo from "src/layouts/full/shared/logo/FullLogo";
 import { Link, useNavigate } from "react-router";
 
@@ -33,26 +34,12 @@ const Login = () => {
     try {
       setLoading(true);
 
-      const response = await fetch("http://127.0.0.1:8000/api/auth/login/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: cleanEmail,
-          password,
-        }),
+      const response = await api.post("/auth/login/", {
+        email: cleanEmail,
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Mensaje backend: "Credenciales inválidas..."
-        const msg =
-          data?.non_field_errors?.[0] ||
-          data?.detail ||
-          "Credenciales inválidas. Verifica email y contraseña.";
-        setErrorMsg(msg);
-        return;
-      }
+      const data = response.data;
 
       // Guardar tokens (si quieres recordar sesión)
       if (remember) {
@@ -68,8 +55,22 @@ const Login = () => {
 
       // Redirigir al panel/home
       navigate("/");
-    } catch (error) {
-      setErrorMsg("No se pudo conectar con el servidor.");
+    } catch (error: any) {
+      if (error.response) {
+        // El servidor respondió con un error (400, 401, etc.)
+        const data = error.response.data;
+        const msg =
+          data?.non_field_errors?.[0] ||
+          data?.detail ||
+          "Credenciales inválidas. Verifica email y contraseña.";
+        setErrorMsg(msg);
+      } else if (error.request) {
+        // La petición se hizo pero no hubo respuesta
+        setErrorMsg("No se pudo conectar con el servidor. Verifica que el backend esté corriendo.");
+      } else {
+        // Otro tipo de error
+        setErrorMsg("Ocurrió un error inesperado.");
+      }
     } finally {
       setLoading(false);
     }
