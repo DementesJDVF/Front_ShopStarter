@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 import { Navigate, createBrowserRouter } from "react-router";
+import { ProductCatalog } from "../components/products/ProductCatalog.tsx";
 
-/* ***Layouts**** */
 const FullLayout = lazy(() => import('../layouts/full/FullLayout'));
 const BlankLayout = lazy(() => import('../layouts/blank/BlankLayout'));
 
@@ -11,22 +11,20 @@ const LandingPage = lazy(() => import('../views/LandingPage/Home'))
 
 // Dashboard
 const Dashboard = lazy(() => import('../views/dashboards/Dashboard'));
-
-// utilities
 const Typography = lazy(() => import("../views/typography/Typography"));
 const Table = lazy(() => import("../views/tables/Table"));
+const Category = lazy(() => import("../views/categories/Category"));
 const Form = lazy(() => import("../views/forms/Form"));
 const Shadow = lazy(() => import("../views/shadows/Shadow"));
 const Alert = lazy(() => import("../views/alerts/Alerts"));
-
-// icons
 const Solar = lazy(() => import("../views/icons/Solar"));
-
-// authentication
 const Login = lazy(() => import('../views/auth/login/Login'));
-const Register = lazy(() => import('../views/auth/register/Register'));
+const Register = lazy(() => import('../views/auth/login/Register')); //
 const SamplePage = lazy(() => import('../views/sample-page/SamplePage'));
 const Error = lazy(() => import('../views/auth/error/Error'));
+
+const ProductDetail = lazy(() => import('../components/products/ProductDetail'));
+const AddProduct = lazy(() => import('../components/products/AddProduct'));
 
 const Router = [
   //Landing Page - Sin layout o con BlankLayout
@@ -64,6 +62,5 @@ const Router = [
   },
 ];
 
-const router = createBrowserRouter(Router)
-
+const router = createBrowserRouter(Router);
 export default router;
