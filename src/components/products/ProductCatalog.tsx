@@ -25,25 +25,47 @@ type ApiProduct = {
 
 export function ProductCatalog() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const handleReserve = async (productId: number) => {
+    if (!window.confirm("¿Deseas reservar este producto para recogerlo en tienda?")) return;
+    try {
+      await api.post('/orders/', { product_id: productId });
+      alert("¡Reserva realizada con éxito! Revisa tu panel para ver los detalles.");
+      const res = await api.get("/products/catalog/");
+      setProducts(res.data.results || res.data);
+    } catch (e: any) {
+      alert(e.response?.data?.error || "Error al realizar la reserva.");
+    }
+  };
+
   useEffect(() => {
-    async function load() {
+    async function loadData() {
       try {
         setLoading(true);
         setError(null);
-        const res = await api.get("/products/");
-        setProducts(res.data.results || res.data);
+        const [prodRes, catRes] = await Promise.all([
+          api.get("/products/catalog/"),
+          api.get("/products/categories/")
+        ]);
+        setProducts(prodRes.data.results || prodRes.data);
+        setCategories(catRes.data.results || catRes.data);
       } catch (e: any) {
         setError(e.response?.data?.message || e.message || "Error al conectar con el servidor.");
       } finally {
         setLoading(false);
       }
     }
-    load();
+    loadData();
   }, []);
+
+  const filteredProducts = selectedCategory 
+    ? products.filter(p => p.category_name === selectedCategory)
+    : products;
 
   if (loading) return (
     <div className="flex justify-center p-20 font-[var(--main-font)]">
@@ -59,18 +81,45 @@ export function ProductCatalog() {
 
   return (
     <section className="catalog font-[var(--main-font)]">
-      <div className="mb-8 border-b border-gray-100 pb-4">
-        <h2 className="text-3xl font-bold text-gray-800">Catálogo de Productos</h2>
-        <p className="text-gray-500 mt-2">Nuestros vendedores locales ofrecen lo mejor para ti.</p>
+      <div className="mb-8 border-b border-gray-100 pb-6">
+        <h2 className="text-4xl font-black text-gray-900 tracking-tight">Catálogo de Productos</h2>
+        <p className="text-gray-500 mt-2 text-lg">Descubre productos únicos de vendedores locales cerca de ti.</p>
+        
+        {/* Filtros de Categoría */}
+        <div className="flex gap-2 mt-6 overflow-x-auto pb-2 scrollbar-hide">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+              selectedCategory === null 
+              ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105' 
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            Todos
+          </button>
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.name)}
+              className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+                selectedCategory === cat.name 
+                ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="catalog__grid">
-        {products.length === 0 ? (
-          <div className="col-span-full py-20 text-center text-gray-400 italic">
-            No se encontraron productos disponibles.
+        {filteredProducts.length === 0 ? (
+          <div className="col-span-full py-20 text-center text-gray-400 italic bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100">
+            No se encontraron productos en esta categoría.
           </div>
         ) : (
-          products.map((p) => {
+          filteredProducts.map((p) => {
             const mainImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
             
             return (
@@ -108,25 +157,20 @@ export function ProductCatalog() {
                     <div className="text-xl font-black text-primary">
                       ${parseFloat(p.price).toLocaleString()}
                     </div>
-                    <button
-                      className="bg-primary text-white p-2 rounded-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2 text-sm font-bold"
-                      onClick={() => navigate(`/products/${p.id}`)}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                      </svg>
-                      Ver Detalles
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                          className="bg-white text-primary border border-primary p-2 rounded-lg hover:bg-primary/5 transition-colors flex items-center gap-2 text-sm font-bold"
+                          onClick={() => navigate(`/products/${p.id}`)}
+                        >
+                          Detalles
+                        </button>
+                        <button
+                          className="bg-primary text-white p-2 rounded-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2 text-sm font-bold"
+                          onClick={() => handleReserve(p.id)}
+                        >
+                          Reservar
+                        </button>
+                    </div>
                   </div>
                 </div>
               </article>

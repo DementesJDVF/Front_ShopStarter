@@ -39,6 +39,7 @@ const Router = [
         children: [
           { path: 'home', element: <ClienteHome /> },
           { path: 'productos', element: <BrowseProducts /> },
+          { path: 'reservas', element: <SamplePage /> },
         ]
       }
     ]
@@ -54,6 +55,7 @@ const Router = [
         children: [
           { path: 'dashboard', element: <VendedorDashboard /> },
           { path: 'productos', element: <ManageProducts /> },
+          { path: 'reservas', element: <Table /> },
         ]
       }
     ]

@@ -46,7 +46,7 @@ const AuthRegister = () => {
                 });
             }
 
-            const response = await api.post('/auth/register/', dataToSend);
+            const response = await api.post('/users/auth/register/', dataToSend);
             if (response.status === 201) {
                 alert("Registro exitoso. Ahora puedes iniciar sesión.");
                 navigate("/auth/login");
