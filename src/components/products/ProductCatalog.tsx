@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { AddProductButton } from "./AddProductButton";
 import "./ProductCatalog.css";
+import api from "../../utils/axios";
 
 type ApiProductImage = {
   id: number;
@@ -23,196 +23,161 @@ type ApiProduct = {
   created_at: string;
 };
 
-type Product = {
-  id: number;
-  title: string;
-  price: number;
-  category: string;
-  image: string;
-  vendor: string;
-};
-
 export function ProductCatalog() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    let cancelled = false;
+  const handleReserve = async (productId: number) => {
+    if (!window.confirm("¿Deseas reservar este producto para recogerlo en tienda?")) return;
+    try {
+      await api.post('/orders/', { product_id: productId });
+      alert("¡Reserva realizada con éxito! Revisa tu panel para ver los detalles.");
+      const res = await api.get("/products/catalog/");
+      setProducts(res.data.results || res.data);
+    } catch (e: any) {
+      alert(e.response?.data?.error || "Error al realizar la reserva.");
+    }
+  };
 
-    async function load() {
+  useEffect(() => {
+    async function loadData() {
       try {
         setLoading(true);
         setError(null);
-
-        const res = await fetch("http://127.0.0.1:8000/api/products");
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const data: ApiProduct[] = await res.json();
-
-        const mapped: Product[] = data.map((p) => {
-          const mainImage = p.images?.find((img) => img.is_main)?.url_image;
-          const fallbackImage = p.images?.[0]?.url_image;
-
-          return {
-            id: p.id,
-            title: p.name,
-            price: Number(p.price),
-            category: p.category_name,
-            image: mainImage ?? fallbackImage ?? "",
-            vendor: p.vendor_name,
-          };
-        });
-
-        if (!cancelled) setProducts(mapped);
-      } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Error desconocido");
+        const [prodRes, catRes] = await Promise.all([
+          api.get("/products/catalog/"),
+          api.get("/products/categories/")
+        ]);
+        setProducts(prodRes.data.results || prodRes.data);
+        setCategories(catRes.data.results || catRes.data);
+      } catch (e: any) {
+        setError(e.response?.data?.message || e.message || "Error al conectar con el servidor.");
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
     }
-
-    load();
-    return () => { cancelled = true; };
+    loadData();
   }, []);
 
-  async function handleDelete(id: number) {
-    const token = localStorage.getItem("access_token");
-    const authHeaders: Record<string, string> = token
-      ? { Authorization: `Bearer ${token}` }
-      : {};
+  const filteredProducts = selectedCategory 
+    ? products.filter(p => p.category_name === selectedCategory)
+    : products;
 
-    try {
-      const res = await fetch(`http://127.0.0.1:8000/api/products/create/${id}/`, {
-        method: "DELETE",
-        headers: authHeaders,
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      setProducts((prev) => prev.filter((p) => p.id !== id));
-    } catch (e) {
-      alert(e instanceof Error ? e.message : "Error al eliminar el producto");
-    } finally {
-      setDeleteId(null);
-    }
-  }
-
-  if (loading) return <p className="catalog__status">Cargando catálogo...</p>;
-  if (error) return <p className="catalog__status catalog__status--error">Error: {error}</p>;
+  if (loading) return (
+    <div className="flex justify-center p-20 font-[var(--main-font)]">
+       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="text-center p-20 text-red-500 font-[var(--main-font)]">
+      <p>Error: {error}</p>
+    </div>
+  );
 
   return (
-    <section className="catalog">
-
-      {/* ── Header: título + botón agregar ── */}
-      <div className="catalog__header">
-        <h2 className="catalog__title">Catálogo</h2>
-        <AddProductButton />
+    <section className="catalog font-[var(--main-font)]">
+      <div className="mb-8 border-b border-gray-100 pb-6">
+        <h2 className="text-4xl font-black text-gray-900 tracking-tight">Catálogo de Productos</h2>
+        <p className="text-gray-500 mt-2 text-lg">Descubre productos únicos de vendedores locales cerca de ti.</p>
+        
+        {/* Filtros de Categoría */}
+        <div className="flex gap-2 mt-6 overflow-x-auto pb-2 scrollbar-hide">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+              selectedCategory === null 
+              ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105' 
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            Todos
+          </button>
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.name)}
+              className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+                selectedCategory === cat.name 
+                ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="catalog__grid">
-        {products.map((p) => (
-          <article key={p.id} className="product-card">
-
-            <div className="product-card__vendor">{p.vendor}</div>
-
-            <div className="product-card__imageWrap">
-              {p.image ? (
-                <img
-                  className="product-card__image"
-                  src={p.image}
-                  alt={p.title}
-                  loading="lazy"
-                />
-              ) : (
-                <div className="product-card__image product-card__image--empty">
-                  Sin imagen
-                </div>
-              )}
-            </div>
-
-            <div className="product-card__category">{p.category}</div>
-            <div className="product-card__price">${p.price.toFixed(2)}</div>
-            <div className="product-card__title">{p.title}</div>
-
-            <div className="product-card__footer">
-              <button
-                className="product-card__delete-btn"
-                onClick={() => setDeleteId(p.id)}
-                title="Eliminar producto"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                  <path d="M10 11v6" />
-                  <path d="M14 11v6" />
-                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                </svg>
-                Eliminar
-              </button>
-
-              <button
-                className="product-card__view-btn"
-                onClick={() => navigate(`/products/${p.id}`)}
-                title="Ver detalle"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-                Ver
-              </button>
-            </div>
-
-          </article>
-        ))}
-      </div>
-
-      {/* ── Modal de confirmación ── */}
-      {deleteId !== null && (
-        <div className="modal-overlay" onClick={() => setDeleteId(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <p className="modal__question">¿Quieres eliminar este producto?</p>
-            <div className="modal__actions">
-              <button
-                className="modal__btn modal__btn--yes"
-                onClick={() => handleDelete(deleteId)}
-              >
-                Sí
-              </button>
-              <button
-                className="modal__btn modal__btn--no"
-                onClick={() => setDeleteId(null)}
-              >
-                No
-              </button>
-            </div>
+        {filteredProducts.length === 0 ? (
+          <div className="col-span-full py-20 text-center text-gray-400 italic bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100">
+            No se encontraron productos en esta categoría.
           </div>
-        </div>
-      )}
+        ) : (
+          filteredProducts.map((p) => {
+            const mainImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
+            
+            return (
+              <article key={p.id} className="product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100 bg-white">
+                <div className="relative aspect-square overflow-hidden bg-gray-50">
+                  {mainImage ? (
+                    <img
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      src={mainImage}
+                      alt={p.name}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-300 italic text-sm">
+                      Sin imagen
+                    </div>
+                  )}
+                  {p.category_name && (
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm">
+                      {p.category_name}
+                    </div>
+                  )}
+                </div>
 
+                <div className="p-5 flex flex-col gap-2">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-bold text-gray-800 line-clamp-1 flex-1">{p.name}</h3>
+                  </div>
+                  
+                  <p className="text-gray-500 text-sm line-clamp-2 min-h-[40px]">
+                    {p.description}
+                  </p>
+
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
+                    <div className="text-xl font-black text-primary">
+                      ${parseFloat(p.price).toLocaleString()}
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                          className="bg-white text-primary border border-primary p-2 rounded-lg hover:bg-primary/5 transition-colors flex items-center gap-2 text-sm font-bold"
+                          onClick={() => navigate(`/products/${p.id}`)}
+                        >
+                          Detalles
+                        </button>
+                        <button
+                          className="bg-primary text-white p-2 rounded-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2 text-sm font-bold"
+                          onClick={() => handleReserve(p.id)}
+                        >
+                          Reservar
+                        </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            );
+          })
+        )}
+      </div>
     </section>
   );
 }

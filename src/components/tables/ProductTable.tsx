@@ -1,347 +1,378 @@
-
-import { Badge, Dropdown, Progress } from "flowbite-react";
+import { Badge, Dropdown, Progress, Table, Spinner, Button, Modal, Label, TextInput, Select, Textarea } from "flowbite-react";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { Icon } from "@iconify/react";
-import { Table } from "flowbite-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
+import api from "../../utils/axios";
 
-import { getUsers, User } from "../../services/UserService";
-
-import product1 from "/src/assets/images/products/dash-prd-1.jpg";
-import product2 from "/src/assets/images/products/dash-prd-2.jpg";
-import product3 from "/src/assets/images/products/dash-prd-3.jpg";
-import product4 from "/src/assets/images/products/dash-prd-4.jpg";
-import { useEffect, useState } from "react";
-
-type Category = {
+interface Product {
   id: number;
   name: string;
-  description?: string;
-  slug?: string;
-  is_active?: boolean;
-  product_count?: number;
-  created_at?: string; 
-};
+  price: number;
+  status: string;
+  stock: number;
+  category_name: string;
+  images: Array<{ url_image: string; is_main: boolean }>;
+}
+
+interface Category {
+  id: number;
+  name: string;
+}
 
 const ProductTable = () => {
-  const [users, setUsers] = useState<User[]>([]); 
-  const [usersLoading, setUsersLoading] = useState(true); 
-  const [usersError, setUsersError] = useState<string | null>(null);
-
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [categoriesError, setCategoriesError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const navigate = useNavigate();
+  
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    description: '',
+    price: '',
+    stock: '',
+    category: '',
+    url_image: ''
+  });
 
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/products/create/');
+      setProducts(response.data.results || response.data);
+    } catch (error) {
+      console.error("Error al cargar productos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const ProductTableData = [
-    {
-      img: product1,
-      name: "iPhone 13 pro max-Pacific Blue-128GB storage",
-      payment: "$180",
-      paymentstatus: "Partially paid",
-      process: 45,
-      processcolor: "bg-warning",
-      statuscolor: "secondary",
-      statustext: "Confirmed",
-    },
-    {
-      img: product2,
-      name: "Apple MacBook Pro 13 inch-M1-8/256GB-space",
-      payment: "$120",
-      paymentstatus: "Full paid",
-      process: 100,
-      processcolor: "bg-success",
-      statuscolor: "success",
-      statustext: "Confirmed",
-    },
-    {
-      img: product3,
-      name: "PlayStation 5 DualSense Wireless Controller",
-      payment: "$120",
-      paymentstatus: "Cancelled",
-      process: 100,
-      processcolor: "bg-error",
-      statuscolor: "error",
-      statustext: "Cancelled",
-    },
-    {
-      img: product4,
-      name: "Amazon Basics Mesh, Mid-Back, Swivel Office",
-      payment: "$120",
-      paymentstatus: "Partially paid",
-      process: 45,
-      processcolor: "bg-warning",
-      statuscolor: "secondary",
-      statustext: "Confirmed",
-    },
-  ];
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/products/get-categories/');
+      console.log("Categorías cargadas:", response.data);
+      
+      let cats: Category[] = [];
+      const data = response.data;
+
+      if (Array.isArray(data)) {
+        cats = data;
+      } else if (data && data.results && Array.isArray(data.results)) {
+        cats = data.results;
+      }
+
+      setCategories(cats);
+      if (cats.length === 0) {
+        console.warn("La lista de categorías está vacía en el servidor.");
+      }
+    } catch (error: any) {
+      console.error("Error crítico al cargar categorías:", error.response?.data || error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, []);
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("¿Estás seguro de que deseas eliminar este producto?")) return;
+    try {
+      await api.delete(`/products/create/${id}/`);
+      fetchProducts();
+    } catch (error) {
+      console.error("Error al eliminar producto:", error);
+      alert("Hubo un error al eliminar el producto.");
+    }
+  };
+
+  const handleEdit = (product: Product) => {
+    // Buscamos el ID coherente con el nombre de la categoría que viene del backend
+    const categoryMatch = categories.find(c => c.name === product.category_name);
+    
+    setEditingId(product.id);
+    setNewProduct({
+      name: product.name,
+      description: '', 
+      price: product.price.toString(),
+      stock: product.stock.toString(),
+      category: categoryMatch ? categoryMatch.id.toString() : '', 
+      url_image: product.images?.[0]?.url_image || ''
+    });
+    setShowModal(true);
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const data = {
+        name: newProduct.name,
+        description: newProduct.description,
+        price: parseFloat(newProduct.price),
+        stock: parseInt(newProduct.stock),
+        category: parseInt(newProduct.category),
+        status: 'ACTIVE',
+        images: [
+          { url_image: newProduct.url_image, is_main: true }
+        ]
+      };
+      
+      if (editingId) {
+        await api.put(`/products/create/${editingId}/`, data);
+      } else {
+        await api.post('/products/create/', data);
+      }
+
+      setShowModal(false);
+      setEditingId(null);
+      setNewProduct({
+        name: '',
+        description: '',
+        price: '',
+        stock: '',
+        category: '',
+        url_image: ''
+      });
+      fetchProducts();
+    } catch (error) {
+      console.error("Error al procesar producto:", error);
+      alert("Error al procesar el producto. Revisa los datos.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   /*Table Action*/
   const tableActionData = [
     {
-      icon: "solar:add-circle-outline",
-      listtitle: "Add",
+      icon: "solar:eye-outline",
+      listtitle: "Ver Detalle",
     },
     {
       icon: "solar:pen-new-square-broken",
-      listtitle: "Edit",
+      listtitle: "Editar",
     },
     {
       icon: "solar:trash-bin-minimalistic-outline",
-      listtitle: "Delete",
+      listtitle: "Borrar",
     },
   ];
 
-  
-  useEffect(() => {
-    let isMounted = true; 
-    
-    const loadUsers = async () => { 
-      try { 
-        const data = await getUsers(); 
-        console.log(data); 
-        
-        if (isMounted) { 
-          setUsers(data); 
-          setUsersError(null); 
-        } 
-      } catch (error) { 
-        if (isMounted) { 
-          setUsersError("No se pudieron cargar los usuarios."); 
-        } 
-      } finally { 
-        if (isMounted) { 
-          setUsersLoading(false); 
-        } 
-      }
-    }; 
-      
-    loadUsers(); 
-    return () => { 
-      isMounted = false; 
-    };
-   }, []);
-   
-const handleCategoryAction = (action: string, category: Category) => {
-    switch (action) {
-      case "edit":
-        console.log("Editar categoría:", category);
-        // Aquí iría tu lógica para editar (abrir modal, navegar, etc.)
-        break;
-      case "delete":
-        if (confirm(`¿Eliminar categoría "${category.name}"?`)) {
-          // Aquí iría tu llamada API para eliminar
-          setCategories(categories.filter(c => c.id !== category.id));
-        }
-        break;
-      case "view":
-        console.log("Ver productos de:", category);
-        // Navegar a productos filtrados por categoría
-        break;
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex justify-center p-10 font-[var(--main-font)]">
+        <Spinner size="xl" />
+      </div>
+    );
+  }
 
-   
   return (
     <>
-    
-      <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray p-6  relative w-full break-words">
-        <h5 className="card-title">Table</h5>
-        <div className="mt-3">
-         
-            <div className="overflow-x-auto">
-              <Table hoverable>
-                <Table.Head>
-                  <Table.HeadCell className="p-6">Products</Table.HeadCell>
-                  <Table.HeadCell>Payment</Table.HeadCell>
-                  <Table.HeadCell>Status</Table.HeadCell>
-                  <Table.HeadCell></Table.HeadCell>
-                </Table.Head>
-                <Table.Body className="divide-y divide-border dark:divide-darkborder ">
-                  {ProductTableData.map((item, index) => (
-                    <Table.Row key={index}>
-                      <Table.Cell className="whitespace-nowrap ps-6">
-                        <div className="flex gap-3 items-center">
-                          <img
-                            src={item.img}
-                            alt="icon"
-                            className="h-[60px] w-[60px] rounded-md"
-                          />
-                          <div className="truncat line-clamp-2 sm:text-wrap max-w-56">
-                            <h6 className="text-sm">{item.name}</h6>
-                          </div>
-                        </div>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <h5 className="text-base text-wrap">
-                          {item.payment}
-                          <span className="text-dark opacity-70">
-                            <span className="mx-1">/</span>499
-                          </span>
-                        </h5>
-                        <div className="text-sm font-medium text-dark opacity-70 mb-2 text-wrap">
-                          {item.paymentstatus}
-                        </div>
-                        <div className="me-5">
-                          <Progress
-                            progress={item.process}
-                            color={`${item.processcolor}`}
-                            className={`${item.processcolor}`}
-                            size={"sm"}
-                          />
-                        </div>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Badge
-                          color={`light${item.statuscolor}`}
-                          className={`text-${item.statuscolor}`}
-                        >
-                          {item.statustext}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Dropdown
-                          label=""
-                          dismissOnClick={false}
-                          renderTrigger={() => (
-                            <span className="h-9 w-9 flex justify-center items-center rounded-full hover:bg-lightprimary hover:text-primary cursor-pointer">
-                              <HiOutlineDotsVertical size={22} />
-                            </span>
-                          )}
-                        >
-                          {tableActionData.map((items, index) => (
-                            <Dropdown.Item key={index} className="flex gap-3">
-                              {" "}
-                              <Icon icon={`${items.icon}`} height={18} />
-                              <span>{items.listtitle}</span>
-                            </Dropdown.Item>
-                          ))}
-                        </Dropdown>
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table>
+      <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray p-6 relative w-full break-words">
+        <div className="flex justify-between items-center mb-4 font-[var(--main-font)]">
+            <h5 className="card-title text-xl font-bold">Gestión de Productos</h5>
+            <div className="flex gap-2">
+              <Button color="primary" onClick={() => {
+                setEditingId(null);
+                setNewProduct({
+                  name: '',
+                  description: '',
+                  price: '',
+                  stock: '',
+                  category: '',
+                  url_image: ''
+                });
+                setShowModal(true);
+              }}>
+                <div className="flex items-center gap-2">
+                  <Icon icon="solar:add-circle-outline" height={20} />
+                  <span>Añadir Producto</span>
+                </div>
+              </Button>
             </div>
-         
         </div>
-      </div>
-
-      <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray p-6 relative w-full break-words mt-6">
-        <h5 className="card-title">Categorias</h5>
         <div className="mt-3">
-          {categoriesLoading ? (
-            <div className="text-sm text-dark opacity-70">Cargando categorías...</div>
-          ) : categoriesError ? (
-            <div className="text-sm text-error">{categoriesError}</div>
-          ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto font-[var(--main-font)]">
               <Table hoverable>
                 <Table.Head>
-                  <Table.HeadCell className="p-6">ID</Table.HeadCell>
-                   <Table.HeadCell>Nombre</Table.HeadCell>
-                  <Table.HeadCell>Descripción</Table.HeadCell>
-                  <Table.HeadCell>Productos</Table.HeadCell>
+                  <Table.HeadCell className="p-6">Producto</Table.HeadCell>
+                  <Table.HeadCell>Categoría</Table.HeadCell>
+                  <Table.HeadCell>Precio / Stock</Table.HeadCell>
                   <Table.HeadCell>Estado</Table.HeadCell>
                   <Table.HeadCell></Table.HeadCell>
                 </Table.Head>
                 <Table.Body className="divide-y divide-border dark:divide-darkborder">
-                  {categories.map((category) => (
-                    <Table.Row key={category.id}>
-                      <Table.Cell className="whitespace-nowrap ps-6">
-                        {category.id}
-                      </Table.Cell>
-                      <Table.Cell className="font-medium">
-                        {category.name}
-                      </Table.Cell>
-                      <Table.Cell className="text-sm text-dark opacity-70 max-w-xs truncate">
-                        {category.description || "—"}
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Badge color="lightprimary" className="text-primary">
-                          {category.product_count ?? 0}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Badge
-                          color={category.is_active ? "lightsuccess" : "lighterror"}
-                          className={category.is_active ? "text-success" : "text-error"}
-                        >
-                          {category.is_active ? "Activa" : "Inactiva"}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Dropdown
-                          label=""
-                          dismissOnClick={false}
-                          renderTrigger={() => (
-                            <span className="h-9 w-9 flex justify-center items-center rounded-full hover:bg-lightprimary hover:text-primary cursor-pointer">
-                              <HiOutlineDotsVertical size={22} />
-                            </span>
-                          )}
-                        >
-                          <Dropdown.Item 
-                            className="flex gap-3"
-                            onClick={() => handleCategoryAction("view", category)}
-                          >
-                            <Icon icon="solar:eye-outline" height={18} />
-                            <span>Ver productos</span>
-                          </Dropdown.Item>
-                          <Dropdown.Item 
-                            className="flex gap-3"
-                            onClick={() => handleCategoryAction("edit", category)}
-                          >
-                            <Icon icon="solar:pen-new-square-broken" height={18} />
-                            <span>Editar</span>
-                          </Dropdown.Item>
-                          <Dropdown.Item 
-                            className="flex gap-3 text-error"
-                            onClick={() => handleCategoryAction("delete", category)}
-                          >
-                            <Icon icon="solar:trash-bin-minimalistic-outline" height={18} />
-                            <span>Eliminar</span>
-                          </Dropdown.Item>
-                        </Dropdown>
+                  {products.length === 0 ? (
+                    <Table.Row>
+                      <Table.Cell colSpan={5} className="text-center py-10 opacity-50">
+                        No hay productos registrados aún.
                       </Table.Cell>
                     </Table.Row>
-                  ))}
+                  ) : (
+                    products.map((product, index) => (
+                      <Table.Row key={product.id || index}>
+                        <Table.Cell className="whitespace-nowrap ps-6">
+                          <div className="flex gap-3 items-center">
+                            <img
+                              src={product.images?.[0]?.url_image || "https://placehold.co/60x60?text=PS"}
+                              alt="product"
+                              className="h-[60px] w-[60px] rounded-md object-cover shadow-sm bg-gray-50"
+                            />
+                            <div className="truncat line-clamp-2 sm:text-wrap max-w-56">
+                              <h6 className="text-sm font-semibold">{product.name}</h6>
+                            </div>
+                          </div>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Badge color="info" className="capitalize">
+                            {product.category_name || 'Sin categoría'}
+                          </Badge>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <h5 className="text-base font-bold text-wrap">
+                            ${parseFloat(product.price.toString()).toLocaleString()}
+                          </h5>
+                          <div className="text-xs font-medium text-dark opacity-70 mb-2">
+                             Stock: {product.stock} unidades
+                          </div>
+                          <div className="me-5">
+                            <Progress
+                              progress={product.stock > 0 ? 100 : 0}
+                              color={product.stock > 10 ? 'success' : product.stock > 0 ? 'warning' : 'red'}
+                              size={"sm"}
+                            />
+                          </div>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Badge
+                            color={product.status === 'ACTIVE' ? 'success' : 'lightsecondary'}
+                            className="uppercase"
+                          >
+                            {product.status || 'SIN ESTADO'}
+                          </Badge>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Dropdown
+                            label=""
+                            dismissOnClick={true}
+                            renderTrigger={() => (
+                              <span className="h-9 w-9 flex justify-center items-center rounded-full hover:bg-lightprimary hover:text-primary cursor-pointer">
+                                <HiOutlineDotsVertical size={22} />
+                              </span>
+                            )}
+                          >
+                            {tableActionData.map((items, index) => (
+                              <Dropdown.Item 
+                                key={index} 
+                                className="flex gap-3"
+                                onClick={() => {
+                                  if (items.listtitle === "Borrar") {
+                                    handleDelete(product.id);
+                                  } else if (items.listtitle === "Editar") {
+                                    handleEdit(product);
+                                  } else if (items.listtitle === "Ver Detalle") {
+                                    navigate(`/products/${product.id}`);
+                                  }
+                                }}
+                              >
+                                <Icon icon={`${items.icon}`} height={18} />
+                                <span>{items.listtitle}</span>
+                              </Dropdown.Item>
+                            ))}
+                          </Dropdown>
+                        </Table.Cell>
+                      </Table.Row>
+                    ))
+                  )}
                 </Table.Body>
               </Table>
             </div>
-          )}
         </div>
       </div>
 
-      <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray p-6 relative w-full break-words mt-6">
-        <h5 className="card-title">Users</h5>
-        <div className="mt-3">
-          {usersLoading ? (
-            <div className="text-sm text-dark opacity-70">Cargando...</div>
-          ) : usersError ? (
-            <div className="text-sm text-error">{usersError}</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table hoverable>
-                <Table.Head>
-                  <Table.HeadCell className="p-6">ID</Table.HeadCell>
-                  <Table.HeadCell>Username</Table.HeadCell>
-                  <Table.HeadCell>Acciones</Table.HeadCell>
-                </Table.Head>
-                <Table.Body className="divide-y divide-border dark:divide-darkborder">
-                  {users.map((user) => (
-                    <Table.Row key={user.id}>
-                      <Table.Cell className="whitespace-nowrap ps-6">
-                        {user.id}
-                      </Table.Cell>
-                      <Table.Cell>{user.name}</Table.Cell>
-                      <Table.Cell>botones</Table.Cell>
-                    </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table>
+      {/* Modal para añadir producto */}
+      <Modal show={showModal} onClose={() => { setShowModal(false); setEditingId(null); }} size="md">
+        <Modal.Header>{editingId ? 'Editar Producto' : 'Añadir Nuevo Producto'}</Modal.Header>
+        <Modal.Body>
+          <form className="flex flex-col gap-4" onSubmit={handleCreate}>
+            <div>
+              <Label htmlFor="name" value="Nombre del Producto" />
+              <TextInput
+                id="name"
+                required
+                value={newProduct.name}
+                onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+              />
             </div>
-          )}
-        </div>
-      </div>
+            <div>
+              <Label htmlFor="description" value="Descripción" />
+              <Textarea
+                id="description"
+                required
+                rows={3}
+                value={newProduct.description}
+                onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="price" value="Precio" />
+                <TextInput
+                  id="price"
+                  type="number"
+                  required
+                  value={newProduct.price}
+                  onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="stock" value="Stock" />
+                <TextInput
+                  id="stock"
+                  type="number"
+                  required
+                  value={newProduct.stock}
+                  onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="category" value="Categoría" />
+              <Select
+                id="category"
+                required
+                value={newProduct.category}
+                onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+              >
+                <option value="">Seleccionar categoría</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="image" value="URL de la Imagen" />
+              <TextInput
+                id="image"
+                required
+                placeholder="https://ejemplo.com/imagen.jpg"
+                value={newProduct.url_image}
+                onChange={(e) => setNewProduct({...newProduct, url_image: e.target.value})}
+              />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button color="gray" onClick={() => setShowModal(false)}>Cancelar</Button>
+              <Button color="primary" type="submit" disabled={submitting}>
+                {submitting ? <Spinner size="sm" /> : 'Guardar Producto'}
+              </Button>
+            </div>
+          </form>
+        </Modal.Body>
+      </Modal>
     </>
   );
 };
