@@ -5,6 +5,10 @@ import { Navigate, createBrowserRouter } from "react-router";
 const FullLayout = lazy(() => import('../layouts/full/FullLayout'));
 const BlankLayout = lazy(() => import('../layouts/blank/BlankLayout'));
 
+
+//Landin Page
+const LandingPage = lazy(() => import('../views/LandingPage/Home'))
+
 // Dashboard
 const Dashboard = lazy(() => import('../views/dashboards/Dashboard'));
 
@@ -25,33 +29,39 @@ const SamplePage = lazy(() => import('../views/sample-page/SamplePage'));
 const Error = lazy(() => import('../views/auth/error/Error'));
 
 const Router = [
-  {
-    path: '/',
-    element: <FullLayout />,
-    children: [
-      { path: '/', exact: true, element: <Dashboard /> },
-      { path: '/ui/typography', exact: true, element: <Typography /> },
-      { path: '/ui/table', exact: true, element: <Table /> },
-      { path: '/ui/form', exact: true, element: <Form /> },
-      { path: '/ui/alert', exact: true, element: <Alert /> },
-      { path: '/ui/shadow', exact: true, element: <Shadow /> },
-      { path: '/icons/solar', exact: true, element: <Solar /> },
-      { path: '/sample-page', exact: true, element: <SamplePage /> },
-      { path: '*', element: <Navigate to="/auth/404" /> },
-    ],
-  },
+  //Landing Page - Sin layout o con BlankLayout
   {
     path: '/',
     element: <BlankLayout />,
     children: [
-      { path: '/auth/login', element: <Login /> },
-      { path: '/auth/register', element: <Register /> },
-      { path: '404', element: <Error /> },
-      { path: '/auth/404', element: <Error /> },
-      { path: '*', element: <Navigate to="/auth/404" /> },
+      { index: true, element: <LandingPage /> }, // "/" → Landing
+      { path: 'auth/login', element: <Login /> },
+      { path: 'auth/register', element: <Register /> },
+      { path: 'auth/404', element: <Error /> },
     ],
-  }
-  ,
+  },
+
+  //Dashboard y rutas protegidas - Con FullLayout
+  {
+    path: '/app',  //prefijo para aislar el layout
+    element: <FullLayout />,
+    children: [
+      { path: 'shopstarter', element: <Dashboard /> },
+      { path: 'ui/typography', element: <Typography /> },
+      { path: 'ui/table', element: <Table /> },
+      { path: 'ui/form', element: <Form /> },
+      { path: 'ui/alert', element: <Alert /> },
+      { path: 'ui/shadow', element: <Shadow /> },
+      { path: 'icons/solar', element: <Solar /> },
+      { path: 'sample-page', element: <SamplePage /> },
+    ],
+  },
+
+  //Catch-all para rutas no encontradas
+  {
+    path: '*',
+    element: <Navigate to="/auth/404" replace />,
+  },
 ];
 
 const router = createBrowserRouter(Router)
