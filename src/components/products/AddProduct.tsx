@@ -42,7 +42,7 @@ export default function AddProduct() {
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
-        api.get("/products/categories/create/")
+        api.get("/products/get-categories/")
             .then((res) => {
                 const data = res.data;
                 setCategories(Array.isArray(data) ? data : data.results ?? []);

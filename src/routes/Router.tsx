@@ -2,6 +2,7 @@ import { lazy } from 'react';
 import { Navigate, createBrowserRouter } from "react-router";
 import { ProductCatalog } from "../components/products/ProductCatalog.tsx";
 import ProtectedRoute from './ProtectedRoute.tsx';
+import HomeRedirect from './HomeRedirect.tsx';
 
 // Layouts
 const FullLayout = lazy(() => import('../layouts/full/FullLayout'));
@@ -22,6 +23,7 @@ const ClienteHome = lazy(() => import('../views/cliente/Home.tsx'));
 const BrowseProducts = lazy(() => import('../views/cliente/BrowseProducts.tsx'));
 const VendedorDashboard = lazy(() => import('../views/vendedor/Dashboard.tsx'));
 const ManageProducts = lazy(() => import('../views/vendedor/ManageProducts.tsx'));
+const AdminDashboard = lazy(() => import('../views/admin/AdminDashboard.tsx'));
 
 // UI / Sample Views (maintained for reference)
 const Typography = lazy(() => import("../views/typography/Typography"));
@@ -38,7 +40,7 @@ const Router = [
     path: '/',
     element: <BlankLayout />,
     children: [
-      { index: true, element: <LandingPage /> },
+      { index: true, element: <HomeRedirect /> },
       {
         path: 'auth',
         children: [
@@ -84,7 +86,22 @@ const Router = [
     ]
   },
 
-  // 4. COMMON / UI ROUTES (Inside FullLayout but not protected for demo/ref)
+  // 4. ADMIN PROTECTED ROUTES
+  {
+    path: '/admin',
+    element: <ProtectedRoute allowedRoles={['ADMIN']} />,
+    children: [
+      {
+        path: '',
+        element: <FullLayout />,
+        children: [
+          { index: true, element: <AdminDashboard /> },
+        ]
+      }
+    ]
+  },
+
+  // 5. COMMON / UI ROUTES (Inside FullLayout but not protected for demo/ref)
   {
     path: '/app',
     element: <FullLayout />,

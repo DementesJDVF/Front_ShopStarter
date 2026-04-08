@@ -50,7 +50,7 @@ export function ProductCatalog() {
         setError(null);
         const [prodRes, catRes] = await Promise.all([
           api.get("/products/catalog/"),
-          api.get("/products/categories/")
+          api.get("/products/get-categories/")
         ]);
         setProducts(prodRes.data.results || prodRes.data);
         setCategories(catRes.data.results || catRes.data);

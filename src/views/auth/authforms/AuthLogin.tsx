@@ -31,7 +31,7 @@ const AuthLogin = () => {
             } else if (user.role === 'CLIENTE') {
                 navigate("/cliente/home");
             } else if (user.role === 'ADMIN') {
-                navigate("/"); // O dashboard de admin si existiera
+                navigate("/admin");
             }
         } catch (err: any) {
             console.error(err);
