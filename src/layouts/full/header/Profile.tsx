@@ -4,7 +4,12 @@ import user1 from "/src/assets/images/profile/user-1.jpg";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../../context/AuthContext";
 
-const Profile = () => {
+interface ProfileProps {
+  variant?: "light" | "dark";
+}
+
+const Profile = ({ variant = "dark" }: ProfileProps) => {
+  const isDark = variant === "dark";
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
@@ -31,8 +36,8 @@ const Profile = () => {
               />
             </span>
             <div className="text-left hidden sm:block">
-               <p className="text-sm font-bold text-dark">{user?.username || 'Usuario'}</p>
-               <p className="text-xs text-gray-500 uppercase">{user?.role}</p>
+               <p className={`text-sm font-bold ${isDark ? 'text-dark' : 'text-white'}`}>{user?.username || 'Usuario'}</p>
+               <p className={`text-xs uppercase ${isDark ? 'text-gray-500' : 'text-white/70'}`}>{user?.role}</p>
             </div>
           </div>
         )}
