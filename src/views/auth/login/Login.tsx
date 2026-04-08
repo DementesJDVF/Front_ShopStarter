@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "src/utils/axios";
 import FullLogo from "src/layouts/full/shared/logo/FullLogo";
 import { Link, useNavigate } from "react-router";
+import { useAuth } from "src/context/AuthContext";
 
 const gradientStyle = {
   background:
@@ -13,6 +14,7 @@ const gradientStyle = {
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,41 +36,39 @@ const Login = () => {
     try {
       setLoading(true);
 
-      const response = await api.post("/auth/login/", {
+      // CORRECCIÓN: Ruta de API correcta
+      const response = await api.post("/users/auth/login/", {
         email: cleanEmail,
         password,
       });
 
-      const data = response.data;
+      const { access_token, user } = response.data;
 
-      // Guardar tokens (si quieres recordar sesión)
-      if (remember) {
-        localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("refresh_token", data.refresh_token);
+      // Sincronizar con el Contexto Global (OBLIGATORIO)
+      login(user, access_token);
+
+      // Redirección profesional basada en ROL
+      if (user.role === 'VENDEDOR') {
+          navigate("/vendedor/dashboard");
+      } else if (user.role === 'CLIENTE') {
+          navigate("/cliente/home");
       } else {
-        sessionStorage.setItem("access_token", data.access_token);
-        sessionStorage.setItem("refresh_token", data.refresh_token);
+          navigate("/");
       }
 
-      // Opcional: guardar usuario
-      localStorage.setItem("user_data", JSON.stringify(data.user));
-
-      // Redirigir al panel/home
-      navigate("/");
     } catch (error: any) {
       if (error.response) {
-        // El servidor respondió con un error (400, 401, etc.)
         const data = error.response.data;
+        // Capturar mensajes específicos del backend (como el de cuenta bloqueada o pendiente)
         const msg =
-          data?.non_field_errors?.[0] ||
-          data?.detail ||
+          data?.message || 
+          data?.detail || 
+          (typeof data === 'string' ? data : null) ||
           "Credenciales inválidas. Verifica email y contraseña.";
         setErrorMsg(msg);
       } else if (error.request) {
-        // La petición se hizo pero no hubo respuesta
         setErrorMsg("No se pudo conectar con el servidor. Verifica que el backend esté corriendo.");
       } else {
-        // Otro tipo de error
         setErrorMsg("Ocurrió un error inesperado.");
       }
     } finally {
@@ -85,59 +85,67 @@ const Login = () => {
               <FullLogo />
             </div>
 
-            <p className="text-sm text-center text-dark my-3">Sign In on Shop_Starter</p>
+            <p className="text-sm text-center text-dark my-3">Acceso a ShopStarter</p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
-                <label className="block mb-2 text-sm font-medium">Correo</label>
+                <label className="block mb-2 text-sm font-medium">Correo Electrónico</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="correo@dominio.com"
-                  className="w-full border rounded-md px-3 py-2"
+                  className="w-full border rounded-md px-3 py-2 outline-none focus:border-primary transition"
                   autoComplete="email"
+                  required
                 />
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium">Password</label>
+                <div className="flex justify-between mb-2">
+                  <label className="text-sm font-medium">Contraseña</label>
+                  <Link to="/auth/forgot-password"  className="text-primary text-xs font-medium">¿Olvidaste tu contraseña?</Link>
+                </div>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Tu contraseña"
-                  className="w-full border rounded-md px-3 py-2"
+                  className="w-full border rounded-md px-3 py-2 outline-none focus:border-primary transition"
                   autoComplete="current-password"
+                  required
                 />
               </div>
 
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <input
                   type="checkbox"
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}
+                  className="rounded border-gray-300 text-primary focus:ring-primary"
                 />
-                Remember this Device
+                Recordar este dispositivo
               </label>
 
               {errorMsg && (
-                <p className="text-red-600 text-sm font-medium">{errorMsg}</p>
+                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-medium animate-pulse">
+                  {errorMsg}
+                </div>
               )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-indigo-600 text-white rounded-md py-2 disabled:opacity-60"
+                className="w-full bg-primary text-white rounded-md py-2.5 font-bold hover:bg-indigo-700 transition disabled:opacity-60 shadow-md hover:shadow-lg mt-2"
               >
-                {loading ? "Ingresando..." : "Sign in"}
+                {loading ? "Ingresando..." : "Iniciar Sesión"}
               </button>
             </form>
 
-            <div className="flex gap-2 text-base text-ld font-medium mt-6 items-center justify-center">
-              <p>New to Shop_Starter?</p>
-              <Link to="/auth/register" className="text-primary text-sm font-medium">
-                Create an account
+            <div className="flex gap-2 text-sm font-medium mt-6 items-center justify-center">
+              <p className="text-gray-500">¿Nuevo en ShopStarter?</p>
+              <Link to="/auth/register" className="text-primary font-bold hover:underline">
+                Crea una cuenta
               </Link>
             </div>
           </div>
