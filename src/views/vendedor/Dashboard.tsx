@@ -56,13 +56,6 @@ const Dashboard = () => {
             </div>
           </div>
         </Card>
-
-        {/* Mapa de Ubicación del Vendedor */}
-        <Card className="col-span-1 md:col-span-2 lg:col-span-1 border-none shadow-none overflow-hidden p-0">
-           <div className="h-full min-h-[140px]">
-              <VendorMap />
-           </div>
-        </Card>
       </div>
 
       <div className="grid grid-cols-1 gap-6">

@@ -10,7 +10,6 @@ const FullLayout: FC = () => {
     <>
       <Topbar />
       <div className="flex w-full min-h-screen dark:bg-darkgray overflow-hidden">
-        <div className="page-wrapper flex w-full relative">
           {/* Sidebar */}
           <Sidebar />
           <div className="page-wrapper-sub flex flex-col w-full dark:bg-darkgray">
@@ -23,7 +22,6 @@ const FullLayout: FC = () => {
               </ScrollToTop>
             </div>
           </div>
-        </div>
       </div>
     </>
   );
