@@ -41,6 +41,13 @@ const SidebarContent: MenuItem[] = [
         url: "/vendedor/productos",
         isPro: false,
       },
+      {
+        name: "Gestión Reservas",
+        icon: "solar:calendar-mark-line-duotone",
+        id: uniqueId(),
+        url: "/vendedor/reservas",
+        isPro: false,
+      },
     ],
   },
   {
@@ -58,6 +65,13 @@ const SidebarContent: MenuItem[] = [
         icon: "solar:shop-2-outline",
         id: uniqueId(),
         url: "/cliente/productos",
+        isPro: false,
+      },
+      {
+        name: "Mis Reservas",
+        icon: "solar:calendar-mark-line-duotone",
+        id: uniqueId(),
+        url: "/cliente/reservas",
         isPro: false,
       },
     ],
