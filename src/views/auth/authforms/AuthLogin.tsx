@@ -19,7 +19,7 @@ const AuthLogin = () => {
         setError(null);
 
         try {
-            const response = await api.post('/auth/login/', { email, password });
+            const response = await api.post('/users/auth/login/', { email, password });
             const { access_token, user } = response.data;
             
             // Guardar en el contexto global
