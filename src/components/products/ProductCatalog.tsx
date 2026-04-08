@@ -180,4 +180,4 @@ export function ProductCatalog() {
       </div>
     </section>
   );
-}
+}
