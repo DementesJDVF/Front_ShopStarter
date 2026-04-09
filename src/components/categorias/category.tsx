@@ -8,7 +8,6 @@ type Category = {
   id: number;
   name: string;
   description?: string;
-  price?: string | number;
   emoji?: string;
   isActive?: boolean;
 };
@@ -40,7 +39,6 @@ const CategoryComponent: React.FC<CategoryProps> = ({ selectedCategoryId, onChan
   // Form State
   const [formData, setFormData] = useState({
     name: "",
-    price: "0",
     description: "",
     emoji: "🛍️"
   });
@@ -68,7 +66,6 @@ const CategoryComponent: React.FC<CategoryProps> = ({ selectedCategoryId, onChan
       setEditingCategory(cat);
       setFormData({
         name: cat.name,
-        price: String(cat.price || 0),
         description: cat.description || "",
         emoji: cat.emoji || "🛍️"
       });
@@ -76,7 +73,6 @@ const CategoryComponent: React.FC<CategoryProps> = ({ selectedCategoryId, onChan
       setEditingCategory(null);
       setFormData({
         name: "",
-        price: "0",
         description: "",
         emoji: "🛍️"
       });
