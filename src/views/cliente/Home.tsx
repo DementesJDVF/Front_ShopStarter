@@ -1,18 +1,16 @@
 import { Card } from 'flowbite-react';
+import VendorMap from 'src/components/geo/VendorMap';
 
 const Home = () => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6 text-dark dark:text-white">Explorar Negocios Cercanos</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Placeholder para el Mapa */}
-        <Card className="h-96 flex items-center justify-center bg-gray-100 dark:bg-dark-light border-dashed border-2 border-gray-300 dark:border-gray-600">
-          <div className="text-center">
-            <p className="text-gray-500 dark:text-gray-400 font-medium text-lg">Mapa Interactivo</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500">(Integración con Google Maps / Leaflet próximamente)</p>
-          </div>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Mapa de Vendedores Real */}
+        <div className="h-[500px]">
+           <VendorMap />
+        </div>
 
         {/* Placeholder para Filtros y Catálogo */}
         <div className="flex flex-col gap-4">

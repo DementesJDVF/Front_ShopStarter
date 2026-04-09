@@ -1,3 +1,5 @@
+import api from "../utils/axios";
+
 //  Interfaz para el usuario
 export interface User {
     id: number;
@@ -14,14 +16,6 @@ export interface User {
 }
 // Servicio para obtener los usuarios 
 export const getUsers = async (): Promise<User[]> =>{
-    const response = await fetch("http://127.0.0.1:8000/api/categories", { 
-        method: "GET", 
-        headers: {
-            "Content-Type": "application/json",
-        }, 
-    }); 
-    if (!response.ok) { 
-        throw new Error( "Failed to fetch users");
-    }
-    return response.json(); 
+    const response = await api.get("/categories"); 
+    return response.data; 
 };

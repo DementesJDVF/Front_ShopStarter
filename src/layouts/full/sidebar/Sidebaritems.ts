@@ -80,10 +80,10 @@ const SidebarContent: MenuItem[] = [
     heading: "SISTEMA",
     children: [
       {
-        name: "Dashboard Admin",
+        name: "Panel de Control",
         icon: "solar:widget-add-line-duotone",
         id: uniqueId(),
-        url: "/",
+        url: "/admin",
         isPro: false,
       },
       {

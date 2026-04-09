@@ -1,5 +1,6 @@
 import { Card, Badge, Table, Button } from "flowbite-react";
 import { HiOutlineCube, HiOutlineShoppingBag, HiOutlineTrendingUp, HiOutlineExternalLink } from 'react-icons/hi';
+import VendorMap from "../../components/geo/VendorMap";
 
 const Dashboard = () => {
   return (
@@ -19,7 +20,7 @@ const Dashboard = () => {
       </div>
       
       {/* Metrics Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card className="bg-primary/5 dark:bg-primary/10 border-none shadow-none">
           <div className="flex items-center gap-5">
             <div className="p-4 bg-primary text-white rounded-xl shadow-md">
@@ -28,9 +29,6 @@ const Dashboard = () => {
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Productos Activos</p>
               <p className="text-3xl font-bold text-dark dark:text-white">12</p>
-              <div className="flex items-center gap-1 text-xs text-primary mt-1">
-                <span>+2 este mes</span>
-              </div>
             </div>
           </div>
         </Card>
@@ -43,9 +41,6 @@ const Dashboard = () => {
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pedidos Hoy</p>
               <p className="text-3xl font-bold text-dark dark:text-white">5</p>
-              <div className="flex items-center gap-1 text-xs text-green-600 mt-1">
-                <span>+15% vs ayer</span>
-              </div>
             </div>
           </div>
         </Card>
@@ -58,9 +53,6 @@ const Dashboard = () => {
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Ventas (7 días)</p>
               <p className="text-3xl font-bold text-dark dark:text-white">$1,250.00</p>
-              <div className="flex items-center gap-1 text-xs text-blue-600 mt-1">
-                <span>En camino a la meta</span>
-              </div>
             </div>
           </div>
         </Card>
