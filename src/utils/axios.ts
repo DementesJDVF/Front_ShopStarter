@@ -1,7 +1,7 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api', // Backend base URL from env or fallback
+  baseURL: import.meta.env.VITE_API_URL || 'https://shop-starter.onrender.com/api', // Backend base URL from env or fallback
   headers: {
     'Content-Type': 'application/json',
   },
