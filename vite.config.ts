@@ -8,7 +8,16 @@ import svgr from '@svgr/rollup';
 export default defineConfig({
     resolve: {
         alias: {
+            // Se mantiene el alias original para que el código anterior no se rompa
             src: resolve(__dirname, 'src'),
+            
+            // ============================================
+            // 🚀 RUTAS ABSOLUTAS (NUEVO ESTÁNDAR)
+            // ============================================
+            // Ahora pueden importar archivos directamente usando el @
+            // Ejemplo viejo: import Button from "../../../../components/Button"
+            // Ejemplo PRO: import Button from "@/components/Button"
+            '@': resolve(__dirname, 'src'),
         },
     },
     esbuild: {

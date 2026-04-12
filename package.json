@@ -12,6 +12,8 @@
   "dependencies": {
     "@svgr/rollup": "8.1.0",
     "@tabler/icons-react": "^2.39.0",
+    "@tanstack/react-query": "^5.28.0",
+    "react-hot-toast": "^2.4.1",
     "aos": "^2.3.4",
     "apexcharts": "3.48.0",
     "axios": "^1.14.0",

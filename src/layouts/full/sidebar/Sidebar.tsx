@@ -15,9 +15,14 @@ const SidebarLayout = () => {
   // Filtrar contenido del sidebar según el ROL
   const filteredContent = SidebarContent?.filter(item => {
     if (!user) return false;
-    if (item.heading === user.role) return true;
-    if (user.role === 'ADMIN' && (item.heading === 'SISTEMA' || item.heading === 'Apps')) return true;
-    return false;
+    
+    // El admin ve su sección y la sección de SISTEMA (UI)
+    if (user.role === 'ADMIN') {
+      return item.heading === 'ADMIN' || item.heading === 'SISTEMA (UI)';
+    }
+    
+    // Otros roles ven su sección correspondiente
+    return item.heading === user.role;
   });
 
   const isCollapsed = !isHovered;

@@ -49,7 +49,7 @@ export default function ProductDetail() {
     try {
       setLoading(true);
       setError(null);
-      const res = await api.get(`/products/${id}/`);
+      const res = await api.get(`products/${id}/`);
       setProduct(res.data);
       const mainIdx = res.data.images?.findIndex((img: ProductImage) => img.is_main) ?? 0;
       setActiveImg(mainIdx >= 0 ? mainIdx : 0);
@@ -70,7 +70,7 @@ export default function ProductDetail() {
     
     try {
       setReserving(true);
-      await api.post('/orders/', { product_id: product.id });
+      await api.post('orders/', { product_id: product.id });
       alert("¡Reserva realizada con éxito! Revisa la sección 'Mis Reservas' para más detalles.");
       navigate('/cliente/reservas');
     } catch (e: any) {

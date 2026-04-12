@@ -32,8 +32,8 @@ const VendorMap: React.FC = () => {
     const L = (window as any).L;
     if (!L || !mapRef.current) return;
 
-    // Inicializar mapa centrado en una ubicación por defecto o del usuario
-    leafletMap.current = L.map(mapRef.current).setView([4.5709, -74.2973], 6); // Centro por defecto (ej. Colombia)
+    // Inicializar mapa centrado en Popayán, Cauca
+    leafletMap.current = L.map(mapRef.current).setView([2.4419, -76.6062], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,

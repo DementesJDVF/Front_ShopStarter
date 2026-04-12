@@ -1,12 +1,13 @@
-import { Badge, Dropdown, Progress, Table, Spinner, Button, Modal, Label, TextInput, Select, Textarea } from "flowbite-react";
+import { Badge, Dropdown, Progress, Table, Spinner, Button, Modal, Label, TextInput, Select, Textarea, FileInput } from "flowbite-react";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { Icon } from "@iconify/react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import api from "../../utils/axios";
+import ImagePreviewModal from "../shared/ImagePreviewModal";
 
 interface Product {
-  id: number;
+  id: string | number;
   name: string;
   price: number;
   status: string;
@@ -16,7 +17,7 @@ interface Product {
 }
 
 interface Category {
-  id: number;
+  id: string | number;
   name: string;
 }
 
@@ -26,8 +27,19 @@ const ProductTable = () => {
   const [showModal, setShowModal] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | number | null>(null);
   const navigate = useNavigate();
+  
+  // Estados para el visor de imágenes
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewTitle, setPreviewTitle] = useState('');
+
+  const openPreview = (url: string, title: string) => {
+    setPreviewUrl(url);
+    setPreviewTitle(title);
+    setIsPreviewOpen(true);
+  };
   
   const [newProduct, setNewProduct] = useState({
     name: '',
@@ -35,13 +47,20 @@ const ProductTable = () => {
     price: '',
     stock: '',
     category: '',
-    url_image: ''
+    image_file: null as File | null
+  });
+
+  const toBase64 = (file: File) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
   });
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/products/create/');
+      const response = await api.get('products/create/');
       setProducts(response.data.results || response.data);
     } catch (error) {
       console.error("Error al cargar productos:", error);
@@ -52,7 +71,7 @@ const ProductTable = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get('/products/get-categories/');
+      const response = await api.get('products/get-categories/');
       console.log("Categorías cargadas:", response.data);
       
       let cats: Category[] = [];
@@ -81,7 +100,7 @@ const ProductTable = () => {
   const handleDelete = async (id: number) => {
     if (!window.confirm("¿Estás seguro de que deseas eliminar este producto?")) return;
     try {
-      await api.delete(`/products/create/${id}/`);
+      await api.delete(`products/create/${id}/`);
       fetchProducts();
     } catch (error) {
       console.error("Error al eliminar producto:", error);
@@ -100,7 +119,7 @@ const ProductTable = () => {
       price: product.price.toString(),
       stock: product.stock.toString(),
       category: categoryMatch ? categoryMatch.id.toString() : '', 
-      url_image: product.images?.[0]?.url_image || ''
+      image_file: null // Reseteamos al editar
     });
     setShowModal(true);
   };
@@ -109,22 +128,28 @@ const ProductTable = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const data = {
+      const data: any = {
         name: newProduct.name,
         description: newProduct.description,
         price: parseFloat(newProduct.price),
         stock: parseInt(newProduct.stock),
         category: parseInt(newProduct.category),
-        status: 'ACTIVE',
-        images: [
-          { url_image: newProduct.url_image, is_main: true }
-        ]
+        // No forzamos status — el backend lo asigna como PENDING por defecto
       };
+
+      if (newProduct.image_file) {
+        const base64 = await toBase64(newProduct.image_file);
+        data.images = [{ url_image: base64, is_main: true }];
+      } else if (!editingId) {
+        alert("La imagen es obligatoria.");
+        setSubmitting(false);
+        return;
+      }
       
       if (editingId) {
-        await api.put(`/products/create/${editingId}/`, data);
+        await api.put(`products/create/${editingId}/`, data);
       } else {
-        await api.post('/products/create/', data);
+        await api.post('products/create/', data);
       }
 
       setShowModal(false);
@@ -135,7 +160,7 @@ const ProductTable = () => {
         price: '',
         stock: '',
         category: '',
-        url_image: ''
+        image_file: null
       });
       fetchProducts();
     } catch (error) {
@@ -184,7 +209,7 @@ const ProductTable = () => {
                   price: '',
                   stock: '',
                   category: '',
-                  url_image: ''
+                  image_file: null
                 });
                 setShowModal(true);
               }}>
@@ -355,13 +380,17 @@ const ProductTable = () => {
               </Select>
             </div>
             <div>
-              <Label htmlFor="image" value="URL de la Imagen" />
-              <TextInput
+              <Label htmlFor="image" value="Imagen del Producto" />
+              <FileInput
                 id="image"
-                required
-                placeholder="https://ejemplo.com/imagen.jpg"
-                value={newProduct.url_image}
-                onChange={(e) => setNewProduct({...newProduct, url_image: e.target.value})}
+                accept="image/*"
+                required={!editingId}
+                helperText="Selecciona una foto real de tu producto."
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    setNewProduct({...newProduct, image_file: e.target.files[0]});
+                  }
+                }}
               />
             </div>
             <div className="flex justify-end gap-2 mt-4">
@@ -373,6 +402,12 @@ const ProductTable = () => {
           </form>
         </Modal.Body>
       </Modal>
+      <ImagePreviewModal 
+        isOpen={isPreviewOpen} 
+        onClose={() => setIsPreviewOpen(false)} 
+        imageUrl={previewUrl} 
+        title={previewTitle} 
+      />
     </>
   );
 };

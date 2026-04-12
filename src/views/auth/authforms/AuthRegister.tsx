@@ -1,4 +1,4 @@
-import { Button, Label, TextInput, Select } from "flowbite-react";
+import { Button, Label, TextInput, Select, Checkbox } from "flowbite-react";
 import { useNavigate } from "react-router";
 import { useState } from "react";
 import api from "../../../utils/axios";
@@ -20,12 +20,14 @@ const AuthRegister = () => {
         document_type: 'CC',
         document_number: '',
         birth_date: '',
-        expedition_date: ''
+        is_human: false,
+        honeypot: ''
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { id, value } = e.target;
-        setFormData(prev => ({ ...prev, [id]: value }));
+        const { id, value, type } = e.target as HTMLInputElement;
+        const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+        setFormData(prev => ({ ...prev, [id]: val }));
         if (id === 'role') setRole(value as any);
     };
 
@@ -38,7 +40,7 @@ const AuthRegister = () => {
             // Filtrar datos para no enviar cadenas vacías en campos que el backend podría validar (como fechas)
             const dataToSend = { ...formData };
             if (role === 'CLIENTE') {
-                const clientFields = ['username', 'email', 'password', 'password_confirm', 'role'];
+                const clientFields = ['username', 'email', 'password', 'password_confirm', 'role', 'is_human', 'honeypot'];
                 Object.keys(dataToSend).forEach(key => {
                     if (!clientFields.includes(key)) {
                         delete (dataToSend as any)[key];
@@ -101,7 +103,7 @@ const AuthRegister = () => {
                         <div className="mb-2 block">
                             <Label htmlFor="password" value="Contraseña" />
                         </div>
-                        <TextInput id="password" type="password" required value={formData.password} onChange={handleChange} className="form-rounded-xl" />
+                        <TextInput id="password" type="password" required value={formData.password} onChange={handleChange} className="form-rounded-xl" helperText="Mín. 8 caracteres, 1 mayúscula, 1 número y 1 símbolo (@, $, !, %...)" />
                     </div>
                     <div>
                         <div className="mb-2 block">
@@ -160,22 +162,28 @@ const AuthRegister = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                             <div>
                                 <div className="mb-2 block">
                                     <Label htmlFor="birth_date" value="Fecha de Nacimiento" />
                                 </div>
-                                <TextInput id="birth_date" type="date" required value={formData.birth_date} onChange={handleChange} className="form-rounded-xl" />
-                            </div>
-                            <div>
-                                <div className="mb-2 block">
-                                    <Label htmlFor="expedition_date" value="Fecha de Expedición del Documento" />
-                                </div>
-                                <TextInput id="expedition_date" type="date" required value={formData.expedition_date} onChange={handleChange} className="form-rounded-xl" />
+                                <TextInput id="birth_date" type="date" required max={new Date().toISOString().split("T")[0]} value={formData.birth_date} onChange={handleChange} className="form-rounded-xl" />
                             </div>
                         </div>
                     </div>
                 )}
+
+                {/* Campo Honeypot para Bots (Invisible para humanos) */}
+                <div style={{ opacity: 0, position: 'absolute', top: 0, left: 0, height: 0, width: 0, zIndex: -1 }}>
+                    <input id="honeypot" type="text" value={formData.honeypot} onChange={handleChange} tabIndex={-1} autoComplete="off" />
+                </div>
+
+                <div className="flex items-center gap-2 mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <Checkbox id="is_human" checked={formData.is_human as boolean} onChange={handleChange} required />
+                    <Label htmlFor="is_human" className="font-semibold text-gray-700">
+                        Confirmar que no eres un robot (CAPTCHA Funcional)
+                    </Label>
+                </div>
 
                 <Button color={'primary'} type="submit" disabled={loading} className="w-full mt-4">
                     {loading ? "Registrando..." : "Completar Registro"}

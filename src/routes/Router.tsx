@@ -17,6 +17,7 @@ const Error = lazy(() => import('../views/auth/error/Error'));
 // Shared / Product Views
 const ProductDetail = lazy(() => import('../components/products/ProductDetail'));
 const Dashboard = lazy(() => import('../views/dashboards/Dashboard'));
+const RoleBasedMap = lazy(() => import('../views/shared/RoleBasedMap'));
 
 // Specific Role Views
 const ClienteHome = lazy(() => import('../views/cliente/Home.tsx'));
@@ -25,7 +26,7 @@ const VendedorDashboard = lazy(() => import('../views/vendedor/Dashboard.tsx'));
 const ManageProducts = lazy(() => import('../views/vendedor/ManageProducts.tsx'));
 const AdminDashboard = lazy(() => import('../views/admin/AdminDashboard.tsx'));
 
-// UI / Sample Views (maintained for reference)
+// UI / Sample Views
 const Typography = lazy(() => import("../views/typography/Typography"));
 const Table = lazy(() => import("../views/tables/Table"));
 const Form = lazy(() => import("../views/forms/Form"));
@@ -63,7 +64,8 @@ const Router = [
         children: [
           { path: 'home', element: <ClienteHome /> },
           { path: 'productos', element: <BrowseProducts /> },
-          { path: 'reservas', element: <SamplePage /> },
+          { path: 'mapa', element: <RoleBasedMap /> },
+          { path: 'reseñas', element: <SamplePage /> },
         ]
       }
     ]
@@ -80,7 +82,9 @@ const Router = [
         children: [
           { path: 'dashboard', element: <VendedorDashboard /> },
           { path: 'productos', element: <ManageProducts /> },
-          { path: 'reservas', element: <Table /> },
+          { path: 'mapa', element: <RoleBasedMap /> },
+          { path: 'pedidos', element: <Table /> },
+          { path: 'reseñas', element: <SamplePage /> },
         ]
       }
     ]
@@ -96,12 +100,15 @@ const Router = [
         element: <FullLayout />,
         children: [
           { index: true, element: <AdminDashboard /> },
+          { path: 'productos/aprobar', element: <AdminDashboard /> }, // Reuses dashboard with tabs
+          { path: 'usuarios', element: <AdminDashboard /> },         // Reuses dashboard with tabs
+          { path: 'categorias', element: <AdminDashboard /> },       // Reuses dashboard with tabs
         ]
       }
     ]
   },
 
-  // 5. COMMON / UI ROUTES (Inside FullLayout but not protected for demo/ref)
+  // 5. COMMON / UI ROUTES
   {
     path: '/app',
     element: <FullLayout />,
@@ -119,7 +126,7 @@ const Router = [
     ],
   },
 
-  // 5. CATCH-ALL
+  // 6. CATCH-ALL
   {
     path: '*',
     element: <Navigate to="/auth/404" replace />,

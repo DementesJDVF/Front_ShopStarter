@@ -16,6 +16,6 @@ export interface User {
 }
 // Servicio para obtener los usuarios 
 export const getUsers = async (): Promise<User[]> =>{
-    const response = await api.get("/categories"); 
+    const response = await api.get("users/list/"); 
     return response.data; 
 };

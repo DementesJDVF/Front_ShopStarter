@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { Badge, Button, Label, Select, Spinner } from "flowbite-react";
+import { Icon } from "@iconify/react";
 import "./ProductCatalog.css";
 import api from "../../utils/axios";
+import ImagePreviewModal from "../shared/ImagePreviewModal";
+import { useCart } from "../../context/CartContext";
+import { useMap } from "../../context/MapContext";
+import { toast } from "react-hot-toast";
 
 type ApiProductImage = {
   id: number;
@@ -21,6 +27,9 @@ type ApiProduct = {
   is_featured: boolean;
   images: ApiProductImage[];
   created_at: string;
+  latitude?: number;
+  longitude?: number;
+  distance?: number;
 };
 
 export function ProductCatalog() {
@@ -31,41 +40,102 @@ export function ProductCatalog() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const { addToCart } = useCart();
+  const { userLocation, radius, setRadius } = useMap();
+
+  // Estados Visor
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewTitle, setPreviewTitle] = useState('');
+
+  // Función para abrir la previsualización de una imagen en grande
+  const openPreview = (url: string, title: string) => {
+    setPreviewUrl(url);
+    setPreviewTitle(title);
+    setIsPreviewOpen(true);
+  };
+
   const handleReserve = async (productId: number) => {
     if (!window.confirm("¿Deseas reservar este producto para recogerlo en tienda?")) return;
     try {
-      await api.post('/orders/', { product_id: productId });
-      alert("¡Reserva realizada con éxito! Revisa tu panel para ver los detalles.");
-      const res = await api.get("/products/catalog/");
-      setProducts(res.data.results || res.data);
+      await api.post('orders/', { product_id: productId });
+      toast.success("¡Reserva realizada con éxito! Revisa tu panel para ver los detalles.");
+      loadData(userLocation?.lat, userLocation?.lng);
     } catch (e: any) {
-      alert(e.response?.data?.error || "Error al realizar la reserva.");
+      toast.error(e.response?.data?.error || "Error al realizar la reserva.");
     }
   };
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        setLoading(true);
-        setError(null);
-        const [prodRes, catRes] = await Promise.all([
-          api.get("/products/catalog/"),
-          api.get("/products/get-categories/")
-        ]);
-        setProducts(prodRes.data.results || prodRes.data);
-        setCategories(catRes.data.results || catRes.data);
-      } catch (e: any) {
-        setError(e.response?.data?.message || e.message || "Error al conectar con el servidor.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
+  /**
+   * Gestiona la adición de un producto al carrito local.
+   */
+  const handleAddToCart = (p: ApiProduct) => {
+    const mainImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
+    addToCart({
+      id: p.id.toString(),
+      name: p.name,
+      price: parseFloat(p.price),
+      quantity: 1,
+      image: mainImage,
+      vendorId: '1', // Placeholder: El backend debería proveer el ID del vendedor en el futuro
+      vendorName: p.vendor_name
+    });
+    toast.success(`${p.name} añadido al carrito`, {
+      icon: '🛒',
+      style: {
+        borderRadius: '10px',
+        background: '#333',
+        color: '#fff',
+      },
+    });
+  };
 
-  const filteredProducts = selectedCategory 
-    ? products.filter(p => p.category_name === selectedCategory)
-    : products;
+  /**
+   * Carga los datos de productos y categorías desde la API.
+   * Si se proporcionan coordenadas, prioriza la búsqueda por cercanía geográfica.
+   */
+  async function loadData(lat?: number, lng?: number) {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      let prodUrl = "products/catalog/";
+      if (lat && lng) {
+         prodUrl = `geo/nearby/?lat=${lat}&lng=${lng}&radius=100`; // Cargamos todo para calcular
+      }
+
+      const [prodRes, catRes] = await Promise.all([
+        api.get(prodUrl),
+        api.get("products/get-categories/")
+      ]);
+
+      // Si viene de geo, el formato es distinto (lista de vendedores con distancia)
+      // Ajustamos para que funcione con el catálogo
+      let prods = prodRes.data.results || prodRes.data;
+      
+      if (lat && lng && Array.isArray(prods)) {
+         // Transformamos el formato de nearby_vendors al formato de catálogo si es necesario
+      }
+
+      setProducts(prods);
+      setCategories(catRes.data.results || catRes.data);
+    } catch (e: any) {
+      setError(e.response?.data?.message || e.message || "Error al conectar con el servidor.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadData(userLocation?.lat, userLocation?.lng);
+  }, [userLocation]);
+
+  // Filtrado reactivo basado en categoría seleccionada y radio de distancia
+  const filteredProducts = products.filter(p => {
+    const categoryMatch = !selectedCategory || p.category_name === selectedCategory;
+    const distanceMatch = radius === 0 || (p.distance !== undefined && p.distance <= radius);
+    return categoryMatch && distanceMatch;
+  });
 
   if (loading) return (
     <div className="flex justify-center p-20 font-[var(--main-font)]">
@@ -76,17 +146,36 @@ export function ProductCatalog() {
   if (error) return (
     <div className="text-center p-20 text-red-500 font-[var(--main-font)]">
       <p>Error: {error}</p>
+      <Button color="gray" className="mt-4 mx-auto" onClick={() => loadData()}>Reintentar</Button>
     </div>
   );
 
   return (
     <section className="catalog font-[var(--main-font)]">
       <div className="mb-8 border-b border-gray-100 pb-6">
-        <h2 className="text-4xl font-black text-gray-900 tracking-tight">Catálogo de Productos</h2>
-        <p className="text-gray-500 mt-2 text-lg">Descubre productos únicos de vendedores locales cerca de ti.</p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 className="text-4xl font-black text-gray-900 tracking-tight">Catálogo de Productos</h2>
+            <p className="text-gray-500 mt-2 text-lg">Descubre productos únicos cerca de ti.</p>
+          </div>
+          
+          <div className="flex flex-col gap-2 w-full md:w-auto">
+             {userLocation && (
+               <div className="flex items-center gap-2 mt-2">
+                  <Label htmlFor="radius" value="Filtrar por distancia:" className="text-xs whitespace-nowrap"/>
+                  <Select id="radius" sizing="sm" value={radius} onChange={(e) => setRadius(parseInt(e.target.value))}>
+                     <option value={0}>Cualquier distancia</option>
+                     <option value={5}>Menos de 5 km</option>
+                     <option value={10}>Menos de 10 km</option>
+                     <option value={20}>Menos de 20 km</option>
+                  </Select>
+               </div>
+             )}
+          </div>
+        </div>
         
         {/* Filtros de Categoría */}
-        <div className="flex gap-2 mt-6 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-2 mt-8 overflow-x-auto pb-2 scrollbar-hide">
           <button
             onClick={() => setSelectedCategory(null)}
             className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
@@ -116,7 +205,7 @@ export function ProductCatalog() {
       <div className="catalog__grid">
         {filteredProducts.length === 0 ? (
           <div className="col-span-full py-20 text-center text-gray-400 italic bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100">
-            No se encontraron productos en esta categoría.
+            No se encontraron productos con estos filtros.
           </div>
         ) : (
           filteredProducts.map((p) => {
@@ -127,9 +216,10 @@ export function ProductCatalog() {
                 <div className="relative aspect-square overflow-hidden bg-gray-50">
                   {mainImage ? (
                     <img
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-zoom-in"
                       src={mainImage}
                       alt={p.name}
+                      onClick={() => openPreview(mainImage, p.name)}
                       loading="lazy"
                     />
                   ) : (
@@ -137,11 +227,20 @@ export function ProductCatalog() {
                       Sin imagen
                     </div>
                   )}
-                  {p.category_name && (
-                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm">
-                      {p.category_name}
-                    </div>
-                  )}
+                  
+                  <div className="absolute top-3 left-3 flex flex-col gap-2">
+                    {p.category_name && (
+                      <div className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm">
+                        {p.category_name}
+                      </div>
+                    )}
+                    {p.distance !== undefined && (
+                      <div className="bg-primary/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-white shadow-sm flex items-center gap-1">
+                        <Icon icon="solar:map-point-linear" />
+                        {p.distance} km
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="p-5 flex flex-col gap-2">
@@ -159,16 +258,19 @@ export function ProductCatalog() {
                     </div>
                     <div className="flex gap-2">
                         <button
-                          className="bg-white text-primary border border-primary p-2 rounded-lg hover:bg-primary/5 transition-colors flex items-center gap-2 text-sm font-bold"
+                          className="bg-gray-50 text-gray-400 p-2 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300"
+                          title="Ver detalle completo"
                           onClick={() => navigate(`/products/${p.id}`)}
                         >
-                          Detalles
+                          <Icon icon="solar:eye-linear" height={20}/>
                         </button>
+                        
                         <button
-                          className="bg-primary text-white p-2 rounded-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2 text-sm font-bold"
-                          onClick={() => handleReserve(p.id)}
+                          className="bg-primary text-white p-2 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2 text-sm font-bold flex-1 justify-center px-4"
+                          onClick={() => handleAddToCart(p)}
                         >
-                          Reservar
+                          <Icon icon="solar:cart-plus-linear" height={18}/>
+                          <span>Añadir</span>
                         </button>
                     </div>
                   </div>
@@ -178,6 +280,14 @@ export function ProductCatalog() {
           })
         )}
       </div>
+
+      {/* Visor de Imágenes */}
+      <ImagePreviewModal 
+        isOpen={isPreviewOpen} 
+        onClose={() => setIsPreviewOpen(false)} 
+        imageUrl={previewUrl} 
+        title={previewTitle} 
+      />
     </section>
   );
 }

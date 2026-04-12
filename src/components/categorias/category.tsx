@@ -47,7 +47,7 @@ const CategoryComponent: React.FC<CategoryProps> = ({ selectedCategoryId, onChan
     try {
       setLoading(true);
       // Admin gets full list, others get public list
-      const endpoint = isAdmin ? '/products/categories/admin/' : '/products/get-categories/';
+      const endpoint = isAdmin ? 'products/categories/admin/' : 'products/get-categories/';
       const res = await api.get(endpoint);
       setCategories(res.data.results || res.data);
     } catch (err) {
@@ -83,9 +83,9 @@ const CategoryComponent: React.FC<CategoryProps> = ({ selectedCategoryId, onChan
   const handleCreateOrUpdate = async () => {
     try {
       if (editingCategory) {
-        await api.put(`/products/categories/admin/${editingCategory.id}/`, formData);
+        await api.put(`products/categories/admin/${editingCategory.id}/`, formData);
       } else {
-        await api.post('/products/categories/admin/', formData);
+        await api.post('products/categories/admin/', formData);
       }
       setIsModalOpen(false);
       fetchCategories();
@@ -97,7 +97,7 @@ const CategoryComponent: React.FC<CategoryProps> = ({ selectedCategoryId, onChan
   const handleDelete = async (id: number) => {
     if (!window.confirm("¿Seguro que deseas eliminar esta categoría?")) return;
     try {
-      await api.delete(`/products/categories/admin/${id}/`);
+      await api.delete(`products/categories/admin/${id}/`);
       fetchCategories();
     } catch (err) {
       alert("Error al eliminar la categoría.");

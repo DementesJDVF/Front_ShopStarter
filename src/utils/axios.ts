@@ -1,7 +1,8 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
+import toast from 'react-hot-toast';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://shop-starter.onrender.com/api', // Backend base URL from env or fallback
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api', // Local backend by default
   headers: {
     'Content-Type': 'application/json',
   },
@@ -19,6 +20,35 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for global error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Si hay un mensaje estructurado proveído por nuestro custom exception handler de DRF
+    const serverMessage = error.response?.data?.message;
+    
+    if (error.response?.status === 401) {
+      toast.error('Sesión expirada. Por favor, inicia sesión de nuevo.');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/auth/login';
+    } else if (error.response?.status === 403) {
+      toast.error(serverMessage || 'No tienes permisos para realizar esta acción.');
+    } else if (error.response?.status >= 500) {
+      toast.error('Error interno del servidor. Intenta de nuevo más tarde.');
+    } else if (serverMessage) {
+      // Cualquier otro error manejado por el backend con mensaje válido (Ej: 400 Bad Request)
+      toast.error(serverMessage);
+    } else if (error.message === 'Network Error') {
+      toast.error('Error de red. Verifica tu conexión a internet o el estado del servidor.');
+    } else {
+      toast.error('Ocurrió un error inesperado en la solicitud.');
+    }
+
     return Promise.reject(error);
   }
 );
