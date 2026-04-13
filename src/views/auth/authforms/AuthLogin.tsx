@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../../context/AuthContext";
 import { useState } from "react";
 import api from "../../../utils/axios";
+import CustomTextInput from "../../../components/shared/CustomTextInput";
 
 const AuthLogin = () => {
     const navigate = useNavigate();
@@ -114,9 +115,9 @@ const AuthLogin = () => {
                     <div className="mb-2 block">
                         <Label htmlFor="password" value="Contraseña" />
                     </div>
-                    <TextInput
+                    <CustomTextInput
                         id="password"
-                        type="password"
+                        isPassword
                         sizing="md"
                         required
                         value={password}

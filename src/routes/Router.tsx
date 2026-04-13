@@ -26,6 +26,7 @@ const VendedorDashboard = lazy(() => import('../views/vendedor/Dashboard.tsx'));
 const ManageProducts = lazy(() => import('../views/vendedor/ManageProducts.tsx'));
 const AdminDashboard = lazy(() => import('../views/admin/AdminDashboard.tsx'));
 const VendorOrders = lazy(() => import('../views/vendedor/VendorOrders.tsx'));
+const Security = lazy(() => import('../views/shared/Security.tsx'));
 
 // UI / Sample Views
 const Typography = lazy(() => import("../views/typography/Typography"));
@@ -108,8 +109,23 @@ const Router = [
       }
     ]
   },
-
-  // 5. COMMON / UI ROUTES
+  
+  // 5. COMMON PROTECTED ROUTES (For all logged in users)
+  {
+    path: '/usuario',
+    element: <ProtectedRoute />, // authenticated only
+    children: [
+      {
+        path: '',
+        element: <FullLayout />,
+        children: [
+          { path: 'seguridad', element: <Security /> },
+        ]
+      }
+    ]
+  },
+  
+  // 6. COMMON / UI ROUTES
   {
     path: '/app',
     element: <FullLayout />,

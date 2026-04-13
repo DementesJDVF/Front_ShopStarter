@@ -3,6 +3,7 @@ import { Label, TextInput, Select, Checkbox, Spinner } from "flowbite-react";
 import { useNavigate } from "react-router";
 import api from "../../../utils/axios";
 import { Icon } from "@iconify/react";
+import CustomTextInput from "../../../components/shared/CustomTextInput";
 
 /**
  * AuthRegister: Registro multi-paso (3 pasos) con tarjeta cuadrada premium.
@@ -292,11 +293,11 @@ const AuthRegister = () => {
                         <div className="flex flex-col gap-4 animate-fade-in">
                             <div>
                                 <Label value="Contraseña Segura" className="text-[11px] font-bold text-gray-600 uppercase tracking-wider ml-1" />
-                                <TextInput id="password" type="password" required value={formData.password} onChange={handleChange} className="mt-1 form-rounded-xl" placeholder="••••••••" />
+                                <CustomTextInput id="password" isPassword required value={formData.password} onChange={handleChange} className="mt-1 form-rounded-xl" placeholder="••••••••" />
                             </div>
                             <div>
                                 <Label value="Confirmar Contraseña" className="text-[11px] font-bold text-gray-600 uppercase tracking-wider ml-1" />
-                                <TextInput id="password_confirm" type="password" required value={formData.password_confirm} onChange={handleChange} className="mt-1 form-rounded-xl" placeholder="••••••••" />
+                                <CustomTextInput id="password_confirm" isPassword required value={formData.password_confirm} onChange={handleChange} className="mt-1 form-rounded-xl" placeholder="••••••••" />
                             </div>
 
                             <div className="p-3 bg-gray-50 rounded-2xl grid grid-cols-2 gap-2 mt-2 border border-gray-100">

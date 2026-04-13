@@ -59,6 +59,14 @@ const Profile = ({ variant = "dark" }: ProfileProps) => {
           <Icon icon="solar:letter-linear" height={20} />
           Mi Cuenta
         </Dropdown.Item>
+        <Dropdown.Item
+          as={Link}
+          to="/usuario/seguridad"
+          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-dark"
+        >
+          <Icon icon="solar:shield-keyhole-linear" height={20} />
+          Seguridad
+        </Dropdown.Item>
 
         <div className="p-3 pt-0">
           <Button 
