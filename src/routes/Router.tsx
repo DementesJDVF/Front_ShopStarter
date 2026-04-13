@@ -12,6 +12,7 @@ const BlankLayout = lazy(() => import('../layouts/blank/BlankLayout'));
 const LandingPage = lazy(() => import('../views/LandingPage/Home'));
 const Login = lazy(() => import('../views/auth/login/Login'));
 const Register = lazy(() => import('../views/auth/register/Register'));
+const ForgotPassword = lazy(() => import('../views/auth/login/ForgotPassword'));
 const Error = lazy(() => import('../views/auth/error/Error'));
 
 // Shared / Product Views

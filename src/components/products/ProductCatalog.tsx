@@ -210,9 +210,12 @@ export function ProductCatalog() {
         ) : (
           filteredProducts.map((p) => {
             const mainImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
+            const isOutOfStock = p.stock <= 0;
+            const isNotAvailable = p.status !== 'ACTIVE';
+            const canPurchase = !isOutOfStock && !isNotAvailable;
             
             return (
-              <article key={p.id} className="product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100 bg-white">
+              <article key={p.id} className={`product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100 bg-white ${!canPurchase ? 'opacity-75 grayscale-[0.3]' : ''}`}>
                 <div className="relative aspect-square overflow-hidden bg-gray-50">
                   {mainImage ? (
                     <img
@@ -228,19 +231,29 @@ export function ProductCatalog() {
                     </div>
                   )}
                   
-                  <div className="absolute top-3 left-3 flex flex-col gap-2">
+                  <div className="absolute top-3 left-3 flex flex-col gap-2 z-20">
                     {p.category_name && (
                       <div className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm">
                         {p.category_name}
                       </div>
                     )}
-                    {p.distance !== undefined && (
-                      <div className="bg-primary/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-white shadow-sm flex items-center gap-1">
-                        <Icon icon="solar:map-point-linear" />
-                        {p.distance} km
+                    {isOutOfStock ? (
+                      <div className="bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-red-500/30">
+                        Agotado
                       </div>
-                    )}
+                    ) : isNotAvailable ? (
+                      <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-amber-500/30">
+                        Reservado
+                      </div>
+                    ) : null}
                   </div>
+                  
+                  {p.distance !== undefined && (
+                    <div className="absolute top-3 right-3 bg-primary/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-white shadow-sm flex items-center gap-1 z-20">
+                      <Icon icon="solar:map-point-linear" />
+                      {p.distance} km
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-5 flex flex-col gap-2">
@@ -256,21 +269,27 @@ export function ProductCatalog() {
                     <div className="text-xl font-black text-primary">
                       ${parseFloat(p.price).toLocaleString()}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 w-full max-w-[140px]">
                         <button
-                          className="bg-gray-50 text-gray-400 p-2 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300"
+                          className="bg-gray-50 text-gray-400 p-2.5 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300 border border-gray-100 shadow-sm"
                           title="Ver detalle completo"
                           onClick={() => navigate(`/app/products/${p.id}`)}
                         >
-                          <Icon icon="solar:eye-linear" height={20}/>
+                          <Icon icon="solar:eye-linear" height={22}/>
                         </button>
                         
                         <button
-                          className="bg-primary text-white p-2 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2 text-sm font-bold flex-1 justify-center px-4"
+                          disabled={!canPurchase}
+                          className={`p-2.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-xs font-black flex-1 uppercase tracking-tight ${
+                            canPurchase 
+                            ? 'bg-primary text-white hover:bg-indigo-700 shadow-primary/20 cursor-pointer active:scale-95' 
+                            : 'bg-gray-100 text-gray-400 cursor-not-allowed grayscale'
+                          }`}
                           onClick={() => handleAddToCart(p)}
+                          title={!canPurchase ? "No disponible para compra" : "Añadir al carrito"}
                         >
-                          <Icon icon="solar:cart-plus-linear" height={18}/>
-                          <span>Añadir</span>
+                          <Icon icon={canPurchase ? "solar:cart-plus-bold-duotone" : "solar:cart-cross-linear"} height={22}/>
+                          <span>{canPurchase ? "Añadir" : "No disponible"}</span>
                         </button>
                     </div>
                   </div>
