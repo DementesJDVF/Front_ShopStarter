@@ -101,7 +101,7 @@ export function ProductCatalog() {
       
       let prodUrl = "products/catalog/";
       if (lat && lng) {
-         prodUrl = `geo/nearby/?lat=${lat}&lng=${lng}&radius=100`; // Cargamos todo para calcular
+         prodUrl = `products/nearby/?lat=${lat}&lng=${lng}&radius=100`; // Cargamos todo para calcular
       }
 
       const [prodRes, catRes] = await Promise.all([

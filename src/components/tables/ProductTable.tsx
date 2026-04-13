@@ -245,7 +245,8 @@ const ProductTable = () => {
                             <img
                               src={product.images?.[0]?.url_image || "https://placehold.co/60x60?text=PS"}
                               alt="product"
-                              className="h-[60px] w-[60px] rounded-md object-cover shadow-sm bg-gray-50"
+                              className="h-[60px] w-[60px] rounded-md object-cover shadow-sm bg-gray-50 cursor-zoom-in"
+                              onClick={() => openPreview(product.images?.[0]?.url_image || "https://placehold.co/60x60?text=PS", product.name)}
                             />
                             <div className="truncat line-clamp-2 sm:text-wrap max-w-56">
                               <h6 className="text-sm font-semibold">{product.name}</h6>

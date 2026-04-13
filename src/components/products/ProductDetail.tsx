@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router";
 import api from "../../utils/axios";
 import { Button, Spinner } from "flowbite-react";
 import { Icon } from "@iconify/react";
+import ImagePreviewModal from "../shared/ImagePreviewModal";
 
 type ProductImage = {
   id: number;
@@ -43,6 +44,17 @@ export default function ProductDetail() {
   const [reserving, setReserving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeImg, setActiveImg] = useState(0);
+
+  // Estados Visor
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewTitle, setPreviewTitle] = useState('');
+
+  const openPreview = (url: string, title: string) => {
+    setPreviewUrl(url);
+    setPreviewTitle(title);
+    setIsPreviewOpen(true);
+  };
 
   const loadProduct = async () => {
     if (!id) return;
@@ -104,7 +116,8 @@ export default function ProductDetail() {
               <img
                 src={currentImage}
                 alt={product.name}
-                className="w-full h-full object-contain max-h-[400px] p-4"
+                className="w-full h-full object-contain max-h-[400px] p-4 cursor-zoom-in"
+                onClick={() => openPreview(currentImage, product.name)}
               />
             ) : (
               <div className="flex flex-col items-center text-gray-400">
@@ -217,6 +230,12 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+      <ImagePreviewModal 
+        isOpen={isPreviewOpen} 
+        onClose={() => setIsPreviewOpen(false)} 
+        imageUrl={previewUrl} 
+        title={previewTitle} 
+      />
     </div>
   );
 }
