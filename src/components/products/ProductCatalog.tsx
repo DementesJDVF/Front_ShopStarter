@@ -260,7 +260,7 @@ export function ProductCatalog() {
                         <button
                           className="bg-gray-50 text-gray-400 p-2 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300"
                           title="Ver detalle completo"
-                          onClick={() => navigate(`/products/${p.id}`)}
+                          onClick={() => navigate(`/app/products/${p.id}`)}
                         >
                           <Icon icon="solar:eye-linear" height={20}/>
                         </button>

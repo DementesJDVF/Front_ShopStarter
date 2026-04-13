@@ -1,4 +1,4 @@
-import { CategoryTable } from "src/components/categorias/category"
+import CategoryTable from "../../components/categorias/category";
 
 
 const Category = () => {

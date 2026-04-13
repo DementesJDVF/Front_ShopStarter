@@ -5,6 +5,7 @@ import api from '../../utils/axios';
 import { useAuth } from '../../context/AuthContext';
 import { useMap } from '../../context/MapContext';
 import { toast } from 'react-hot-toast';
+import VendorCatalogModal from '../../components/geo/VendorCatalogModal';
 
 const RoleBasedMap: React.FC = () => {
     const { user } = useAuth();
@@ -14,13 +15,23 @@ const RoleBasedMap: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [locations, setLocations] = useState<any[]>([]);
 
-    // Estados para que el Vendedor pueda añadir/editar una ubicación
+    // Estados para la gestión de ubicaciones (específico para el rol de VENDEDOR)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedPosition, setSelectedPosition] = useState<{lat: number, lng: number} | null>(null);
     const [locationDescription, setLocationDescription] = useState('');
 
+    // Estados para el Modal de Catálogo (Cliente)
+    const [isCatalogModalOpen, setIsCatalogModalOpen] = useState(false);
+    const [selectedVendor, setSelectedVendor] = useState<{id: string, name: string} | null>(null);
+
     // Efecto para inicializar el mapa cuando la librería Leaflet (L) esté disponible globalmente
     useEffect(() => {
+        // Exponer función global para que Leaflet (HTML crudo) pueda comunicarse con React
+        (window as any).openVendorCatalog = (vendorId: string, vendorName: string) => {
+             setSelectedVendor({ id: vendorId, name: vendorName });
+             setIsCatalogModalOpen(true);
+        };
+
         const checkLeaflet = setInterval(() => {
             if ((window as any).L) {
                 clearInterval(checkLeaflet);
@@ -29,11 +40,11 @@ const RoleBasedMap: React.FC = () => {
         }, 100);
 
         return () => {
-            // Limpieza del mapa al desmontar el componente para evitar fugas de memoria
             if (leafletMap.current) {
                 leafletMap.current.remove();
             }
             clearInterval(checkLeaflet);
+            delete (window as any).openVendorCatalog;
         };
     }, [user?.role]);
 
@@ -65,13 +76,14 @@ const RoleBasedMap: React.FC = () => {
         fetchAndRenderMarkers(L);
     };
 
-    // Función para obtener las ubicaciones de la API y dibujarlas en el mapa
+    // Obtiene las ubicaciones desde la API y las renderiza como marcadores con Popups
     const fetchAndRenderMarkers = async (L: any) => {
         try {
             setLoading(true);
-            // El endpoint cambia según el rol: El vendedor solo ve sus puntos, otros ven todos
-            let endpoint = '/geo/vendors-locations/';
-            if (user?.role === 'VENDEDOR') endpoint = '/geo/my-locations/';
+            
+            // Selección dinámica del endpoint según el rol del usuario conectado
+            let endpoint = 'geo/vendors-locations/';
+            if (user?.role === 'VENDEDOR') endpoint = 'geo/my-locations/';
             
             const response = await api.get(endpoint);
             const data = response.data;
@@ -84,8 +96,13 @@ const RoleBasedMap: React.FC = () => {
                     .bindPopup(`
                         <div class="p-2">
                             <b class="text-primary">${loc.user_name || 'Establecimiento'}</b><br/>
-                            <p class="text-xs text-gray-500">${loc.description || 'Sin descripción'}</p>
+                            <p class="text-xs text-gray-500 mb-2">${loc.description || 'Sin descripción'}</p>
                             ${user?.role === 'ADMIN' ? `<p class="text-[10px] text-red-400">Owner: ${loc.user_email}</p>` : ''}
+                            <button onclick="window.openVendorCatalog('${loc.user}', '${loc.user_name?.replace(/'/g, "\\'") || 'Vendedor'}')" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-1.5 px-3 rounded text-xs transition-colors shadow-sm">
+                                <span style="display:flex; justify-content:center; align-items:center;">
+                                    Ver Catálogo <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                </span>
+                            </button>
                         </div>
                     `);
                 markers.push(marker);
@@ -107,7 +124,7 @@ const RoleBasedMap: React.FC = () => {
     const handleSaveLocation = async () => {
         if (!selectedPosition) return;
         try {
-            await api.post('/geo/locations/', {
+            await api.post('geo/locations/', {
                 latitude: selectedPosition.lat,
                 longitude: selectedPosition.lng,
                 description: locationDescription
@@ -137,6 +154,7 @@ const RoleBasedMap: React.FC = () => {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
+                    {/* Botón interactivo para solicitar la geolocalización real del dispositivo */}
                     <Button 
                         color={userLocation ? "success" : "primary"} 
                         size="sm" 
@@ -191,6 +209,14 @@ const RoleBasedMap: React.FC = () => {
                     <Button color="gray" onClick={() => setIsEditModalOpen(false)}>Cancelar</Button>
                 </Modal.Footer>
             </Modal>
+
+            {/* Modal de Catálogo Inyectado para que viva sobre el mapa sin cambiar de página */}
+            <VendorCatalogModal 
+                isOpen={isCatalogModalOpen}
+                onClose={() => setIsCatalogModalOpen(false)}
+                vendorId={selectedVendor?.id || null}
+                vendorName={selectedVendor?.name}
+            />
         </div>
     );
 };

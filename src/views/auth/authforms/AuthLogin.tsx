@@ -10,6 +10,15 @@ const AuthLogin = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Diccionario para traducir nombres técnicos del backend a etiquetas amigables en español
+    const fieldLabels: Record<string, string> = {
+        email: 'Correo Electrónico',
+        password: 'Contraseña',
+        non_field_errors: 'Credenciales',
+        detail: 'Detalle',
+        error: 'Error'
+    };
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -19,13 +28,13 @@ const AuthLogin = () => {
         setError(null);
 
         try {
-            const response = await api.post('/users/auth/login/', { email, password });
+            const response = await api.post('users/auth/login/', { email, password });
             const { access_token, user } = response.data;
             
-            // Guardar en el contexto global
+            // Guardamos el estado del usuario y el token en el contexto global de la aplicación
             login(user, access_token);
 
-            // Redirección profesional basada en ROL REAL del Backend
+            // Sistema de redirección profesional basado en el ROL del usuario obtenido del Backend
             if (user.role === 'VENDEDOR') {
                 navigate("/vendedor/dashboard");
             } else if (user.role === 'CLIENTE') {
@@ -34,9 +43,32 @@ const AuthLogin = () => {
                 navigate("/admin");
             }
         } catch (err: any) {
-            console.error(err);
-            const message = err.response?.data?.message || err.response?.data?.non_field_errors?.[0] || "Credenciales inválidas o error de servidor.";
-            setError(message);
+            console.error("Error de Login:", err.response?.data);
+            const backendErrors = err.response?.data;
+            
+            if (backendErrors && typeof backendErrors === 'object') {
+                const mainError = backendErrors.error || backendErrors.detail || backendErrors.message;
+                
+                if (typeof mainError === 'string') {
+                    setError(mainError);
+                } else {
+                    try {
+                        const messages = Object.entries(backendErrors)
+                            .filter(([field]) => field !== 'error' && field !== 'detail')
+                            .map(([field, msgs]) => {
+                                const label = fieldLabels[field] || field;
+                                const message = Array.isArray(msgs) ? msgs[0] : msgs;
+                                return `${label}: ${message}`;
+                            })
+                            .join(" | ");
+                        setError(messages || "No se pudo iniciar sesión. Verifica tus datos.");
+                    } catch (e) {
+                        setError("Error en las credenciales proporcionadas.");
+                    }
+                }
+            } else {
+                setError(err.response?.data?.message || err.response?.data?.error || "Credenciales inválidas o error de servidor.");
+            }
         } finally {
             setLoading(false);
         }
@@ -46,8 +78,20 @@ const AuthLogin = () => {
         <>
             <form onSubmit={handleSubmit} >
                 {error && (
-                    <div className="mb-4 p-3 text-sm text-red-500 bg-red-100 rounded-lg font-medium">
-                        {error}
+                    <div className="flex items-start gap-3 p-4 mb-6 text-sm text-red-800 bg-red-50 border-l-4 border-red-500 rounded-lg animate-shake font-[var(--main-font)] shadow-md">
+                        <div className="mt-0.5">
+                            <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p className="font-bold mb-1">Error de Acceso:</p>
+                            <div className="flex flex-col gap-1">
+                                {error.split(' | ').map((msg, i) => (
+                                    <span key={i} className="block">• {msg}</span>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 )}
 

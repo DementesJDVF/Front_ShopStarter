@@ -1,14 +1,34 @@
 import React, { useState } from 'react';
-import { Drawer, Button, Icon, Badge } from 'flowbite-react';
+import { Drawer, Button, Badge } from 'flowbite-react';
 import { useCart } from '../../../context/CartContext';
 import { Icon as Iconify } from '@iconify/react';
+import api from '../../../utils/axios';
 
 const Cart = () => {
   // Controla si el panel lateral (Drawer) del carrito está desplegado o no
   const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { cart, removeFromCart, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
 
   const handleClose = () => setIsOpen(false);
+
+  const handleCheckout = async () => {
+      setLoading(true);
+      try {
+          // Se envía un POST de reserva por cada item seleccionado
+          const promises = cart.map((item: any) => api.post('orders/', { product_id: item.id }));
+          await Promise.all(promises);
+          
+          clearCart();
+          alert("¡Pedido realizado con éxito! El vendedor ha sido notificado y tu producto ha sido reservado.");
+          setIsOpen(false);
+      } catch (error) {
+          console.error("Error al procesar la orden", error);
+          alert("Ocurrió un error al procesar el pedido. Es posible que alguno de los productos ya haya sido reservado por otro cliente.");
+      } finally {
+          setLoading(false);
+      }
+  };
 
   return (
     <>
@@ -108,10 +128,11 @@ const Cart = () => {
               <span className="text-xl font-black text-dark dark:text-white">${totalPrice.toLocaleString()}</span>
             </div>
             <div className="grid grid-cols-1 gap-3">
-                <Button color="primary" className="w-full rounded-xl py-1 font-bold">
-                    Procesar Compra
+                <Button color="primary" className="w-full rounded-xl py-1 font-bold" onClick={handleCheckout} disabled={loading} isProcessing={loading}>
+                    {loading ? "Procesando Reserva..." : "Procesar Compra"}
                 </Button>
                 <button 
+
                     onClick={clearCart}
                     className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition underline underline-offset-4"
                 >

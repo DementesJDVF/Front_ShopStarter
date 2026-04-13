@@ -33,8 +33,8 @@ const TableView = () => {
     try {
       setLoading(true);
       const [ordersRes, userRes] = await Promise.all([
-        api.get('/orders/'),
-        api.get('/users/auth/me/')
+        api.get('orders/'),
+        api.get('users/auth/me/')
       ]);
       setOrders(ordersRes.data.results || ordersRes.data);
       setUserProfile(userRes.data);
@@ -55,9 +55,9 @@ const TableView = () => {
 
     try {
       if (action === 'complete') {
-        await api.post(`/orders/${id}/complete/`);
+        await api.post(`orders/${id}/complete/`);
       } else {
-        await api.post(`/orders/${id}/cancel/`);
+        await api.post(`orders/${id}/cancel/`);
       }
       alert("Operación realizada con éxito. Tu reputación ha sido actualizada.");
       fetchData();

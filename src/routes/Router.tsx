@@ -25,6 +25,7 @@ const BrowseProducts = lazy(() => import('../views/cliente/BrowseProducts.tsx'))
 const VendedorDashboard = lazy(() => import('../views/vendedor/Dashboard.tsx'));
 const ManageProducts = lazy(() => import('../views/vendedor/ManageProducts.tsx'));
 const AdminDashboard = lazy(() => import('../views/admin/AdminDashboard.tsx'));
+const VendorOrders = lazy(() => import('../views/vendedor/VendorOrders.tsx'));
 
 // UI / Sample Views
 const Typography = lazy(() => import("../views/typography/Typography"));
@@ -83,7 +84,7 @@ const Router = [
           { path: 'dashboard', element: <VendedorDashboard /> },
           { path: 'productos', element: <ManageProducts /> },
           { path: 'mapa', element: <RoleBasedMap /> },
-          { path: 'pedidos', element: <Table /> },
+          { path: 'pedidos', element: <VendorOrders /> },
           { path: 'reseñas', element: <SamplePage /> },
         ]
       }

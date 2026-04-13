@@ -40,15 +40,20 @@ const Dashboard = () => {
     try {
       setSavingLocation(true);
       await api.post('geo/locations/', {
-        latitude: lat,
-        longitude: lng,
+        latitude: parseFloat(lat.toFixed(6)),
+        longitude: parseFloat(lng.toFixed(6)),
         description: "Mi tienda" 
       });
       setVendorLocation({ lat, lng });
       setShowLocationModal(false);
       alert("¡Ubicación actualizada con éxito!");
-    } catch (err) {
-      alert("Error al guardar la ubicación.");
+    } catch (err: any) {
+      console.error(err);
+      if (err.response && err.response.data) {
+        alert("Error Backend: " + JSON.stringify(err.response.data));
+      } else {
+        alert("Error Red o Interno: " + err.message);
+      }
     } finally {
       setSavingLocation(false);
     }

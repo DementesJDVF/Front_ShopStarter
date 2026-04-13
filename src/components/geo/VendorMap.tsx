@@ -41,7 +41,7 @@ const VendorMap: React.FC = () => {
     }).addTo(leafletMap.current);
 
     try {
-      const response = await api.get('/geo/vendors-locations/');
+      const response = await api.get('geo/vendors-locations/');
       const locations = response.data;
 
       if (Array.isArray(locations) && locations.length > 0) {

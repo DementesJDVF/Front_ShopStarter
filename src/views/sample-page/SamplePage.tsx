@@ -34,8 +34,8 @@ const SamplePage = () => {
     try {
       setLoading(true);
       const [ordersRes, userRes] = await Promise.all([
-        api.get('/orders/'),
-        api.get('/users/auth/me/')
+        api.get('orders/'),
+        api.get('users/auth/me/')
       ]);
       setOrders(ordersRes.data.results || ordersRes.data);
       setUserProfile(userRes.data);
@@ -53,7 +53,7 @@ const SamplePage = () => {
   const handleCancel = async (id: string) => {
     if (!window.confirm("¿Estás seguro de que deseas cancelar esta reserva?")) return;
     try {
-      await api.post(`/orders/${id}/cancel/`);
+      await api.post(`orders/${id}/cancel/`);
       alert("Reserva cancelada con éxito.");
       fetchData();
     } catch (error) {
@@ -64,7 +64,7 @@ const SamplePage = () => {
   const handleReport = async (id: string) => {
     if (!window.confirm("¿Confirmas que el vendedor vendió el producto a otra persona? Esto activará una penalización para el vendedor.")) return;
     try {
-      await api.post(`/orders/${id}/report_vendor/`);
+      await api.post(`orders/${id}/report_vendor/`);
       alert("Reporte enviado. Lamentamos el inconveniente.");
       fetchData();
     } catch (error) {

@@ -97,7 +97,7 @@ const ProductTable = () => {
     fetchCategories();
   }, []);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string | number) => {
     if (!window.confirm("¿Estás seguro de que deseas eliminar este producto?")) return;
     try {
       await api.delete(`products/create/${id}/`);
@@ -301,7 +301,7 @@ const ProductTable = () => {
                                   } else if (items.listtitle === "Editar") {
                                     handleEdit(product);
                                   } else if (items.listtitle === "Ver Detalle") {
-                                    navigate(`/products/${product.id}`);
+                                    navigate(`/app/products/${product.id}`);
                                   }
                                 }}
                               >
