@@ -193,6 +193,7 @@ const AuthRegister = () => {
             }
         } catch (err: any) {
             console.error("Error de registro:", err.response?.data);
+            alert("ALERTA DE DEPURACIÓN: " + JSON.stringify(err.response?.data || err.message));
             const responseData = err.response?.data;
 
             if (responseData && typeof responseData === 'object') {

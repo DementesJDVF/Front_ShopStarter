@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Spinner, Card } from 'flowbite-react';
+import { Modal, Spinner, Card, Badge } from 'flowbite-react';
 import { Icon } from '@iconify/react';
 import api from '../../utils/axios';
 

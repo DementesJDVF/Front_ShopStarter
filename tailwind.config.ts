@@ -19,6 +19,24 @@ const config: Config = {
       sans: ['Manrope', 'system-ui', 'serif'], // Define a custom sans-serif font family
     },
     extend: {
+      animation: {
+        blob: "blob 7s infinite",
+        tilt: "tilt 5s infinite cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+        "spin-slow": "spin 8s linear infinite",
+      },
+      keyframes: {
+        blob: {
+          "0%": { transform: "translate(0px, 0px) scale(1)" },
+          "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+          "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+          "100%": { transform: "translate(0px, 0px) scale(1)" },
+        },
+        tilt: {
+          "0%, 50%, 100%": { transform: "rotate(0deg)" },
+          "25%": { transform: "rotate(2deg)" },
+          "75%": { transform: "rotate(-2deg)" },
+        },
+      },
       boxShadow: {
         md: "0px 2px 4px -1px rgba(175, 182, 201, 0.2);",
         lg: "0 1rem 3rem rgba(0, 0, 0, 0.175)",

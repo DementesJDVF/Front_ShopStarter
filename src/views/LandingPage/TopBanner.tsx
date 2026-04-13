@@ -1,6 +1,6 @@
-// src/components/Navbar.tsx
 import { useState } from 'react';
 import { Link } from 'react-router';
+import { Icon } from '@iconify/react';
 
 interface NavbarProps {
   // Props can be added here if needed in the future
@@ -8,6 +8,7 @@ interface NavbarProps {
 
 const TopBanner: React.FC<NavbarProps> = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [logoError, setLogoError] = useState(false);
 
   const navLinks = [
     { name: 'Características', href: '#features' },
@@ -17,18 +18,32 @@ const TopBanner: React.FC<NavbarProps> = () => {
 
   return (
     <>
-      {/* Navbar principal */}
-      <nav className="fixed w-full z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">
+      {/* Navbar principal Glassmorphism Premium */}
+      <nav className="fixed w-full z-40 bg-white/40 backdrop-blur-xl border-b border-white/30 shadow-[0_4px_30px_rgba(0,0,0,0.05)] dark:bg-gray-900/40 dark:border-gray-800/50 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             
             {/* 👈 Logo (siempre visible) */}
-            <div className="flex-shrink-0 flex items-center">
-              <span className="text-2xl font-bold text-indigo-600 tracking-tight cursor-pointer"
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              >
-                shop_starter
-              </span>
+            <div className="flex-shrink-0 flex items-center transform hover:scale-105 transition duration-300">
+              <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                {!logoError ? (
+                  <img 
+                    src="/logo.jpg" 
+                    alt="Shopstarter Logo" 
+                    className="h-[45px] md:h-[55px] w-auto drop-shadow-md rounded-lg" 
+                    onError={() => setLogoError(true)}
+                  />
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg transform -rotate-6">
+                       <Icon icon="solar:shop-2-bold-duotone" className="text-white text-2xl" />
+                    </div>
+                    <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 tracking-tighter">
+                      ShopStarter
+                    </span>
+                  </div>
+                )}
+              </Link>
             </div>
 
             {/* 👉 Enlaces Desktop (ocultos en móvil) */}
@@ -37,7 +52,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
                 <a 
                   key={link.name}
                   href={link.href} 
-                  className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition"
+                  className="relative text-gray-700 dark:text-gray-300 font-semibold hover:text-indigo-600 dark:hover:text-indigo-400 transition-all before:content-[''] before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-0.5 before:bg-indigo-600 hover:before:w-full before:transition-all before:duration-300"
                 >
                   {link.name}
                 </a>
@@ -45,16 +60,16 @@ const TopBanner: React.FC<NavbarProps> = () => {
               
               <Link 
                 to="/auth/login" 
-                className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 font-medium transition"
+                className="text-gray-700 dark:text-gray-300 font-semibold hover:text-indigo-600 transition tracking-wide"
               >
-                Log In
+                Ingresar
               </Link>
 
               <Link 
                 to="/auth/register" 
-                className="bg-indigo-600 text-white px-5 py-2 rounded-full font-medium hover:bg-indigo-700 transition shadow-md hover:shadow-lg text-center"
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:shadow-indigo-500/30 transform hover:-translate-y-1 transition-all duration-300 text-center"
               >
-                Empezar Ahora
+                Empezar Gratis
               </Link>
             </div>
 
@@ -62,7 +77,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
             <div className="md:hidden flex items-center gap-3">
               <Link 
                 to="/auth/register"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-indigo-700 transition"
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-md hover:shadow-lg transform active:scale-95 transition"
               >
                 Empezar
               </Link>

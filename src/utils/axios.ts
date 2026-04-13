@@ -11,8 +11,16 @@ const api = axios.create({
 // Request interceptor to add token
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('token') || localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-    if (token) {
+    const token =
+      localStorage.getItem('token') ||
+      localStorage.getItem('access_token') ||
+      sessionStorage.getItem('access_token');
+
+    // No enviamos token en rutas de auth públicas para evitar errores con tokens viejos (como token_not_valid)
+    const isPublicAuthRoute =
+      config.url?.includes('auth/login') || config.url?.includes('auth/register');
+
+    if (token && !isPublicAuthRoute) {
       if (config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -32,10 +40,15 @@ api.interceptors.response.use(
     const serverMessage = error.response?.data?.message;
     
     if (error.response?.status === 401) {
-      toast.error('Sesión expirada. Por favor, inicia sesión de nuevo.');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/auth/login';
+      
+      // Solo redireccionamos si NO estamos ya en el Landing o en Login/Register
+      const isPublicPath = window.location.pathname === '/' || window.location.pathname.startsWith('/auth');
+      if (!isPublicPath) {
+        toast.error('Sesión expirada. Por favor, inicia sesión de nuevo.');
+        window.location.href = '/auth/login';
+      }
     } else if (error.response?.status === 403) {
       toast.error(serverMessage || 'No tienes permisos para realizar esta acción.');
     } else if (error.response?.status >= 500) {
