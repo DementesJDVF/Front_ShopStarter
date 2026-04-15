@@ -79,7 +79,8 @@ const Login = () => {
   return (
     <div style={gradientStyle} className="relative overflow-hidden h-screen">
       <div className="flex h-full justify-center items-center px-4">
-        <div className="rounded-xl shadow-md bg-white dark:bg-darkgray p-6 w-full md:w-96 border-none">
+        <div className="rounded-lg shadow-2xl bg-white dark:bg-darkgray p-8 w-full md:w-[400px] border-none">
+
           <div className="flex flex-col gap-2 p-0 w-full">
             <div className="mx-auto">
               <FullLogo />
@@ -128,10 +129,18 @@ const Login = () => {
               </label>
 
               {errorMsg && (
-                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-medium animate-pulse">
-                  {errorMsg}
+                <div className={`p-3 border rounded-lg text-xs font-bold animate-fade-in ${
+                  errorMsg.includes("REVISADA") 
+                    ? "bg-amber-50 border-amber-200 text-amber-700 shadow-sm"
+                    : "bg-red-50 border-red-100 text-red-600 shadow-sm"
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <Icon icon={errorMsg.includes("REVISADA") ? "solar:clock-circle-bold" : "solar:danger-bold"} height={16} />
+                    <span>{errorMsg}</span>
+                  </div>
                 </div>
               )}
+
 
               <button
                 type="submit"

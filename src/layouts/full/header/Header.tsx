@@ -41,8 +41,9 @@ const Header = () => {
           : "bg-white dark:bg-dark py-4"
           }`}
       >
-        <Navbar fluid className="bg-transparent dark:bg-transparent container mx-auto px-4">
+        <Navbar fluid className="bg-transparent dark:bg-transparent px-4">
           <div className="flex items-center justify-between w-full">
+
             
             {/* Sección Izquierda: Botón de menú móvil y Logo */}
             <div className="flex items-center gap-4">

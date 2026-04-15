@@ -194,18 +194,15 @@ const AuthRegister = () => {
             }
         } catch (err: any) {
             console.error("Error de registro:", err.response?.data);
-            alert("ALERTA DE DEPURACIÓN: " + JSON.stringify(err.response?.data || err.message));
             const responseData = err.response?.data;
 
-            if (responseData && typeof responseData === 'object') {
-                // El backend usa custom_exception_handler que siempre devuelve:
-                // { error: true, message: string, code: string, details: { campo: [errores] } }
-                
-                const mainMsg = responseData.message; // Siempre es un string legible
-                const fieldDetails = responseData.details; // Errores por campo específico
+            if (responseData) {
+                // Prioridad 1: Mensaje estructurado de nuestro custom exception handler
+                const mainMsg = responseData.message;
+                const fieldDetails = responseData.details;
 
                 if (fieldDetails && typeof fieldDetails === 'object' && Object.keys(fieldDetails).length > 0) {
-                    // Mostrar errores de campo específicos primero
+                    // Mostrar errores de campo específicos
                     const fieldMessages = Object.entries(fieldDetails)
                         .map(([field, msgs]) => {
                             const label = fieldLabels[field] || field;
@@ -214,16 +211,18 @@ const AuthRegister = () => {
                         })
                         .join(" | ");
                     setError(fieldMessages);
-                } else if (typeof mainMsg === 'string') {
-                    // Mensaje general del backend (ej: "Error de validación de datos.")
+                } else if (mainMsg) {
                     setError(mainMsg);
                 } else {
-                    setError("Datos inválidos. Revisa el formulario e intenta de nuevo.");
+                    setError("Error de validación de datos. Revisa el formulario.");
                 }
+            } else if (err.message === 'Network Error') {
+                setError("Error de red. Verifica que el backend esté encendido.");
             } else {
-                setError("No se pudo conectar con el servidor. Intenta de nuevo.");
+                setError("Ocurrió un error inesperado. Intenta más tarde.");
             }
         } finally {
+
             setLoading(false);
         }
     };
@@ -245,10 +244,11 @@ const AuthRegister = () => {
 
             {/* ERROR */}
             {error && (
-                <div className="w-full p-3 mb-5 text-xs bg-red-100/90 text-red-700 border border-red-300 rounded-xl animate-shake font-bold text-center">
+                <div className="w-full p-3 mb-5 text-xs bg-red-100/90 text-red-700 border border-red-300 rounded-lg animate-shake font-bold text-center">
                     ⚠️ {error}
                 </div>
             )}
+
 
             {/* Stepper Premium */}
             <div className="flex items-center justify-center gap-2 mb-8 w-full px-4">
@@ -300,7 +300,8 @@ const AuthRegister = () => {
                                 <CustomTextInput id="password_confirm" isPassword required value={formData.password_confirm} onChange={handleChange} className="mt-1 form-rounded-xl" placeholder="••••••••" />
                             </div>
 
-                            <div className="p-3 bg-gray-50 rounded-2xl grid grid-cols-2 gap-2 mt-2 border border-gray-100">
+                            <div className="p-3 bg-gray-50 rounded-xl grid grid-cols-2 gap-2 mt-2 border border-gray-100">
+
                                 {[
                                     { label: "8+ Caracteres", ok: formData.password.length >= 8 },
                                     { label: "Mayúscula",     ok: /[A-Z]/.test(formData.password) },
@@ -355,12 +356,13 @@ const AuthRegister = () => {
                                 </>
                             )}
 
-                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 mt-2 hover:bg-gray-100 transition-colors">
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-tw border border-gray-100 mt-2 hover:bg-gray-100 transition-colors">
                                 <Checkbox id="is_human" checked={formData.is_human as boolean} onChange={handleChange} required className="text-primary focus:ring-primary" />
                                 <Label htmlFor="is_human" className="text-xs font-bold text-gray-700 cursor-pointer">
                                     Confirmo que no soy un robot
                                 </Label>
                             </div>
+
                         </div>
                     )}
                 </div>
@@ -370,7 +372,7 @@ const AuthRegister = () => {
                         type={isLastStep ? "submit" : "button"}
                         onClick={isLastStep ? undefined : handleNext}
                         disabled={loading}
-                        className={`w-full py-3.5 bg-primary hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-primary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        className={`w-full py-3.5 bg-primary hover:bg-indigo-700 text-white font-bold rounded-tw shadow-lg shadow-primary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
                     >
                         {loading ? <Spinner size="sm" /> : (
                             <>
@@ -379,6 +381,7 @@ const AuthRegister = () => {
                             </>
                         )}
                     </button>
+
 
                     {step > 1 && (
                         <button type="button" onClick={handleBack} className="w-full py-2 text-gray-500 font-bold text-xs hover:text-primary transition-colors">
@@ -392,7 +395,8 @@ const AuthRegister = () => {
             {/* ── MODAL DE ÉXITO (DIFERENTE PARA CLIENTE Y VENDEDOR) ── */}
             {showSuccess && (
                 <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-[2rem] p-10 max-w-sm w-full text-center shadow-2xl">
+                    <div className="bg-white rounded-lg p-10 max-w-sm w-full text-center shadow-2xl">
+
 
                         {formData.role === 'VENDEDOR' ? (
                             // Mensaje para VENDEDOR (estado PENDING, necesita aprobación)
@@ -409,10 +413,11 @@ const AuthRegister = () => {
                                 </p>
                                 <button
                                     onClick={() => navigate("/auth/login")}
-                                    className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl transition-all"
+                                    className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-tw transition-all"
                                 >
                                     Entendido, volver al inicio
                                 </button>
+
                             </>
                         ) : (
                             // Mensaje para CLIENTE (estado ACTIVE, puede entrar de inmediato)
@@ -426,10 +431,11 @@ const AuthRegister = () => {
                                 </p>
                                 <button
                                     onClick={() => navigate("/auth/login")}
-                                    className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl transition-all"
+                                    className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-tw transition-all"
                                 >
                                     Ir al Inicio de Sesión →
                                 </button>
+
                             </>
                         )}
                     </div>

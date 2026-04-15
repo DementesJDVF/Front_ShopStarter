@@ -18,11 +18,12 @@ const NavItems: React.FC<NavItemsProps> = ({ item, isCollapsed = false }) => {
       to={item.url}
       target={item?.isPro ? "blank" : "_self"}
       as={Link}
-      className={`transition-all duration-300 ${item.url == pathname
-          ? "text-white bg-primary rounded-xl shadow-md"
+      className={`transition-all duration-300 w-full block ${item.url == pathname
+          ? "text-white bg-primary rounded-tw shadow-md"
           : "text-link bg-transparent group/link hover:bg-gray-50 dark:hover:bg-white/5"
-        } ${isCollapsed ? 'px-2 flex justify-center' : 'px-4'}`}
+        } ${isCollapsed ? 'px-2' : 'px-4 mb-1'}`}
     >
+
       <div className={`flex items-center gap-3 w-full transition-all duration-300`}>
         <div className="flex-shrink-0 flex items-center justify-center w-6 h-6">
           {item.icon ? (
@@ -37,9 +38,10 @@ const NavItems: React.FC<NavItemsProps> = ({ item, isCollapsed = false }) => {
           )}
         </div>
         
-        <span className={`transition-all duration-300 origin-left whitespace-nowrap overflow-hidden ${
-          isCollapsed ? 'opacity-0 w-0 scale-95' : 'opacity-100 w-auto scale-100'
+        <span className={`transition-all duration-300 origin-left whitespace-nowrap ${
+          isCollapsed ? 'opacity-0 w-0 scale-95 overflow-hidden' : 'opacity-100 w-auto scale-100'
         }`}>
+
           {item.name}
           {item.isPro && (
             <span className="ml-2 py-0.5 px-2 text-[10px] bg-secondary/10 text-secondary rounded animate-pulse">Pro</span>

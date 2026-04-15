@@ -141,18 +141,20 @@ const AdminDashboard: React.FC = () => {
 
         <Tabs.Item title="Gestión de Categorías" icon={MdCategory}>
           <div className="mt-4">
-            <Card className="shadow-md border-t-4 border-t-primary">
+            <div className="panel-card border-t-4 border-t-primary p-6">
                <CategoryComponent showAdminManagement={true} />
-            </Card>
+            </div>
           </div>
         </Tabs.Item>
+
         
         <Tabs.Item title="Gestión de Usuarios" icon={HiUserCircle}>
           <div className="mt-4">
-            <Card className="shadow-md">
+            <div className="panel-card p-6 overflow-visible">
               <h2 className="text-2xl font-bold text-dark dark:text-white mb-6">Usuarios Registrados</h2>
-              <div className="overflow-x-auto">
+              <div className="overflow-visible">
                 <Table hoverable className="text-center">
+
                   <Table.Head className="bg-gray-50 dark:bg-dark-light">
                     <Table.HeadCell>Email</Table.HeadCell>
                     <Table.HeadCell>Usuario</Table.HeadCell>
@@ -203,15 +205,17 @@ const AdminDashboard: React.FC = () => {
                   </Table.Body>
                 </Table>
               </div>
-            </Card>
+            </div>
+
           </div>
         </Tabs.Item>
         <Tabs.Item title="Aprobación de Productos" icon={MdOutlinePendingActions}>
           <div className="mt-4">
-            <Card className="shadow-md">
+            <div className="panel-card p-6 overflow-visible">
               <h2 className="text-2xl font-bold text-dark dark:text-white mb-6">Productos Pendientes</h2>
-              <div className="overflow-x-auto">
+              <div className="overflow-visible">
                 <Table hoverable className="text-center">
+
                   <Table.Head className="bg-gray-50 dark:bg-dark-light text-[11px] uppercase tracking-wider">
                     <Table.HeadCell>Imagen</Table.HeadCell>
                     <Table.HeadCell>Nombre</Table.HeadCell>
@@ -263,7 +267,8 @@ const AdminDashboard: React.FC = () => {
                   </Table.Body>
                 </Table>
               </div>
-            </Card>
+            </div>
+
           </div>
         </Tabs.Item>
       </Tabs>

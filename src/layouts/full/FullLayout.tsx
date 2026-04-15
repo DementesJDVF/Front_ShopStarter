@@ -4,16 +4,25 @@ import ScrollToTop from 'src/components/shared/ScrollToTop';
 import Sidebar from './sidebar/Sidebar';
 import Header from './header/Header';
 const FullLayout: FC = () => {
+  const [isHovered, setIsHovered] = useState(false);
   return (
     <>
       <div className="flex w-full min-h-screen dark:bg-darkgray overflow-hidden">
-          {/* Sidebar */}
-          <Sidebar />
-          <div className="page-wrapper-sub flex flex-col w-full dark:bg-darkgray">
+          <div 
+            className={`xl:block hidden sticky top-[72px] z-40 transition-all duration-300 ease-in-out ${isHovered ? 'w-64' : 'w-20'}`}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <Sidebar isHovered={isHovered} />
+
+          </div>
+          <div className="page-wrapper-sub flex flex-col w-full dark:bg-darkgray min-h-screen">
             <Header />
-            <div className="bg-lightgray dark:bg-dark h-full rounded-bb p-6">
+            <div className="bg-lightgray dark:bg-dark flex-grow rounded-bb p-6">
               <ScrollToTop>
-                <div className="container mx-auto">
+                <div className="container-fluid mx-auto">
+
+
                   <Outlet />
                 </div>
               </ScrollToTop>

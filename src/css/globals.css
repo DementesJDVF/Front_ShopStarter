@@ -93,6 +93,15 @@
     @apply !bg-white/40 !border-white/20 !text-gray-800 placeholder-gray-500 !rounded-2xl focus:!bg-white/60 focus:!ring-purple-200 transition-all;
   }
 
+  /* --- ESTANDARIZACIÓN DE PANELES (UI STYLE GUIDE) --- */
+  .panel-card {
+    @apply bg-white dark:bg-dark-light shadow-md border-ld rounded-bb overflow-visible transition-all duration-300;
+  }
+
+  .panel-header {
+    @apply p-6 border-b border-ld flex items-center justify-between;
+  }
+
   /* Utilidades de texto y colores generales */
   .text-ld { @apply text-dark dark:text-white; }
   
