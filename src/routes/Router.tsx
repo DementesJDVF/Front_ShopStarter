@@ -1,4 +1,4 @@
-import { lazy } from 'react';
+import { lazy } from "react"
 import { Navigate, createBrowserRouter } from "react-router";
 import { ProductCatalog } from "../components/products/ProductCatalog.tsx";
 import ProtectedRoute from './ProtectedRoute.tsx';
