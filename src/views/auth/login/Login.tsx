@@ -3,6 +3,8 @@ import api from "src/utils/axios";
 import FullLogo from "src/layouts/full/shared/logo/FullLogo";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "src/context/AuthContext";
+import { Icon } from "@iconify/react";
+
 
 const gradientStyle = {
   background:
