@@ -4,6 +4,8 @@ import api from "../../utils/axios";
 import { Button, Spinner } from "flowbite-react";
 import { Icon } from "@iconify/react";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
+import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-hot-toast";
 
 type ProductImage = {
   id: number;
@@ -15,6 +17,7 @@ type ProductDetailData = {
   id: number;
   name: string;
   description: string;
+  ai_description?: string;
   price: string;
   stock: number;
   status: string;
@@ -44,6 +47,9 @@ export default function ProductDetail() {
   const [reserving, setReserving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeImg, setActiveImg] = useState(0);
+  const [processingAI, setProcessingAI] = useState(false);
+  
+  const { user } = useAuth();
 
   // Estados Visor
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -75,6 +81,11 @@ export default function ProductDetail() {
   useEffect(() => {
     loadProduct();
   }, [id]);
+
+    } finally {
+      setProcessingAI(false);
+    }
+  };
 
   const handleReserve = async () => {
     if (!product) return;
@@ -183,6 +194,19 @@ export default function ProductDetail() {
             {product.description}
           </p>
 
+          {/* Bloque AI Description */}
+          {product.ai_description && (
+             <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-800/30">
+               <div className="flex items-center gap-2 mb-2 text-indigo-600 dark:text-indigo-400 font-bold uppercase text-xs tracking-wider">
+                  <Icon icon="solar:magic-stick-3-bold" fontSize={18} />
+                  <span>Reseña Mágica</span>
+               </div>
+               <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed italic">
+                 "{product.ai_description}"
+               </p>
+             </div>
+          )}
+          
           <div className="grid grid-cols-2 gap-4 mt-2">
             <div className="bg-gray-50 dark:bg-dark p-4 rounded-2xl flex items-center gap-3">
               <Icon icon="solar:shop-2-linear" className="text-primary text-2xl" />

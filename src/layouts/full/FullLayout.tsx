@@ -3,6 +3,8 @@ import { Outlet } from "react-router";
 import ScrollToTop from 'src/components/shared/ScrollToTop';
 import Sidebar from './sidebar/Sidebar';
 import Header from './header/Header';
+import FloatingAssistant from 'src/components/chat/FloatingAssistant';
+
 const FullLayout: FC = () => {
   const [isHovered, setIsHovered] = useState(false);
   return (
@@ -29,6 +31,7 @@ const FullLayout: FC = () => {
             </div>
           </div>
       </div>
+      <FloatingAssistant />
     </>
   );
 };
