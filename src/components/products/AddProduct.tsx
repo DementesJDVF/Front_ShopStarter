@@ -38,6 +38,7 @@ export default function AddProduct() {
     });
 
     const [loading, setLoading] = useState(false);
+    const [generatingAI, setGeneratingAI] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
@@ -111,6 +112,27 @@ export default function AddProduct() {
         }
     }
 
+    async function handleSuggestAI() {
+        if (!form.image1_url.trim()) {
+            alert("Por favor, ingresa una URL de imagen primero.");
+            return;
+        }
+        setGeneratingAI(true);
+        try {
+            const res = await api.post("/products/suggest_description/", {
+                image_url: form.image1_url.trim()
+            });
+            if (res.data.suggestion) {
+                setForm(prev => ({ ...prev, description: res.data.suggestion }));
+            }
+        } catch (err: any) {
+            console.error("Error IA:", err);
+            alert("No se pudo obtener una sugerencia de la IA.");
+        } finally {
+            setGeneratingAI(false);
+        }
+    }
+
     return (
         <div className="add-product">
 
@@ -133,55 +155,8 @@ export default function AddProduct() {
             )}
 
             <form onSubmit={handleSubmit} className="add-product__form">
-
-                <div className="add-product__row">
-                    <div className="add-product__field">
-                        <label className="add-product__label">
-                            Vendedor <span className="add-product__required">*</span>
-                        </label>
-                        {loadingVendors ? (
-                            <p className="add-product__loading-text">Cargando vendedores...</p>
-                        ) : (
-                            <select
-                                name="vendor"
-                                value={form.vendor}
-                                onChange={handleChange}
-                                required
-                                title="Selecciona un vendedor"
-                                className="add-product__input"
-                            >
-                                <option value="">Selecciona un vendedor</option>
-                                {vendors.map((v) => (
-                                    <option key={v.id} value={v.id}>{v.username}</option>
-                                ))}
-                            </select>
-                        )}
-                    </div>
-
-                    <div className="add-product__field">
-                        <label className="add-product__label">
-                            Categoría <span className="add-product__required">*</span>
-                        </label>
-                        {loadingCats ? (
-                            <p className="add-product__loading-text">Cargando categorías...</p>
-                        ) : (
-                            <select
-                                name="category"
-                                value={form.category}
-                                onChange={handleChange}
-                                required
-                                title="Selecciona una categoría"
-                                className="add-product__input"
-                            >
-                                <option value="">Selecciona una categoría</option>
-                                {categories.map((c) => (
-                                    <option key={c.id} value={c.id}>{c.name}</option>
-                                ))}
-                            </select>
-                        )}
-                    </div>
-                </div>
-
+                
+                {/* 1. Nombre */}
                 <div className="add-product__field">
                     <label className="add-product__label">
                         Nombre <span className="add-product__required">*</span>
@@ -197,6 +172,51 @@ export default function AddProduct() {
                     />
                 </div>
 
+                {/* 2. Imagen con previsualización */}
+                <div className="add-product__image-box">
+                    <label className="add-product__label add-product__label--image">📷 URL de Imagen Principal</label>
+                    <input
+                        type="url"
+                        name="image1_url"
+                        value={form.image1_url}
+                        onChange={handleChange}
+                        placeholder="https://ejemplo.com/imagen1.jpg"
+                        className="add-product__input"
+                    />
+                    {form.image1_url && (
+                        <div className="mt-3 relative group">
+                            <img
+                                src={form.image1_url}
+                                alt="preview 1"
+                                className="add-product__preview rounded-xl border border-indigo-100 shadow-sm transition-transform group-hover:scale-[1.02]"
+                                onError={(e) => (e.currentTarget.style.display = "none")}
+                                onLoad={(e) => (e.currentTarget.style.display = "block")}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                {/* 3. Botón IA */}
+                <div className="flex justify-start mb-4">
+                    <button
+                        type="button"
+                        onClick={handleSuggestAI}
+                        disabled={generatingAI || !form.image1_url}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm ${
+                            generatingAI 
+                            ? 'bg-gray-100 text-gray-400 cursor-wait' 
+                            : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100'
+                        }`}
+                    >
+                        {generatingAI ? (
+                            <><Spinner size="sm" /> Generando...</>
+                        ) : (
+                            <><Icon icon="solar:magic-stick-3-bold-duotone" /> ✨ Sugerir descripción con IA</>
+                        )}
+                    </button>
+                </div>
+
+                {/* 4. Descripción editable */}
                 <div className="add-product__field">
                     <label className="add-product__label">
                         Descripción <span className="add-product__required">*</span>
@@ -206,12 +226,13 @@ export default function AddProduct() {
                         value={form.description}
                         onChange={handleChange}
                         required
-                        rows={3}
-                        placeholder="Descripción del producto"
-                        className="add-product__input add-product__textarea"
+                        rows={5}
+                        placeholder="Escribe la descripción o usa la IA para sugerir una..."
+                        className="add-product__input add-product__textarea border-indigo-50 focus:border-indigo-300"
                     />
                 </div>
 
+                {/* 5. Precio / Stock */}
                 <div className="add-product__row">
                     <div className="add-product__field">
                         <label className="add-product__label">
@@ -243,86 +264,68 @@ export default function AddProduct() {
                     </div>
                 </div>
 
-                <label className="add-product__checkbox-label">
-                    <input
-                        type="checkbox"
-                        name="is_featured"
-                        checked={form.is_featured}
-                        onChange={handleChange}
-                        className="add-product__checkbox"
-                    />
-                    Producto destacado
-                </label>
-
-                <div className="add-product__image-box">
-                    <label className="add-product__label add-product__label--image">📷 Imagen 1</label>
-                    <input
-                        type="url"
-                        name="image1_url"
-                        value={form.image1_url}
-                        onChange={handleChange}
-                        placeholder="https://ejemplo.com/imagen1.jpg"
-                        className="add-product__input"
-                    />
-                    {form.image1_url && (
-                        <img
-                            src={form.image1_url}
-                            alt="preview 1"
-                            className="add-product__preview"
-                            onError={(e) => (e.currentTarget.style.display = "none")}
-                            onLoad={(e) => (e.currentTarget.style.display = "block")}
-                        />
-                    )}
-                    <label className="add-product__checkbox-label add-product__checkbox-label--small">
-                        <input
-                            type="checkbox"
-                            name="image1_main"
-                            checked={form.image1_main}
-                            onChange={handleChange}
-                            className="add-product__checkbox"
-                        />
-                        Imagen principal
+                {/* 6. Categoría */}
+                <div className="add-product__field">
+                    <label className="add-product__label">
+                        Categoría <span className="add-product__required">*</span>
                     </label>
+                    {loadingCats ? (
+                        <p className="add-product__loading-text">Cargando categorías...</p>
+                    ) : (
+                        <select
+                            name="category"
+                            value={form.category}
+                            onChange={handleChange}
+                            required
+                            title="Selecciona una categoría"
+                            className="add-product__input"
+                        >
+                            <option value="">Selecciona una categoría</option>
+                            {categories.map((c) => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                        </select>
+                    )}
                 </div>
 
-                <div className="add-product__image-box">
-                    <label className="add-product__label add-product__label--image">📷 Imagen 2</label>
-                    <input
-                        type="url"
-                        name="image2_url"
-                        value={form.image2_url}
-                        onChange={handleChange}
-                        placeholder="https://ejemplo.com/imagen2.jpg"
-                        className="add-product__input"
-                    />
-                    {form.image2_url && (
-                        <img
-                            src={form.image2_url}
-                            alt="preview 2"
-                            className="add-product__preview"
-                            onError={(e) => (e.currentTarget.style.display = "none")}
-                            onLoad={(e) => (e.currentTarget.style.display = "block")}
-                        />
-                    )}
-                    <label className="add-product__checkbox-label add-product__checkbox-label--small">
+                {/* Extras y Guardado */}
+                <div className="border-t border-gray-100 pt-6 mt-6">
+                    {/* Vendedor (Solo para administradores o elección de test) */}
+                    <div className="add-product__field mb-4">
+                        <label className="add-product__label">Vendedor Administrador (Opcional)</label>
+                        {loadingVendors ? (
+                            <p className="add-product__loading-text">Cargando...</p>
+                        ) : (
+                            <select name="vendor" value={form.vendor} onChange={handleChange} className="add-product__input">
+                                <option value="">Auto-asignar usuario actual</option>
+                                {vendors.map((v) => (
+                                    <option key={v.id} value={v.id}>{v.username}</option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
+
+                    <label className="add-product__checkbox-label mb-6 bg-gray-50 p-3 rounded-xl border border-gray-100 inline-flex">
                         <input
                             type="checkbox"
-                            name="image2_main"
-                            checked={form.image2_main}
+                            name="is_featured"
+                            checked={form.is_featured}
                             onChange={handleChange}
-                            className="add-product__checkbox"
+                            className="add-product__checkbox mr-3"
                         />
-                        Imagen principal
+                        <span className="text-sm font-semibold text-gray-700">Destacar este producto</span>
                     </label>
-                </div>
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className={`add-product__submit${loading ? " add-product__submit--loading" : ""}`}
-                >
-                    {loading ? "Guardando..." : "Crear producto"}
-                </button>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className={`add-product__submit w-full py-4 text-lg font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all ${
+                            loading ? "bg-gray-300 cursor-not-allowed" : "bg-primary text-white hover:bg-darkprimary hover:-translate-y-1 active:scale-95"
+                        }`}
+                    >
+                        {loading ? "Registrando..." : "Crear producto ahora"}
+                    </button>
+                </div>
 
             </form>
         </div>
