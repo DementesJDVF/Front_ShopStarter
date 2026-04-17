@@ -82,10 +82,6 @@ export default function ProductDetail() {
     loadProduct();
   }, [id]);
 
-    } finally {
-      setProcessingAI(false);
-    }
-  };
 
   const handleReserve = async () => {
     if (!product) return;

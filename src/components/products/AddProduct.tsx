@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import api from "../../utils/axios";
 import "./ProductCatalog.css";
+import { Icon } from "@iconify/react";
+import { Spinner } from "flowbite-react";
 
 type Category = {
     id: number;
