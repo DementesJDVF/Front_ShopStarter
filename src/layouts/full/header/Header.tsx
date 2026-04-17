@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Navbar } from "flowbite-react";
+import { Navbar, useThemeMode } from "flowbite-react";
 import { Icon } from "@iconify/react";
 import { Drawer } from "flowbite-react";
 import MobileSidebar from "../sidebar/MobileSidebar";
@@ -10,6 +10,7 @@ import { useAuth } from "../../../context/AuthContext";
 
 const Header = () => {
   const [isSticky, setIsSticky] = useState(false);
+  const { mode, toggleMode } = useThemeMode();
   const { user } = useAuth();
 
   // Manejador del scroll para añadir efecto de transparencia y desenfoque (sticky) al bajar la página
@@ -76,6 +77,21 @@ const Header = () => {
               <div className="flex items-center">
                 <Notification />
               </div>
+
+              {/* Botón de cambio de tema (Dark Mode/Light Mode) con animación premium */}
+              <button
+                onClick={toggleMode}
+                className="group h-10 w-10 flex text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-lightprimary dark:hover:bg-darkmuted rounded-xl justify-center items-center transition-all duration-500 active:scale-90"
+                title={mode === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+              >
+                <div className={`transition-all duration-500 transform ${mode === 'dark' ? 'rotate-180' : 'rotate-0'}`}>
+                  {mode === "dark" ? (
+                    <Icon icon="solar:sun-2-line-duotone" height={24} className="text-yellow-400 group-hover:scale-110 transition-transform" />
+                  ) : (
+                    <Icon icon="solar:moon-line-duotone" height={22} className="group-hover:text-primary group-hover:scale-110 transition-transform" />
+                  )}
+                </div>
+              </button>
 
               {/* Divisor visual */}
               <div className="h-6 w-[1px] bg-gray-200 dark:bg-gray-700 mx-1 hidden sm:block"></div>

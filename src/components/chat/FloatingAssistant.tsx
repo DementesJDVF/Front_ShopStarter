@@ -83,7 +83,7 @@ const FloatingAssistant: React.FC = () => {
         formData.append('image', currentFile);
       }
 
-      const response = await api.post('/chat/assistant/', formData);
+      const response = await api.post('chat/assistant/', formData);
 
       // Clear loading states
       setIsProcessingVision(false);

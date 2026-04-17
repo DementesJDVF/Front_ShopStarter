@@ -18,7 +18,7 @@ const AIRecommendationsHistory: React.FC = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await api.get('/chat/history/');
+        const response = await api.get('chat/history/');
         setHistory(response.data);
       } catch (error) {
         console.error('Error fetching AI history:', error);

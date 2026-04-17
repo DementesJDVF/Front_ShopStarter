@@ -62,7 +62,7 @@ const DailyActivity = () => {
                       <div className={`${item.line}`}></div>
                     </div>
                     <div className="">
-                      <p className="text-dark text-start">{item.action}</p>
+                      <p className="text-ld text-start">{item.action}</p>
                       <Link to="#" className="text-blue-700">
                         {item.id}
                       </Link>

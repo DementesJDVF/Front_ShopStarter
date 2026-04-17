@@ -32,4 +32,15 @@
     --color-info-emphasis: #3cacc8;
     --color-surface-ld: #ffffff;
     --color-bodytext: #98A4AE;
+    --glow-color: rgba(255, 152, 0, 0.1); /* Warm solar glow */
+}
+
+.dark {
+    --color-surface-ld: #121212; /* Deep warm coal */
+    --color-bodytext: #bcc8d4;
+    --color-border: #2a2a2e;
+    --color-lighthover: #1f1f23;
+    --color-darklink: #ffffff;
+    --color-darkmuted: #222226;
+    --glow-color: rgba(99, 91, 255, 0.15); /* Soft purple lunar glow */
 }

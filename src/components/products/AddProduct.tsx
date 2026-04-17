@@ -43,7 +43,7 @@ export default function AddProduct() {
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
-        api.get("/products/get-categories/")
+        api.get("products/get-categories/")
             .then((res) => {
                 const data = res.data;
                 setCategories(Array.isArray(data) ? data : data.results ?? []);
@@ -53,7 +53,7 @@ export default function AddProduct() {
     }, []);
 
     useEffect(() => {
-        api.get("/users/list/")
+        api.get("users/list/")
             .then((res) => {
                 const data = res.data;
                 const all: Vendor[] = Array.isArray(data) ? data : data.results ?? [];
@@ -97,7 +97,7 @@ export default function AddProduct() {
         if (images.length) body.images = images;
 
         try {
-            await api.post("/products/create/", body);
+            await api.post("products/create/", body);
 
             setSuccess(true);
             // ✅ Redirige al catálogo y cierra el formulario
@@ -119,7 +119,7 @@ export default function AddProduct() {
         }
         setGeneratingAI(true);
         try {
-            const res = await api.post("/products/suggest_description/", {
+            const res = await api.post("products/suggest_description/", {
                 image_url: form.image1_url.trim()
             });
             if (res.data.suggestion) {

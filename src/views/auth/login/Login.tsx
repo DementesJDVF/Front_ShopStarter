@@ -39,7 +39,7 @@ const Login = () => {
       setLoading(true);
 
       // CORRECCIÓN: Ruta de API correcta
-      const response = await api.post("/users/auth/login/", {
+      const response = await api.post("users/auth/login/", {
         email: cleanEmail,
         password,
       });

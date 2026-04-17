@@ -147,7 +147,7 @@ const ProductTable = () => {
         formData.append('product_id', editingId.toString());
       }
 
-      const res = await api.post("/products/suggest_description/", formData, {
+      const res = await api.post("products/suggest_description/", formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 

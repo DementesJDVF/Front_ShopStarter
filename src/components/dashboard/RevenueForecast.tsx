@@ -1,10 +1,11 @@
 
 import React, { useState } from "react";
-import { Select } from "flowbite-react";
+import { Select, useThemeMode } from "flowbite-react";
 import { ApexOptions } from "apexcharts";
 import Chart from "react-apexcharts"
 
 const RevenueForecast = () => {
+  const { mode } = useThemeMode();
   const [selectedPeriod, setSelectedPeriod] = useState<string>("This Week");
 
   const getChartData = (period: string) => {
@@ -78,6 +79,9 @@ const RevenueForecast = () => {
         show: false,
       },
     },
+    theme: {
+      mode: mode === "dark" ? "dark" : "light",
+    },
     colors: ["var(--color-primary)", "var(--color-error)"],
     dataLabels: {
       enabled: false,
@@ -118,11 +122,21 @@ const RevenueForecast = () => {
       axisTicks: {
         show: false,
       },
+      labels: {
+        style: {
+          colors: mode === 'dark' ? '#bcc8d4' : '#94a3b8',
+        }
+      }
     },
     yaxis: {
       min: -4,
       max: 4,
       tickAmount: 4,
+      labels: {
+        style: {
+          colors: mode === 'dark' ? '#bcc8d4' : '#94a3b8',
+        }
+      }
     },
     legend: {
       show: false,
