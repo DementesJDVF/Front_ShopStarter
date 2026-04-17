@@ -56,8 +56,9 @@ api.interceptors.response.use(
     } else if (serverMessage) {
       // Cualquier otro error manejado por el backend con mensaje válido (Ej: 400 Bad Request)
       toast.error(serverMessage);
-    } else if (error.message === 'Network Error') {
-      toast.error('Error de red. Verifica tu conexión a internet o el estado del servidor.');
+    } else if (error.message === 'Network Error' || error.code === 'ECONNABORTED') {
+      // Ignoramos errores de red momentáneos para evitar cierres de sesión agresivos
+      console.warn('Micro-corte de red detectado. Reintentando silenciosamente o esperando estabilidad.');
     } else {
       toast.error('Ocurrió un error inesperado en la solicitud.');
     }
