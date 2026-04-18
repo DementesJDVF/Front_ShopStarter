@@ -180,7 +180,7 @@
 
   /* --- ESTANDARIZACIÓN DE PANELES (UI STYLE GUIDE) --- */
   .panel-card {
-    @apply bg-white/70 dark:bg-slate-900/80 backdrop-blup-xl shadow-white/40 dark:border-white/5 rounded-[2.5rem] overflow-visible transition-all duration-500 hover:shadow-2x1;
+    @apply bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-white/40 dark:border-white/5 rounded-[2.5rem] overflow-visible transition-all duration-500 hover:shadow-2xl;
   }
 
   .panel-header {
