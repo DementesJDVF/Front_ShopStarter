@@ -19,18 +19,18 @@ interface User {
 
 const AdminDashboard: React.FC = () => {
   const location = useLocation();
-  const tabsRef = useRef<TabsRef>(null);
-  
+  const [currentView, setCurrentView] = useState(0);
+
   const [users, setUsers] = useState<User[]>([]);
   const [pendingProducts, setPendingProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Sincronizar tab con URL
+  // Sincronizar vista con URL
   useEffect(() => {
-    if (location.pathname.includes('usuarios')) tabsRef.current?.setActiveTab(2);
-    else if (location.pathname.includes('categorias')) tabsRef.current?.setActiveTab(1);
-    else if (location.pathname.includes('productos/aprobar')) tabsRef.current?.setActiveTab(3);
-    else tabsRef.current?.setActiveTab(0); // Resumen
+    if (location.pathname.includes('usuarios')) setCurrentView(2);
+    else if (location.pathname.includes('categorias')) setCurrentView(1);
+    else if (location.pathname.includes('productos/aprobar')) setCurrentView(3);
+    else setCurrentView(0); // Resumen
   }, [location.pathname]);
   
   // Estados para el visor de imágenes
@@ -106,52 +106,65 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold text-dark dark:text-white mb-8">Panel de Administración</h1>
+    <div className="w-full">
+      <div className="mb-10">
+        <h1 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic">
+          Centro de <span className="text-secondary">Control Maestro</span>
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400 font-medium text-lg">Gestiona usuarios, productos y categorías con precisión quirúrgica.</p>
+      </div>
       
-      <Tabs aria-label="Tabs with underline" variant="underline" ref={tabsRef}>
-        <Tabs.Item active title="Resumen General" icon={HiOutlineChartPie}>
-           <div className="mt-4">
-              <Card className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-none shadow-xl p-12 text-center overflow-hidden relative">
-                <div className="absolute top-[-50px] right-[-50px] w-40 h-40 bg-indigo-500/20 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-[-50px] left-[-50px] w-40 h-40 bg-purple-500/20 rounded-full blur-3xl"></div>
-                
-                <div className="relative z-10 flex flex-col items-center gap-6">
-                  <div className="p-6 bg-white dark:bg-dark-light rounded-3xl shadow-2xl scale-110">
-                    <Icon icon="solar:crown-minimalistic-bold-duotone" className="text-secondary" height={64} />
+      <div className="bg-white/40 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2rem] border border-gray-100 dark:border-slate-800 p-2 md:p-4 overflow-hidden shadow-sm">
+        
+        {currentView === 0 && (
+          <div className="py-6 px-2 animate-fade-in">
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-secondary to-purple-600 rounded-[2.5rem] blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
+                <Card className="relative bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border-none shadow-xl p-8 md:p-20 text-center rounded-[2.5rem] overflow-hidden">
+                  <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+                    <Icon icon="solar:crown-minimalistic-bold-duotone" width={250} />
                   </div>
-                  <div className="max-w-md">
-                    <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic">
-                      Próximamente <span className="text-secondary italic">por Papayo</span>
-                    </h2>
-                    <p className="text-gray-500 dark:text-gray-400 mt-4 text-lg font-medium">
-                      El centro de control maestro está en desarrollo. Pronto podrás ver analíticas globales, 
-                      gestionar el sistema completo y supervisar el crecimiento de ShopStarter.
-                    </p>
+                  
+                  <div className="relative z-10 flex flex-col items-center gap-8">
+                    <div className="p-6 bg-gradient-to-br from-secondary to-purple-700 rounded-3xl shadow-xl transform hover:rotate-6 transition duration-500">
+                      <Icon icon="solar:shield-star-bold-duotone" className="text-white" height={56} />
+                    </div>
+                    <div className="max-w-2xl">
+                      <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic leading-none">
+                        Consola Administrativa <br/>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-purple-500">Próximamente por Papayo</span>
+                      </h2>
+                      <p className="text-gray-500 dark:text-gray-400 mt-6 text-base md:text-lg font-medium leading-relaxed">
+                        La super-visión de ShopStarter está en camino. Supervisa el flujo de ventas global, 
+                        gestiona la reputación de los vendedores y domina el mercado desde un solo lugar.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-3">
+                       <Badge color="purple" className="px-5 py-2 rounded-full font-black uppercase text-xs">Métricas Globales</Badge>
+                       <Badge color="indigo" className="px-5 py-2 rounded-full font-black uppercase text-xs">Control Total</Badge>
+                       <Badge color="pink" className="px-5 py-2 rounded-full font-black uppercase text-xs">Soporte Master</Badge>
+                    </div>
                   </div>
-                  <div className="flex gap-4 mt-4">
-                     <Badge color="purple" size="xl" className="font-bold">Métricas Globales</Badge>
-                     <Badge color="indigo" size="xl" className="font-bold">Control Total</Badge>
-                     <Badge color="pink" size="xl" className="font-bold">Soporte Master</Badge>
-                  </div>
-                </div>
-              </Card>
-           </div>
-        </Tabs.Item>
+                </Card>
+              </div>
+          </div>
+        )}
 
-        <Tabs.Item title="Gestión de Categorías" icon={MdCategory}>
-          <div className="mt-4">
+        {currentView === 1 && (
+          <div className="mt-4 animate-fade-in">
             <div className="panel-card border-t-4 border-t-primary p-6">
                <CategoryComponent showAdminManagement={true} />
             </div>
           </div>
-        </Tabs.Item>
+        )}
 
         
-        <Tabs.Item title="Gestión de Usuarios" icon={HiUserCircle}>
-          <div className="mt-4">
+        {currentView === 2 && (
+          <div className="mt-4 animate-fade-in">
             <div className="panel-card p-6 overflow-visible">
-              <h2 className="text-2xl font-bold text-dark dark:text-white mb-6">Usuarios Registrados</h2>
+              <h2 className="text-2xl font-bold text-dark dark:text-white mb-6 flex items-center gap-2">
+                <HiUserCircle className="text-primary text-3xl" /> Usuarios Registrados
+              </h2>
               <div className="overflow-visible">
                 <Table hoverable className="text-center">
 
@@ -208,11 +221,13 @@ const AdminDashboard: React.FC = () => {
             </div>
 
           </div>
-        </Tabs.Item>
-        <Tabs.Item title="Aprobación de Productos" icon={MdOutlinePendingActions}>
-          <div className="mt-4">
+        )}
+        {currentView === 3 && (
+          <div className="mt-4 animate-fade-in">
             <div className="panel-card p-6 overflow-visible">
-              <h2 className="text-2xl font-bold text-dark dark:text-white mb-6">Productos Pendientes</h2>
+              <h2 className="text-2xl font-bold text-dark dark:text-white mb-6 flex items-center gap-2">
+                <MdOutlinePendingActions className="text-primary text-3xl" /> Productos Pendientes
+              </h2>
               <div className="overflow-visible">
                 <Table hoverable className="text-center">
 
@@ -270,8 +285,8 @@ const AdminDashboard: React.FC = () => {
             </div>
 
           </div>
-        </Tabs.Item>
-      </Tabs>
+        )}
+      </div>
 
       {/* Visor de Imágenes Global */}
       <ImagePreviewModal 

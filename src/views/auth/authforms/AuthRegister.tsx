@@ -6,7 +6,7 @@ import { Icon } from "@iconify/react";
 import CustomTextInput from "../../../components/shared/CustomTextInput";
 
 /**
- * AuthRegister: Registro multi-paso (3 pasos) con tarjeta cuadrada premium.
+ * AuthRegister: Registro multi-paso (3 pasos) con integración de Textos Legales (Colombia).
  *
  * LÓGICA DE CAMPOS POR ROL:
  * - CLIENTE: username, email, password, password_confirm, full_name, role, is_human
@@ -22,8 +22,8 @@ const AuthRegister = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [showTerms, setShowTerms] = useState(false); // Modal Legal
 
-    // Mapeo de campos técnicos a nombres en español para mostrar errores del backend legibles
     const fieldLabels: Record<string, string> = {
         username: 'Nombre de Usuario',
         email: 'Correo Electrónico',
@@ -40,7 +40,6 @@ const AuthRegister = () => {
         error: 'Error'
     };
 
-    // Estado inicial del formulario — incluye TODOS los campos posibles del backend
     const [formData, setFormData] = useState({
         username: '',
         email: '',
@@ -53,6 +52,7 @@ const AuthRegister = () => {
         document_number: '',
         birth_date: '',
         is_human: false,
+        accepted_terms: false, // Nuevo Checkbox Estricto
         honeypot: ''
     });
 
@@ -62,10 +62,6 @@ const AuthRegister = () => {
         setFormData(prev => ({ ...prev, [id]: val }));
     };
 
-    /**
-     * Validación estricta por paso.
-     * Los vendedores deben pasar validaciones adicionales en el Paso 3.
-     */
     const validateStep = (): boolean => {
         setError(null);
 
@@ -104,7 +100,6 @@ const AuthRegister = () => {
                 setError("El nombre completo es obligatorio.");
                 return false;
             }
-            // Campos extra obligatorios solo para VENDEDOR
             if (formData.role === 'VENDEDOR') {
                 if (!formData.phone_number.trim()) {
                     setError("El teléfono es obligatorio para Vendedores.");
@@ -119,6 +114,13 @@ const AuthRegister = () => {
                     return false;
                 }
             }
+            
+            // VALIDACIÓN ESTRICTA LEY COLOMBIANA
+            if (!formData.accepted_terms) {
+                setError("Por imposición legal, debes aceptar los Términos y Condiciones, y la Política de Tratamiento de Datos (Ley 1581 de 2012) para poder registrarte.");
+                return false;
+            }
+
             if (!formData.is_human) {
                 setError("Debes confirmar que no eres un robot.");
                 return false;
@@ -139,25 +141,17 @@ const AuthRegister = () => {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-
-        // Si el formulario se envía antes del último paso, avanzamos de paso
         if (step < 3) {
             handleNext();
             return;
         }
-
-        // Validar el paso final antes de enviar
         if (!validateStep()) return;
 
         setLoading(true);
         setError(null);
 
         try {
-            // Construir el payload según el ROL del usuario
-            // CLIENTE: solo los campos básicos
-            // VENDEDOR: todos los campos (incluyendo datos fiscales)
             let dataToSend: Record<string, any>;
-
             if (formData.role === 'CLIENTE') {
                 dataToSend = {
                     username: formData.username,
@@ -170,7 +164,6 @@ const AuthRegister = () => {
                     honeypot: formData.honeypot,
                 };
             } else {
-                // VENDEDOR — enviar todos los campos que el backend requiere
                 dataToSend = {
                     username: formData.username,
                     email: formData.email,
@@ -188,28 +181,19 @@ const AuthRegister = () => {
             }
 
             const response = await api.post('users/auth/register/', dataToSend);
-
-            if (response.status === 201) {
-                setShowSuccess(true);
-            }
+            if (response.status === 201) setShowSuccess(true);
         } catch (err: any) {
-            console.error("Error de registro:", err.response?.data);
             const responseData = err.response?.data;
-
             if (responseData) {
-                // Prioridad 1: Mensaje estructurado de nuestro custom exception handler
                 const mainMsg = responseData.message;
                 const fieldDetails = responseData.details;
-
                 if (fieldDetails && typeof fieldDetails === 'object' && Object.keys(fieldDetails).length > 0) {
-                    // Mostrar errores de campo específicos
                     const fieldMessages = Object.entries(fieldDetails)
                         .map(([field, msgs]) => {
                             const label = fieldLabels[field] || field;
                             const message = Array.isArray(msgs) ? msgs[0] : String(msgs);
                             return `${label}: ${message}`;
-                        })
-                        .join(" | ");
+                        }).join(" | ");
                     setError(fieldMessages);
                 } else if (mainMsg) {
                     setError(mainMsg);
@@ -222,17 +206,14 @@ const AuthRegister = () => {
                 setError("Ocurrió un error inesperado. Intenta más tarde.");
             }
         } finally {
-
             setLoading(false);
         }
     };
 
-    // Indica si el paso actual es el paso final
     const isLastStep = step === 3;
 
     return (
         <div className="w-full font-[var(--main-font)] flex flex-col items-center">
-            {/* Título integrado limpiamente */}
             <div className="text-center mb-6">
                 <h2 className="text-2xl font-black text-indigo-900 uppercase tracking-tighter">
                     {step === 1 && "Identidad y Rol"}
@@ -242,15 +223,12 @@ const AuthRegister = () => {
                 <p className="text-[11px] text-indigo-900/60 font-bold mt-1 tracking-widest uppercase">Paso {step} de 3</p>
             </div>
 
-            {/* ERROR */}
             {error && (
                 <div className="w-full p-3 mb-5 text-xs bg-red-100/90 text-red-700 border border-red-300 rounded-lg animate-shake font-bold text-center">
                     ⚠️ {error}
                 </div>
             )}
 
-
-            {/* Stepper Premium */}
             <div className="flex items-center justify-center gap-2 mb-8 w-full px-4">
                 {[1, 2, 3].map((s) => (
                     <React.Fragment key={s}>
@@ -267,7 +245,6 @@ const AuthRegister = () => {
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full">
                 <div className="min-h-[220px] flex flex-col justify-start">
-                    {/* ── PASO 1 ── */}
                     {step === 1 && (
                         <div className="flex flex-col gap-4 animate-fade-in">
                             <div>
@@ -288,7 +265,6 @@ const AuthRegister = () => {
                         </div>
                     )}
 
-                    {/* ── PASO 2 ── */}
                     {step === 2 && (
                         <div className="flex flex-col gap-4 animate-fade-in">
                             <div>
@@ -301,7 +277,6 @@ const AuthRegister = () => {
                             </div>
 
                             <div className="p-3 bg-gray-50 rounded-xl grid grid-cols-2 gap-2 mt-2 border border-gray-100">
-
                                 {[
                                     { label: "8+ Caracteres", ok: formData.password.length >= 8 },
                                     { label: "Mayúscula",     ok: /[A-Z]/.test(formData.password) },
@@ -317,7 +292,6 @@ const AuthRegister = () => {
                         </div>
                     )}
 
-                    {/* ── PASO 3 ── */}
                     {step === 3 && (
                         <div className="flex flex-col gap-4 animate-fade-in">
                             <div>
@@ -356,13 +330,20 @@ const AuthRegister = () => {
                                 </>
                             )}
 
-                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-tw border border-gray-100 mt-2 hover:bg-gray-100 transition-colors">
+                            {/* CHECKBOX LEGAL (HABEAS DATA) */}
+                            <div className="flex items-start gap-3 p-3 bg-red-50/50 rounded-tw border border-red-200/50 mt-2 hover:bg-red-50 transition-colors">
+                                <Checkbox id="accepted_terms" checked={formData.accepted_terms} onChange={handleChange} required className="text-red-600 focus:ring-red-500 mt-1" />
+                                <div className="text-[11px] font-medium text-gray-700 leading-tight">
+                                    Acepto los <button type="button" onClick={() => setShowTerms(true)} className="text-red-700 font-bold hover:underline outline-none">Términos, Condiciones y Política de Tratamiento de Datos (Ley 1581 de 2012)</button>. Comprendo que ShopStarter es únicamente una herramienta organizativa de catálogo.
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-tw border border-gray-100 hover:bg-gray-100 transition-colors">
                                 <Checkbox id="is_human" checked={formData.is_human as boolean} onChange={handleChange} required className="text-primary focus:ring-primary" />
                                 <Label htmlFor="is_human" className="text-xs font-bold text-gray-700 cursor-pointer">
                                     Confirmo que no soy un robot
                                 </Label>
                             </div>
-
                         </div>
                     )}
                 </div>
@@ -382,7 +363,6 @@ const AuthRegister = () => {
                         )}
                     </button>
 
-
                     {step > 1 && (
                         <button type="button" onClick={handleBack} className="w-full py-2 text-gray-500 font-bold text-xs hover:text-primary transition-colors">
                             ← Volver al paso anterior
@@ -391,15 +371,66 @@ const AuthRegister = () => {
                 </div>
             </form>
 
+            {/* ── MODAL LEGAL: TÉRMINOS Y HABEAS DATA ── */}
+            {showTerms && (
+                <div className="fixed inset-0 z-[4000] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-gray-200">
+                        <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="font-black text-gray-800 text-lg flex items-center gap-2">
+                                <Icon icon="solar:shield-warning-bold-duotone" className="text-red-500 text-2xl" />
+                                Textos Legales y Privacidad
+                            </h3>
+                            <button onClick={() => setShowTerms(false)} className="text-gray-400 hover:text-gray-700 transition">
+                                <Icon icon="solar:close-circle-bold" className="text-2xl" />
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto text-sm text-gray-600 space-y-4 font-medium leading-relaxed bg-white">
+                            <h4 className="font-bold text-gray-800 text-base">1. Naturaleza del Servicio</h4>
+                            <p>
+                                De conformidad con el Estatuto del Consumidor (Ley 1480 de 2011), <strong>ShopStarter</strong> declara explícitamente que actúa de manera exclusiva como un portal de contacto (intermediario tecnológico organizativo) y catálogo digital. 
+                                En ningún momento ShopStarter percibe dinero, resguarda transacciones financieras, recauda pagos o cobra comisiones por venta. Cualquier controversia por el mal estado de un producto, garantía, o pagos efectuados mediante efectivo, transferencias directas (Nequi, Daviplata, etc.) será responsabilidad única, exclusiva y directa entre el Comprador y el Vendedor inscrito en la plataforma.
+                            </p>
 
-            {/* ── MODAL DE ÉXITO (DIFERENTE PARA CLIENTE Y VENDEDOR) ── */}
+                            <h4 className="font-bold text-gray-800 text-base mt-6">2. Autorización de Tratamiento de Datos (Ley 1581 de 2012)</h4>
+                            <p>
+                                Mediante la aceptación de este documento y en cumplimiento de la Ley Estatuaria 1581 de 2012 (Habeas Data) y su Decreto Reglamentario 1377 de 2013, el Usuario y/o Vendedor autoriza de manera voluntaria, previa, explícita, informada e inequívoca a <strong>ShopStarter</strong> para recolectar, recaudar, almacenar, usar, circular, suprimir, procesar, compilar, intercambiar y actualizar mis datos personales compartidos en la presente plataforma.
+                            </p>
+                            <p>
+                                <strong>Finalidad:</strong> Los datos recopilados serán utilizados con la única y exclusiva finalidad de proveer el servicio de catálogo digital, geolocalización comercial local y notificaciones informativas inherentes a la plataforma. 
+                            </p>
+
+                            <h4 className="font-bold text-gray-800 text-base mt-6">3. Sus Derechos como Titular</h4>
+                            <p>
+                                Como titular de los datos personales, le informamos que asiste el derecho a conocer, actualizar y rectificar sus datos; solicitar prueba de la autorización otorgada; ser informado sobre el uso de los mismos; presentar quejas ante la Superintendencia de Industria y Comercio; y revocar de forma voluntaria la presente autorización eliminando su perfil dentro del aplicativo.
+                            </p>
+
+                            <h4 className="font-bold text-gray-800 text-base mt-6">4. Exención de Vínculos</h4>
+                            <p>
+                                El uso de la plataforma por parte de un Vendedor no crea, constituye, ni deriva en ninguna relación, contrato de trabajo, asociación comercial (Partnership), ni vinculación sociológica contractual de ninguna naturaleza jurídica con ShopStarter.
+                            </p>
+                        </div>
+                        <div className="p-5 border-t border-gray-100 bg-gray-50 flex justify-end">
+                            <button 
+                                type="button" 
+                                onClick={() => {
+                                    setFormData(prev => ({ ...prev, accepted_terms: true }));
+                                    setShowTerms(false);
+                                }} 
+                                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-md"
+                            >
+                                Aceptar Términos y Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+            {/* ── MODAL DE ÉXITO ── */}
             {showSuccess && (
                 <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-fade-in">
                     <div className="bg-white rounded-lg p-10 max-w-sm w-full text-center shadow-2xl">
-
-
                         {formData.role === 'VENDEDOR' ? (
-                            // Mensaje para VENDEDOR (estado PENDING, necesita aprobación)
                             <>
                                 <div className="w-20 h-20 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-6">
                                     <Icon icon="solar:clock-circle-bold" height={48} />
@@ -417,10 +448,8 @@ const AuthRegister = () => {
                                 >
                                     Entendido, volver al inicio
                                 </button>
-
                             </>
                         ) : (
-                            // Mensaje para CLIENTE (estado ACTIVE, puede entrar de inmediato)
                             <>
                                 <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
                                     <Icon icon="solar:check-circle-bold" height={48} />
@@ -435,7 +464,6 @@ const AuthRegister = () => {
                                 >
                                     Ir al Inicio de Sesión →
                                 </button>
-
                             </>
                         )}
                     </div>

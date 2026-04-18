@@ -36,11 +36,16 @@
 }
 
 .dark {
-    --color-surface-ld: #121212; /* Deep warm coal */
-    --color-bodytext: #bcc8d4;
-    --color-border: #2a2a2e;
-    --color-lighthover: #1f1f23;
-    --color-darklink: #ffffff;
-    --color-darkmuted: #222226;
+    /* Premium Deep Slate/Indigo Dark Mode Palette */
+    --color-surface-ld: #0f172a;    /* Deep slate for general surface */
+    --color-darkgray: #0B1121;      /* Very deep backdrop (Main App Bg) */
+    --color-dark: #1e293b;          /* Elevated elements (Cards, Sidebars) */
+    --color-dark-light: #161C2E;    /* Internal card panels */
+    --color-darkmuted: #1e293b;     /* Muted/hover backgrounds */
+    --color-border: #1e293b;        /* Subtle slate borders */
+    --color-darkborder: #2B3856;    /* Enhanced borders for inputs/active elements */
+    --color-bodytext: #94a3b8;      /* Clear readable typography */
+    --color-lighthover: #1e293b;    /* Hover interactions */
+    --color-darklink: #f8fafc;      /* High contrast text */
     --glow-color: rgba(99, 91, 255, 0.15); /* Soft purple lunar glow */
 }

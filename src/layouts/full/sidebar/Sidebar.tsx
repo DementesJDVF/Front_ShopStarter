@@ -32,18 +32,16 @@ const SidebarLayout: React.FC<SidebarProps> = ({ isHovered }) => {
 
   return (
     <Sidebar
-      className={`fixed h-screen border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-darkgray shadow-sm transition-all duration-300 ease-in-out ${isHovered ? 'w-64' : 'w-20'}`}
+      className={`bg-transparent dark:bg-transparent transition-all duration-300 ease-in-out ${isHovered ? 'w-64' : 'w-20'}`}
       aria-label="Sidebar"
     >
-      <div className="sidebar-logo-spacer h-4"></div>
-      
-      <SimpleBar className="h-[calc(100vh_-_100px)] overflow-x-hidden">
-        <Sidebar.Items className={`${isCollapsed ? 'px-2' : 'px-4'} transition-all duration-300`}>
+      <SimpleBar className="h-full overflow-x-hidden backdrop-blur-sm">
+        <Sidebar.Items className={`${isCollapsed ? 'px-1' : 'px-4'} transition-all duration-300 pt-2`}>
           <Sidebar.ItemGroup className="sidebar-nav">
             {filteredContent?.map((item, index) => (
-              <div className="mb-4" key={item.heading || index}>
+              <div className="mb-6 pt-2" key={item.heading || index}>
                 {!isCollapsed && (
-                  <h5 className="text-link dark:text-white/70 font-semibold text-xs pb-3 uppercase tracking-widest opacity-100 transition-opacity duration-300">
+                  <h5 className="text-gray-400 dark:text-gray-500 font-bold text-[11px] mb-4 uppercase tracking-[0.15em] opacity-100 transition-opacity duration-300 px-2">
                     {item.heading}
                   </h5>
                 )}
