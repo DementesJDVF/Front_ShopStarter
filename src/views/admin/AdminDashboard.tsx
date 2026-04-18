@@ -124,12 +124,12 @@ const AdminDashboard = () => {
               onClick={() => setOpenCard(openCard === i ? null : i)}
               className={`cursor-pointer backdrop-blur-xl rounded-2xl p-5 transition border border-white/30
               ${openCard === i
-                  ? "fixed top-1/2 left-1/2 z-50 w-[55%] h-[75%] overflow-auto -translate-x-1/2 -translate-y-1/2 bg-[#0f172a] shadow-[0_0_30px_rgba(59,130,246,0.7)] border-blue-400 p-8"
+                  ? "fixed top-1/2 left-1/2 z-50 w-[55%] h-[75%] overflow-auto -translate-x-1/2 -translate-y-1/2 bg-[#] shadow-[0_0_20px_rgba(255,255,255)] border-blue-400 p-8"
                   : "bg-white/5 shadow-[0_0_20px_rgba(0,255,255)] hover:scale-[1.03]"
                 }`}
             >
               <p className="text-sm">{k.title}</p>
-              <h2 className="text-3xl font-bold">{k.value}</h2>
+              <h2 className="text-3xl font-bold text-white">{k.value}</h2>
             </div>
           ))}
         </div>
@@ -139,7 +139,7 @@ const AdminDashboard = () => {
 
           <Card className="md:col-span-2 bg-white/5 border border-white/20 shadow-[0_0_20px_rgba(0,255,255)]">
             <div className="flex justify-between mb-3">
-              <h2>Crecimiento usuarios</h2>
+              <h2 className="text-white">Crecimiento usuarios</h2>
               <Select value={period} onChange={(e) => setPeriod(e.target.value)}>
                 <option value="d">dias</option> {/*indicador de crecimiento por dias o por mes */}
                 <option value="month">Meses</option>
@@ -158,7 +158,7 @@ const AdminDashboard = () => {
 
           <div className="flex flex-col gap-4">
             <Card className="bg-white/5 border border-white/20">
-              <h2 className="text-sm">Usuarios por rol</h2>
+              <h2 className="text-white">Usuarios por rol</h2>
               <ResponsiveContainer width="100%" height={120}>
                 <PieChart>
                   <Pie
@@ -178,7 +178,7 @@ const AdminDashboard = () => {
             </Card>
 
             <Card className="bg-white/5 border border-white/20">
-              <h2 className="text-sm">Activos vs Inactivos</h2>
+              <h2 className="text-white">activos e inactivos</h2>
               <ResponsiveContainer width="100%" height={120}>
                 <PieChart>
                   <Pie
@@ -233,7 +233,7 @@ const AdminDashboard = () => {
 
           {/* cuadro para mapa vendedores*/}
           <Card className="bg-white/5 border border-white/20 shadow-[0_0_20px_rgba(0,255,255)]">
-            <h2 className="mb-4">Mapa de vendedores</h2>
+            <h2 className="mb-4 text-white">Mapa de vendedores</h2>
 
             <div className="h-[300px] w-full rounded-xl overflow-hidden">
               <MapContainer
