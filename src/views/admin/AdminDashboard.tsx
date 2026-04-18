@@ -157,7 +157,7 @@ const AdminDashboard = () => {
           </Card>
 
           <div className="flex flex-col gap-4">
-            <Card className="bg-white/5 border border-white/20">
+            <Card className="bg-white/5 border border-white/20 shadow-[0_0_20px_rgba(0,255,255)]">
               <h2 className="text-white">Usuarios por rol</h2>
               <ResponsiveContainer width="100%" height={120}>
                 <PieChart>
@@ -177,7 +177,7 @@ const AdminDashboard = () => {
               </ResponsiveContainer>
             </Card>
 
-            <Card className="bg-white/5 border border-white/20">
+            <Card className="bg-white/5 border border-white/20 shadow-[0_0_20px_rgba(0,255,255)]">
               <h2 className="text-white">activos e inactivos</h2>
               <ResponsiveContainer width="100%" height={120}>
                 <PieChart>

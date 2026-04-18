@@ -27,7 +27,7 @@ const Notification = ({ variant = "dark" }: NotificationProps) => {
     const { data: notifications = [], isLoading } = useQuery<NotificationItem[]>({
         queryKey: ["notifications"],
         queryFn: async () => {
-            const response = await api.get("/core/notifications/");
+            const response = await api.get("core/notifications/");
             return response.data;
         },
         enabled: isAuthenticated,
@@ -37,7 +37,7 @@ const Notification = ({ variant = "dark" }: NotificationProps) => {
     // Mutación para marcar una notificación como leída en el servidor
     const markAsRead = useMutation({
         mutationFn: async (id: string) => {
-            await api.post(`/core/notifications/${id}/mark_as_read/`);
+            await api.post(`core/notifications/${id}/mark_as_read/`);
         },
         onSuccess: () => {
             // Invalidar la caché para forzar una recarga de las notificaciones tras el cambio

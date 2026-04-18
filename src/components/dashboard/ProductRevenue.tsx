@@ -77,7 +77,7 @@ const ProductRevenue = () => {
                         />
                         <div className="truncat line-clamp-2 sm:text-wrap max-w-56">
                           <h6 className="text-sm">{item.name}</h6>
-                          <p className="text-xs ">{item.seller}</p>
+                          <p className="text-xs text-bodytext">{item.seller}</p>
                         </div>
                       </div>
                     </Table.Cell>

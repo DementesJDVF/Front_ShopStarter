@@ -61,10 +61,10 @@ const Dashboard = () => {
 
   return (
     <div className="p-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <div className="bg-gradient-to-r from-[#CFFEFF] to-[#BBADFF] dark:bg-none dark:bg-transparent p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 shadow-sm border border-white/50 dark:border-gray-800">
         <div>
-          <h1 className="text-2xl font-bold text-dark dark:text-white">Panel de Gestión - Vendedor</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1 italic">[ Funcionalidades completas próximamente ]</p>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Panel de Gestión - Vendedor</h1>
+          <p className="text-slate-600 dark:text-gray-400 mt-1 italic font-medium">[ Funcionalidades completas próximamente ]</p>
         </div>
         <div className="flex gap-2">
             <Badge color="success" size="lg" className="px-4 py-2">Estado: Activo</Badge>
@@ -76,36 +76,36 @@ const Dashboard = () => {
       </div>
       
       {/* Metrics Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="bg-primary/5 dark:bg-primary/10 border-none shadow-none">
-          <div className="flex items-center gap-5">
-            <div className="p-4 bg-primary text-white rounded-xl shadow-md">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 mb-8">
+        <Card className="panel-card !bg-white/60 dark:!bg-gray-800/60 backdrop-blur-xl border-none shadow-xl hover:-translate-y-1 transition-all duration-500">
+          <div className="flex items-center gap-5 p-2">
+            <div className="p-4 bg-primary/10 text-primary rounded-2xl">
               <HiOutlineCube size={28} />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Productos Activos</p>
-              <p className="text-3xl font-bold text-dark dark:text-white">12</p>
+              <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Productos Activos</p>
+              <p className="text-3xl font-black text-gray-900 dark:text-white">12</p>
             </div>
           </div>
         </Card>
 
         {/* Info card de ubicación actual */}
-        <Card className="bg-orange-50 dark:bg-orange-900/10 border-none shadow-none col-span-1 md:col-span-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-5 text-left">
-              <div className="p-4 bg-orange-500 text-white rounded-xl shadow-md">
+        <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border border-gray-100 dark:border-gray-700 shadow-sm rounded-3xl sm:col-span-2 xl:col-span-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-2">
+            <div className="flex items-center gap-5">
+              <div className="p-4 bg-orange-100 text-orange-600 rounded-2xl">
                 <HiOutlineLocationMarker size={28} />
               </div>
-              <div className="text-left">
-                <p className="text-sm font-medium text-gray-500 text-left">Ubicación de tu Negocio</p>
+              <div className="flex flex-col">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Ubicación de tu Negocio</p>
                 {loadingLocation ? (
                   <Spinner size="sm" />
                 ) : vendorLocation ? (
-                  <p className="text-xs font-bold text-dark dark:text-white text-left break-all">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white break-all">
                     {vendorLocation.lat.toFixed(5)}, {vendorLocation.lng.toFixed(5)}
                   </p>
                 ) : (
-                  <p className="text-xs text-red-500 text-left">Aún no has fijado tu ubicación en el mapa.</p>
+                  <p className="text-xs text-red-500 font-bold">Sin ubicación asignada</p>
                 )}
               </div>
             </div>
@@ -114,9 +114,10 @@ const Dashboard = () => {
                 href={`https://www.google.com/maps?q=${vendorLocation.lat},${vendorLocation.lng}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary text-xs font-bold hover:underline"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-xl text-xs font-black hover:bg-primary/20 transition"
               >
-                Ver en Maps
+                VER EN MAPS
+                <HiOutlineExternalLink />
               </a>
             )}
           </div>
@@ -124,30 +125,35 @@ const Dashboard = () => {
       </div>
 
       {/* Dashboard Placeholder - Próximamente por Papayo */}
-      <Card className="bg-gradient-to-br from-primary/10 to-indigo-500/10 border-none shadow-xl p-12 text-center overflow-hidden relative">
-        <div className="absolute top-[-50px] right-[-50px] w-40 h-40 bg-primary/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-[-50px] left-[-50px] w-40 h-40 bg-indigo-500/20 rounded-full blur-3xl"></div>
-        
-        <div className="relative z-10 flex flex-col items-center gap-6">
-          <div className="p-6 bg-white dark:bg-dark-light rounded-3xl shadow-2xl scale-110">
-            <Icon icon="solar:chart-square-bold-duotone" className="text-primary" height={64} />
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-indigo-500 rounded-[2.5rem] blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+        <Card className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-none shadow-2xl p-6 md:p-12 text-center rounded-[2.5rem] overflow-hidden">
+          <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
+            <Icon icon="solar:chart-square-bold-duotone" width={200} />
           </div>
-          <div className="max-w-md">
-            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic">
-              Próximamente <span className="text-primary italic">por Papayo</span>
-            </h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-4 text-lg font-medium">
-              Estamos preparando un centro de mando avanzado para gestionar tus pedidos, 
-              ver analíticas en tiempo real y optimizar tu negocio. ¡Mantente atento!
-            </p>
+          
+          <div className="relative z-10 flex flex-col items-center gap-8">
+            <div className="p-6 bg-gradient-to-br from-primary to-indigo-600 rounded-[2rem] shadow-xl transform hover:scale-110 transition duration-500">
+              <Icon icon="solar:widget-bold-duotone" className="text-white" height={48} />
+            </div>
+            <div className="max-w-xl">
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic leading-none break-words">
+                Gestión Inteligente <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2CD4D9] to-[#3A17E4] dark:from-primary dark:to-indigo-500">Próximamente por Papayo</span>
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400 mt-6 text-base md:text-lg font-medium leading-relaxed">
+                Estamos construyendo el centro de mando más avanzado para tu negocio. 
+                Analiza tus ventas con IA, gestiona inventarios en segundos y escala como nunca antes.
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-3">
+               <Badge color="info" className="px-4 py-2 rounded-full font-black uppercase text-[10px]">Analíticas IA</Badge>
+               <Badge color="indigo" className="px-4 py-2 rounded-full font-black uppercase text-[10px]">Inventario Cloud</Badge>
+               <Badge color="purple" className="px-4 py-2 rounded-full font-black uppercase text-[10px]">Reportes ERP</Badge>
+            </div>
           </div>
-          <div className="flex gap-4 mt-4">
-             <Badge color="info" size="xl" className="font-bold">Analíticas Avanzadas</Badge>
-             <Badge color="indigo" size="xl" className="font-bold">IA Predictiva</Badge>
-             <Badge color="purple" size="xl" className="font-bold">Gestión ERP</Badge>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      </div>
 
       {/* Modal para elegir ubicación */}
       <Modal show={showLocationModal} onClose={() => setShowLocationModal(false)} size="lg">

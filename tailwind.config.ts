@@ -133,7 +133,9 @@ const config: Config = {
         successemphasis: "var(--color-success-emphasis)",
         infoemphasis: "var(--color-info-emphasis)",
         darkmuted: "var( --color-darkmuted)",
+        "dark-light": "var(--color-darkmuted)",
       },
+
     },
   },
   plugins: [

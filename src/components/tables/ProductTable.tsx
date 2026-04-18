@@ -47,8 +47,11 @@ const ProductTable = () => {
     price: '',
     stock: '',
     category: '',
-    image_file: null as File | null
+    image_file: null as File | null,
+    preview_url: ''
   });
+
+  const [generatingAI, setGeneratingAI] = useState(false);
 
   const toBase64 = (file: File) => new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -111,7 +114,6 @@ const ProductTable = () => {
   const handleEdit = (product: Product) => {
     // Buscamos el ID coherente con el nombre de la categoría que viene del backend
     const categoryMatch = categories.find(c => c.name === product.category_name);
-    
     setEditingId(product.id);
     setNewProduct({
       name: product.name,
@@ -119,9 +121,45 @@ const ProductTable = () => {
       price: product.price.toString(),
       stock: product.stock.toString(),
       category: categoryMatch ? categoryMatch.id.toString() : '', 
-      image_file: null // Reseteamos al editar
+      image_file: null,
+      preview_url: product.images?.[0]?.url_image || ''
     });
     setShowModal(true);
+  };
+
+  const handleSuggestAI = async () => {
+    const hasImage = newProduct.image_file || newProduct.preview_url;
+    if (!hasImage) {
+      alert("Por favor, selecciona una imagen primero.");
+      return;
+    }
+
+    setGeneratingAI(true);
+    try {
+      const formData = new FormData();
+      if (newProduct.image_file) {
+        formData.append('image_file', newProduct.image_file);
+      } else {
+        formData.append('image_url', newProduct.preview_url);
+      }
+      
+      if (editingId) {
+        formData.append('product_id', editingId.toString());
+      }
+
+      const res = await api.post("products/suggest_description/", formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      if (res.data.suggestion) {
+        setNewProduct(prev => ({ ...prev, description: res.data.suggestion }));
+      }
+    } catch (err) {
+      console.error("Error IA:", err);
+      alert("No se pudo obtener sugerencia de la IA.");
+    } finally {
+      setGeneratingAI(false);
+    }
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -160,7 +198,8 @@ const ProductTable = () => {
         price: '',
         stock: '',
         category: '',
-        image_file: null
+        image_file: null,
+        preview_url: ''
       });
       fetchProducts();
     } catch (error) {
@@ -209,7 +248,8 @@ const ProductTable = () => {
                   price: '',
                   stock: '',
                   category: '',
-                  image_file: null
+                  image_file: null,
+                  preview_url: ''
                 });
                 setShowModal(true);
               }}>
@@ -325,6 +365,7 @@ const ProductTable = () => {
         <Modal.Header>{editingId ? 'Editar Producto' : 'Añadir Nuevo Producto'}</Modal.Header>
         <Modal.Body>
           <form className="flex flex-col gap-4" onSubmit={handleCreate}>
+            {/* 1. Nombre */}
             <div>
               <Label htmlFor="name" value="Nombre del Producto" />
               <TextInput
@@ -334,16 +375,68 @@ const ProductTable = () => {
                 onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
               />
             </div>
+
+            {/* 2. Imagen y Preview */}
             <div>
-              <Label htmlFor="description" value="Descripción" />
+              <Label htmlFor="image" value="Imagen del Producto" />
+              <FileInput
+                id="image"
+                accept="image/*"
+                required={!editingId}
+                helperText="Selecciona una foto real de tu producto."
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    const file = e.target.files[0];
+                    setNewProduct({
+                      ...newProduct, 
+                      image_file: file,
+                      preview_url: URL.createObjectURL(file)
+                    });
+                  }
+                }}
+              />
+              {newProduct.preview_url && (
+                <div className="mt-2 text-center">
+                   <img 
+                    src={newProduct.preview_url} 
+                    alt="preview" 
+                    className="h-32 mx-auto rounded-lg border shadow-sm object-cover"
+                   />
+                </div>
+              )}
+            </div>
+
+            {/* 3. Botón IA */}
+            <div className="flex justify-center">
+               <Button
+                color="light"
+                pill
+                size="sm"
+                onClick={handleSuggestAI}
+                disabled={generatingAI || (!newProduct.image_file && !newProduct.preview_url)}
+               >
+                 {generatingAI ? (
+                   <><Spinner size="sm" className="mr-2"/> Analizando...</>
+                 ) : (
+                   <><Icon icon="solar:magic-stick-3-bold-duotone" className="mr-2 text-indigo-500" /> ✨ Sugerir descripción con IA</>
+                 )}
+               </Button>
+            </div>
+
+            {/* 4. Descripción */}
+            <div>
+              <Label htmlFor="description" value="Descripción (Editable)" />
               <Textarea
                 id="description"
                 required
-                rows={3}
+                rows={4}
                 value={newProduct.description}
+                placeholder="Escribe aquí o usa la sugerencia de la IA..."
                 onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
               />
             </div>
+
+            {/* 5. Precio / Stock */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="price" value="Precio" />
@@ -366,6 +459,8 @@ const ProductTable = () => {
                 />
               </div>
             </div>
+
+            {/* 6. Categoría */}
             <div>
               <Label htmlFor="category" value="Categoría" />
               <Select
@@ -379,20 +474,6 @@ const ProductTable = () => {
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </Select>
-            </div>
-            <div>
-              <Label htmlFor="image" value="Imagen del Producto" />
-              <FileInput
-                id="image"
-                accept="image/*"
-                required={!editingId}
-                helperText="Selecciona una foto real de tu producto."
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    setNewProduct({...newProduct, image_file: e.target.files[0]});
-                  }
-                }}
-              />
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button color="gray" onClick={() => setShowModal(false)}>Cancelar</Button>

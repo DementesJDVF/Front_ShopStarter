@@ -27,6 +27,7 @@ const VendedorDashboard = lazy(() => import('../views/vendedor/Dashboard.tsx'));
 const ManageProducts = lazy(() => import('../views/vendedor/ManageProducts.tsx'));
 const AdminDashboard = lazy(() => import('../views/admin/AdminDashboard.tsx'));
 const VendorOrders = lazy(() => import('../views/vendedor/VendorOrders.tsx'));
+const AIRecommendationsHistory = lazy(() => import('../views/vendedor/AIRecommendationsHistory.tsx'));
 const Security = lazy(() => import('../views/shared/Security.tsx'));
 
 // UI / Sample Views
@@ -87,6 +88,7 @@ const Router = [
           { path: 'productos', element: <ManageProducts /> },
           { path: 'mapa', element: <RoleBasedMap /> },
           { path: 'pedidos', element: <VendorOrders /> },
+          { path: 'auditoria-ia', element: <AIRecommendationsHistory /> },
           { path: 'reseñas', element: <SamplePage /> },
         ]
       }

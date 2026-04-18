@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { Icon } from '@iconify/react';
 
+import FullLogo from '../../layouts/full/shared/logo/FullLogo';
+
 interface NavbarProps {
   // Props can be added here if needed in the future
 }
 
 const TopBanner: React.FC<NavbarProps> = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
-  const [logoError, setLogoError] = useState(false);
 
   const navLinks = [
     { name: 'Características', href: '#features' },
@@ -19,40 +20,22 @@ const TopBanner: React.FC<NavbarProps> = () => {
   return (
     <>
       {/* Navbar principal Glassmorphism Premium */}
-      <nav className="fixed w-full z-40 bg-white/40 backdrop-blur-xl border-b border-white/30 shadow-[0_4px_30px_rgba(0,0,0,0.05)] dark:bg-gray-900/40 dark:border-gray-800/50 transition-all duration-300">
+      <nav className="fixed w-full z-40 bg-white/60 backdrop-blur-2xl border-b border-white/40 shadow-xl dark:bg-gray-900/60 dark:border-gray-800/50 transition-all duration-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-20 md:h-24 px-1 sm:px-4">
             
-            {/* 👈 Logo (siempre visible) */}
-            <div className="flex-shrink-0 flex items-center transform hover:scale-105 transition duration-300">
-              <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                {!logoError ? (
-                  <img 
-                    src="/logo.jpg" 
-                    alt="Shopstarter Logo" 
-                    className="h-[45px] md:h-[55px] w-auto drop-shadow-md rounded-lg" 
-                    onError={() => setLogoError(true)}
-                  />
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg transform -rotate-6">
-                       <Icon icon="solar:shop-2-bold-duotone" className="text-white text-2xl" />
-                    </div>
-                    <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 tracking-tighter">
-                      ShopStarter
-                    </span>
-                  </div>
-                )}
-              </Link>
+            {/* 👈 Logo Unificado */}
+            <div className="flex-shrink-0 flex items-center transform hover:scale-[1.05] transition duration-500 drop-shadow-lg">
+              <FullLogo />
             </div>
 
-            {/* 👉 Enlaces Desktop (ocultos en móvil) */}
-            <div className="hidden md:flex items-center space-x-8">
+            {/* 👉 Enlaces Desktop */}
+            <div className="hidden md:flex items-center space-x-10">
               {navLinks.map((link) => (
                 <a 
                   key={link.name}
                   href={link.href} 
-                  className="relative text-gray-700 dark:text-gray-300 font-semibold hover:text-indigo-600 dark:hover:text-indigo-400 transition-all before:content-[''] before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-0.5 before:bg-indigo-600 hover:before:w-full before:transition-all before:duration-300"
+                  className="relative text-[#0A014A] dark:text-white font-black uppercase tracking-widest text-[11px] hover:text-[#3A17E4] transition-all before:content-[''] before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-0.5 before:bg-[#3A17E4] hover:before:w-full before:transition-all before:duration-300"
                 >
                   {link.name}
                 </a>
@@ -60,35 +43,33 @@ const TopBanner: React.FC<NavbarProps> = () => {
               
               <Link 
                 to="/auth/login" 
-                className="text-gray-700 dark:text-gray-300 font-semibold hover:text-indigo-600 transition tracking-wide"
+                className="text-[#0A014A] dark:text-white font-black uppercase tracking-widest text-[11px] hover:text-[#3A17E4] transition-all"
               >
                 Ingresar
               </Link>
 
               <Link 
                 to="/auth/register" 
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:shadow-indigo-500/30 transform hover:-translate-y-1 transition-all duration-300 text-center"
+                className="bg-gradient-to-r from-[#3A17E4] via-[#2CD4D9] to-[#0A014A] text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:shadow-[0_10px_30px_rgba(58,23,228,0.3)] hover:scale-[1.05] active:scale-95 transition-all duration-300 shadow-xl"
               >
                 Empezar Gratis
               </Link>
             </div>
 
-            {/* 📱 Botón menú móvil (solo visible en móvil) */}
+            {/* 📱 Botón menú móvil */}
             <div className="md:hidden flex items-center gap-3">
               <Link 
                 to="/auth/register"
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-md hover:shadow-lg transform active:scale-95 transition"
+                className="bg-gradient-to-r from-[#3A17E4] to-[#0A014A] text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-90 transition"
               >
                 Empezar
               </Link>
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition"
+                className="p-2 rounded-xl text-[#0A014A] dark:text-white hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors"
                 aria-label="Abrir menú"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+                <Icon icon="solar:hamburger-menu-bold-duotone" className="w-7 h-7" />
               </button>
             </div>
 
@@ -99,49 +80,47 @@ const TopBanner: React.FC<NavbarProps> = () => {
       {/* 📱 Overlay + Menú Móvil (Sidebar) */}
       {isMobileMenuOpen && (
         <>
-          {/* Overlay oscuro */}
           <div 
-            className="fixed inset-0 bg-black/50 z-45 md:hidden" 
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-45 md:hidden" 
             onClick={() => setIsMobileMenuOpen(false)}
           />
           
-          {/* Panel lateral */}
-          <div className="fixed inset-y-0 right-0 z-50 w-64 bg-white dark:bg-gray-900 shadow-xl transform transition-transform duration-300 ease-in-out md:hidden">
-            <div className="p-4 flex items-center justify-between border-b dark:border-gray-800">
-              <span className="text-xl font-bold text-indigo-600">shop_starter</span>
+          <div className="fixed inset-y-0 right-0 z-50 w-72 bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(10,1,74,0.3)] transform transition-transform duration-500 ease-in-out md:hidden border-l border-white/20 dark:border-slate-800">
+            <div className="p-6 flex items-center justify-between border-b border-indigo-50 dark:border-slate-800">
+              <div className="scale-90 origin-left">
+                <FullLogo variant="dark" />
+              </div>
               <button 
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                className="p-2 text-[#0A014A] dark:text-white hover:bg-indigo-50 dark:hover:bg-slate-800 rounded-xl"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <Icon icon="solar:close-circle-bold-duotone" className="w-7 h-7" />
               </button>
             </div>
             
-            <nav className="p-4 space-y-2">
+            <nav className="p-6 space-y-3">
               {navLinks.map((link) => (
                 <a 
                   key={link.name}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 rounded-lg transition font-medium"
+                  className="block px-5 py-4 text-[#0A014A] dark:text-white hover:bg-indigo-50 dark:hover:bg-slate-800 hover:text-[#3A17E4] rounded-2xl transition-all font-black uppercase tracking-widest text-xs"
                 >
                   {link.name}
                 </a>
               ))}
-              <div className="pt-4 border-t dark:border-gray-800 space-y-3">
+              <div className="pt-6 border-t border-indigo-50 space-y-4">
                 <Link 
                   to="/auth/login"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block w-full text-center px-5 py-3 text-gray-700 dark:text-gray-200 font-medium hover:text-indigo-600 transition"
+                  className="block w-full text-center px-5 py-2 text-[#0A014A] dark:text-white font-black uppercase tracking-widest text-xs hover:text-[#3A17E4]"
                 >
                   Iniciar Sesión
                 </Link>
                 <Link 
                   to="/auth/register"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block w-full bg-indigo-600 text-white px-5 py-3 rounded-lg font-medium hover:bg-indigo-700 transition text-center"
+                  className="block w-full bg-gradient-to-r from-[#3A17E4] to-[#0A014A] text-white px-5 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl active:scale-95 transition-transform text-center"
                 >
                   Empezar Ahora
                 </Link>
