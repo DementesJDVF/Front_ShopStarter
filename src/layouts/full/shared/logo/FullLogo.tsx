@@ -3,9 +3,10 @@ import LogoImage from "src/assets/images/logos/shopstarter-logo.png";
 
 interface FullLogoProps {
   isCollapsed?: boolean;
+  variant?: 'light' | 'dark';
 }
 
-const FullLogo = ({ isCollapsed = false }: FullLogoProps) => {
+const FullLogo = ({ isCollapsed = false, variant = 'dark' }: FullLogoProps) => {
   return (
     <Link to={"/"} className="flex items-center gap-3 group decoration-none shrink-0">
       {/* 🚀 Round Icon - High Precision Layout & Scaling (Elegant sizing) */}
@@ -25,7 +26,7 @@ const FullLogo = ({ isCollapsed = false }: FullLogoProps) => {
       {!isCollapsed && (
         <div className="flex flex-col leading-none animate-fade-in pl-0.5 justify-center mt-0.5">
           <h2 className="text-xl md:text-[22px] font-extrabold tracking-tight leading-none whitespace-nowrap">
-            <span className="text-gray-900 dark:text-gray-50">Shop</span>
+            <span className={variant === 'light' ? "text-white" : "text-gray-900 dark:text-gray-50"}>Shop</span>
             <span className="text-brand-gradient ml-[1px]">Starter</span>
           </h2>
         </div>

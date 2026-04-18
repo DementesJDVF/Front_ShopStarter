@@ -11,7 +11,7 @@ const FullLayout: FC = () => {
   
   return (
     <>
-      <div className="flex w-full min-h-screen bg-lightgray dark:bg-darkgray overflow-hidden">
+      <div className="flex w-full min-h-screen bg-lightgray dark:bg-darkgray">
         {/* Desktop Sidebar Column */}
         <aside 
           className={`xl:block hidden sticky top-0 h-screen z-40 transition-all duration-300 ease-in-out bg-white dark:bg-darkgray border-r border-gray-100 dark:border-gray-800 ${isHovered ? 'w-64' : 'w-20'}`}
@@ -32,12 +32,12 @@ const FullLayout: FC = () => {
         </aside>
 
         {/* Main Content Column */}
-        <div className="flex flex-col flex-grow min-h-screen relative overflow-hidden">
+        <div className="flex flex-col flex-grow min-h-screen relative">
           {/* Global Header (Actions & Mobile Menu) */}
           <Header /> 
           
           {/* Page Outlet */}
-          <main className="flex-grow p-4 md:p-8 overflow-y-auto custom-scrollbar bg-gray-50/50 dark:bg-transparent">
+          <main className="flex-grow p-4 md:p-8 bg-gray-50/50 dark:bg-transparent">
             <ScrollToTop>
               <div className="container-fluid mx-auto max-w-[1600px] animate-fade-in">
                 <Outlet />
