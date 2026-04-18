@@ -35,10 +35,10 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 50% -20%, var(--glow-color), transparent 70%);
+    background: radial-gradient(circle at 50% -20%, var(--glow-color), transparent 85%);
     pointer-events: none;
     z-index: 0;
-    animation: glow-pulse 10s ease-in-out infinite alternate;
+    animation: glow-pulse 15s ease-in-out infinite alternate;
   }
 
   .dark body::after {
@@ -81,7 +81,23 @@
   }
 
   .animate-twinkle {
-    animation: stars-twinkle 100s linear infinite;
+    animation: twinkle 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  @keyframes shooting {
+    0% { transform: translate(-100px, -100px) rotate(45deg) scale(0); opacity: 0; }
+    5% { transform: translate(0, 0) rotate(45deg) scale(1); opacity: 1; }
+    15% { transform: translate(200px, 200px) rotate(45deg) scale(0); opacity: 0; }
+    100% { transform: translate(200px, 200px) rotate(45deg) scale(0); opacity: 0; }
+  }
+
+  .animate-shooting {
+    animation: shooting 8s ease-in-out infinite;
   }
 
   .dropdown {
@@ -145,6 +161,18 @@
     40%, 60% { transform: translate3d(4px, 0, 0); }
   }
 
+/* --- ANIMACIONES DE MALLA AMBIENTE (PREMIUM) --- */
+  @keyframes ambient-blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+
+  .animate-blob {
+    animation: ambient-blob 7s infinite;
+  }
+
   /* --- UTILIDADES PREMIUM PÚRPURA --- */
   .input-minimalist input, .input-minimalist select {
     @apply !bg-white/40 !border-white/20 !text-gray-800 placeholder-gray-500 !rounded-2xl focus:!bg-white/60 focus:!ring-purple-200 transition-all;
@@ -152,11 +180,19 @@
 
   /* --- ESTANDARIZACIÓN DE PANELES (UI STYLE GUIDE) --- */
   .panel-card {
-    @apply bg-white dark:bg-dark-light shadow-md border-ld rounded-bb overflow-visible transition-all duration-300;
+    @apply bg-white/70 dark:bg-slate-900/80 backdrop-blup-xl shadow-white/40 dark:border-white/5 rounded-[2.5rem] overflow-visible transition-all duration-500 hover:shadow-2x1;
   }
 
   .panel-header {
-    @apply p-6 border-b border-ld flex items-center justify-between;
+    @apply p-8 border-b border-white/20 flex items-center justify-between;
+  }
+  
+  .glass-panel {
+    @apply bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/20 dark:border-white/5 shadow-2xl;
+  }
+
+  .glass-card-premium {
+    @apply bg-white/60 dark:bg-slate-900/80 backdrop-blur-3xl border border-white/40 dark:border-white/10 shadow-2xl rounded-[2.5rem] relative overflow-hidden;
   }
 
   /* Utilidades de texto y colores generales */

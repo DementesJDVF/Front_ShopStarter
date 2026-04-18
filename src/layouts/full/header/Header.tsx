@@ -47,28 +47,33 @@ const GreetingClock = ({ user }: { user: any }) => {
   });
 
   return (
-    <div className="flex bg-white/40 dark:bg-slate-900/60 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 rounded-full px-6 py-2.5 items-center gap-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:shadow-black/20 hover:shadow-lg transition-all duration-500 animate-fade-in group">
+    <div className="flex bg-indigo-50/40 dark:bg-slate-950/80 backdrop-blur-2xl border border-indigo-200/40 dark:border-white/10 rounded-full px-6 py-2.5 items-center gap-6 shadow-2xl hover:shadow-[0_0_30px_rgba(58,23,228,0.2)] hover:scale-[1.02] transition-all duration-500 animate-fade-in group relative overflow-hidden">
+      {/* ✨ Efecto de Aura Premium Pulsante */}
+      <div className="absolute inset-0 opacity-40 pointer-events-none">
+        <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-[#2CD4D9]/20 to-transparent animate-pulse shadow-[0_0_50px_rgba(44,212,217,0.2)]"></div>
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#3A17E4]/20 to-transparent animate-pulse [animation-delay:2s] shadow-[0_0_50px_rgba(58,23,228,0.2)]"></div>
+      </div>
       
       {/* Saludo y Fecha */}
-      <div className="flex flex-col -mt-0.5">
-        <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+      <div className="flex flex-col -mt-0.5 relative z-10">
+        <span className="text-[10px] font-bold text-[#3A17E4]/50 dark:text-white/40 uppercase tracking-[0.2em]">
           {dateString}
         </span>
         <div className="flex items-center gap-2">
           <span className="text-lg transform transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110 origin-bottom-right">{emoji}</span>
-          <span className="text-sm font-bold text-gray-700 dark:text-gray-200">
-            {greeting}, <span className={`text-transparent bg-clip-text bg-gradient-to-r ${gradient} font-black`}>{user?.first_name || user?.username || user?.role || 'Amigo'}</span>
+          <span className="text-sm font-bold text-[#0A014A] dark:text-white">
+            {greeting}, <span className="text-[#3A17E4] dark:text-[#2CD4D9] font-black">{user?.first_name || user?.username || user?.role || 'Amigo'}</span>
           </span>
         </div>
       </div>
       
       {/* Separador */}
-      <div className="h-6 w-px bg-gray-200 dark:bg-slate-700 group-hover:opacity-50 transition-opacity"></div>
+      <div className="h-6 w-px bg-white/20 group-hover:opacity-50 transition-opacity relative z-10"></div>
 
-      {/* Reloj Dinámico */}
-      <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-mono bg-white dark:bg-slate-900 px-3 py-1.5 rounded-full shadow-inner border border-indigo-100/50 dark:border-indigo-500/30">
+      {/* Reloj Dinámico (Efecto Cristal Inverso) */}
+      <div className="flex items-center gap-2 text-[#3A17E4] dark:text-[#2CD4D9] font-mono bg-indigo-100/30 dark:bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full shadow-inner border border-indigo-200/40 dark:border-white/10 relative z-10">
         <Icon icon="solar:clock-circle-bold-duotone" className="text-xl animate-spin-slow" style={{ animationDuration: '8s' }} />
-        <span className="text-base font-black tracking-tight">{timeString}</span>
+        <span className="text-base font-black tracking-tight text-[#0A014A] dark:text-white">{timeString}</span>
       </div>
     </div>
   );
@@ -96,9 +101,9 @@ const Header = () => {
   return (
     <>
       <header
-        className={`sticky top-0 z-[50] transition-all duration-300 ${isSticky
-          ? "bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl border-b border-gray-100/50 dark:border-slate-800/50 py-2 shadow-sm"
-          : "bg-transparent py-4"
+        className={`sticky top-0 z-[50] transition-all duration-500 ${isSticky
+          ? "bg-[#0A014A]/60 backdrop-blur-2xl border-b border-[#2CD4D9]/20 py-2 shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
+          : "bg-[#0A014A]/30 backdrop-blur-md py-4 border-b border-white/5"
           }`}
       >
         <Navbar fluid className="bg-transparent dark:bg-transparent px-4">
@@ -108,10 +113,10 @@ const Header = () => {
             <div className="flex items-center gap-4 w-1/4">
               <button
                 onClick={() => setIsOpen(true)}
-                className="h-10 w-10 flex text-gray-600 dark:text-gray-300 xl:hidden hover:text-primary hover:bg-lightprimary rounded-xl justify-center items-center transition-colors shadow-sm bg-white dark:bg-dark-light"
+                className="h-10 w-10 flex text-white xl:hidden hover:bg-white/10 rounded-xl justify-center items-center transition-all shadow-sm bg-white/10 backdrop-blur-md border border-white/10"
                 aria-label="Abrir menú"
               >
-                <Icon icon="solar:hamburger-menu-line-duotone" height={22} />
+                <Icon icon="solar:hamburger-menu-line-duotone" height={22} className="text-[#2CD4D9]" />
               </button>
               
               <div className="xl:hidden block">
@@ -141,7 +146,7 @@ const Header = () => {
 
               <button
                 onClick={toggleMode}
-                className="group h-10 w-10 flex text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-lightprimary dark:hover:bg-slate-800 rounded-full justify-center items-center transition-all duration-500 active:scale-95 bg-gray-50 dark:bg-slate-900 shadow-sm border border-gray-200/50 dark:border-slate-800/50"
+                className="group h-10 w-10 flex text-white hover:bg-white/20 rounded-full justify-center items-center transition-all duration-500 active:scale-95 bg-white/10 shadow-sm border border-white/10 backdrop-blur-sm"
                 title={mode === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
               >
                 <div className={`transition-all duration-500 transform ${mode === 'dark' ? 'rotate-180' : 'rotate-0'}`}>
@@ -153,7 +158,7 @@ const Header = () => {
                 </div>
               </button>
 
-              <div className="h-8 w-[1px] bg-gray-200 dark:bg-slate-700 mx-1 hidden sm:block"></div>
+              <div className="h-8 w-[1px] bg-white/10 mx-1 hidden sm:block"></div>
               <Profile />
               
             </div>

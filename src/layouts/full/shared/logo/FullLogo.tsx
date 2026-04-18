@@ -25,9 +25,9 @@ const FullLogo = ({ isCollapsed = false, variant = 'dark' }: FullLogoProps) => {
       {/* 💎 Brand Name - Perfectly Balanced, Clean Typography (No italics, controlled tracking) */}
       {!isCollapsed && (
         <div className="flex flex-col leading-none animate-fade-in pl-0.5 justify-center mt-0.5">
-          <h2 className="text-xl md:text-[22px] font-extrabold tracking-tight leading-none whitespace-nowrap">
-            <span className={variant === 'light' ? "text-white" : "text-gray-900 dark:text-gray-50"}>Shop</span>
-            <span className="text-brand-gradient ml-[1px]">Starter</span>
+          <h2 className="text-xl md:text-[22px] font-extrabold tracking-tight leading-none whitespace-nowrap drop-shadow-sm">
+            <span className={variant === 'light' ? "text-white drop-shadow-lg" : "text-[#0A014A] dark:text-white"}>Shop</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2CD4D9] via-[#3A17E4] to-[#0A014A] ml-[1px] font-black">Starter</span>
           </h2>
         </div>
       )}

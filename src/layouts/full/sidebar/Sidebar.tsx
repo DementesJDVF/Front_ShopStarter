@@ -1,4 +1,3 @@
-
 import {  Sidebar } from "flowbite-react";
 import SidebarContent from "./Sidebaritems";
 import NavItems from "./NavItems";
@@ -32,7 +31,13 @@ const SidebarLayout: React.FC<SidebarProps> = ({ isHovered }) => {
 
   return (
     <Sidebar
-      className={`bg-transparent dark:bg-transparent transition-all duration-300 ease-in-out ${isHovered ? 'w-64' : 'w-20'}`}
+      theme={{
+        root: {
+          base: "h-full bg-transparent transition-all duration-300",
+          inner: "h-full overflow-y-auto overflow-x-hidden bg-transparent py-4 px-3"
+        }
+      }}
+      className={`transition-all duration-300 ease-in-out ${isHovered ? 'w-64' : 'w-20'}`}
       aria-label="Sidebar"
     >
       <SimpleBar className="h-full overflow-x-hidden backdrop-blur-sm">
@@ -41,7 +46,7 @@ const SidebarLayout: React.FC<SidebarProps> = ({ isHovered }) => {
             {filteredContent?.map((item, index) => (
               <div className="mb-6 pt-2" key={item.heading || index}>
                 {!isCollapsed && (
-                  <h5 className="text-gray-400 dark:text-gray-500 font-bold text-[11px] mb-4 uppercase tracking-[0.15em] opacity-100 transition-opacity duration-300 px-2">
+                  <h5 className="text-white/40 font-black text-[11px] mb-4 uppercase tracking-[0.2em] transition-opacity duration-300 px-2">
                     {item.heading}
                   </h5>
                 )}
