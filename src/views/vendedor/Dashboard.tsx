@@ -61,10 +61,10 @@ const Dashboard = () => {
 
   return (
     <div className="p-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <div className="bg-gradient-to-r from-[#CFFEFF] to-[#BBADFF] dark:bg-none dark:bg-transparent p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 shadow-sm border border-white/50 dark:border-gray-800">
         <div>
-          <h1 className="text-2xl font-bold text-dark dark:text-white">Panel de Gestión - Vendedor</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1 italic">[ Funcionalidades completas próximamente ]</p>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Panel de Gestión - Vendedor</h1>
+          <p className="text-slate-600 dark:text-gray-400 mt-1 italic font-medium">[ Funcionalidades completas próximamente ]</p>
         </div>
         <div className="flex gap-2">
             <Badge color="success" size="lg" className="px-4 py-2">Estado: Activo</Badge>
@@ -76,8 +76,8 @@ const Dashboard = () => {
       </div>
       
       {/* Metrics Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-        <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border border-gray-100 dark:border-gray-700 shadow-sm rounded-3xl hover:shadow-lg transition-all">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 mb-8">
+        <Card className="panel-card !bg-white/60 dark:!bg-gray-800/60 backdrop-blur-xl border-none shadow-xl hover:-translate-y-1 transition-all duration-500">
           <div className="flex items-center gap-5 p-2">
             <div className="p-4 bg-primary/10 text-primary rounded-2xl">
               <HiOutlineCube size={28} />
@@ -137,9 +137,9 @@ const Dashboard = () => {
               <Icon icon="solar:widget-bold-duotone" className="text-white" height={48} />
             </div>
             <div className="max-w-xl">
-              <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic leading-none">
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic leading-none break-words">
                 Gestión Inteligente <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-500">Próximamente por Papayo</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2CD4D9] to-[#3A17E4] dark:from-primary dark:to-indigo-500">Próximamente por Papayo</span>
               </h2>
               <p className="text-gray-500 dark:text-gray-400 mt-6 text-base md:text-lg font-medium leading-relaxed">
                 Estamos construyendo el centro de mando más avanzado para tu negocio. 

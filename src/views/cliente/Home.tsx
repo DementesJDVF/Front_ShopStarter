@@ -127,7 +127,7 @@ const ClienteHome = () => {
 
       {/* 🛍️ Llamada a la Acción Final: Incentiva al cliente a explorar el catálogo completo */}
       <section className="px-6 text-center" data-aos="fade-up">
-            <div className="bg-primary py-20 rounded-[50px] relative overflow-hidden shadow-2xl shadow-primary/30">
+            <div className="bg-gradient-to-r from-[#2CD4D9] via-[#3A17E4] to-[#0A014A] dark:bg-none dark:bg-primary py-20 rounded-[50px] relative overflow-hidden shadow-2xl">
                 <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -ml-32 -mt-32 animate-pulse"></div>
                 <div className="absolute bottom-0 right-0 w-64 h-64 bg-black/10 rounded-full blur-3xl -mr-32 -mb-32"></div>
                 
