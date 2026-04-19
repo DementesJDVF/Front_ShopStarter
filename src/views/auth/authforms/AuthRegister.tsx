@@ -44,6 +44,28 @@ const AuthRegister = () => {
         honeypot: '',
     });
 
+    // Control de fecha por bloques para evitar errores de espacios o formato
+    const [dateParts, setDateParts] = useState({
+        day: '',
+        month: '',
+        year: ''
+    });
+
+    // Sincroniza los 3 bloques con el campo birth_date oficial del formulario
+    React.useEffect(() => {
+        if (dateParts.day && dateParts.month && dateParts.year) {
+            // Aseguramos formato YYYY-MM-DD
+            const formattedDay = dateParts.day.padStart(2, '0');
+            const formattedMonth = dateParts.month.padStart(2, '0');
+            setFormData(prev => ({ 
+                ...prev, 
+                birth_date: `${dateParts.year}-${formattedMonth}-${formattedDay}` 
+            }));
+        } else {
+            setFormData(prev => ({ ...prev, birth_date: '' }));
+        }
+    }, [dateParts]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { id, value, type } = e.target;
         const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
@@ -60,6 +82,11 @@ const AuthRegister = () => {
         if (step === 2) {
             if (formData.password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres."); return false; }
             if (formData.password !== formData.password_confirm) { setError("Las contraseñas no coinciden."); return false; }
+        }
+        if (step === 3 && formData.role === 'VENDEDOR') {
+            if (!formData.birth_date) { setError("La fecha de nacimiento es obligatoria."); return false; }
+            if (!formData.document_number) { setError("El número de documento es obligatorio."); return false; }
+            if (!formData.phone_number) { setError("El WhatsApp es obligatorio."); return false; }
         }
         return true;
     };
@@ -180,11 +207,29 @@ const AuthRegister = () => {
                                     {passwordMismatch && <p className="text-[10px] text-red-500 font-bold mt-1 ml-1 animate-fade-in uppercase tracking-tighter">Las contraseñas no coinciden</p>}
                                 </div>
 
-                                <div className="p-4 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800 mt-2">
-                                    <p className="text-[10px] text-indigo-600 dark:text-indigo-300 font-bold uppercase tracking-widest mb-2 flex items-center gap-1">
-                                        <Icon icon="solar:shield-check-bold" /> Seguridad
+                                {/* MEDIDOR DE FUERZA DE CONTRASEÑA PREMIUM */}
+                                <div className="p-5 bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-indigo-100 dark:border-white/5 shadow-sm">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <p className="text-[10px] text-indigo-600 dark:text-indigo-300 font-black uppercase tracking-widest flex items-center gap-1.5">
+                                            <Icon icon={formData.password.length < 8 ? "solar:shield-warning-bold" : formData.password.length < 12 ? "solar:shield-check-bold" : "solar:shield-star-bold"} className="text-sm" />
+                                            Nivel de Seguridad
+                                        </p>
+                                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                                            formData.password.length === 0 ? 'text-slate-400' :
+                                            formData.password.length < 8 ? 'text-red-500 bg-red-50' :
+                                            formData.password.length < 12 ? 'text-orange-500 bg-orange-50' : 'text-green-500 bg-green-50'
+                                        }`}>
+                                            {formData.password.length === 0 ? 'Vacío' :
+                                             formData.password.length < 8 ? 'Débil' :
+                                             formData.password.length < 12 ? 'Media' : 'Excelente'}
+                                        </span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex gap-1 p-0.5">
+                                        <div className={`h-full rounded-full transition-all duration-500 ${formData.password.length > 0 ? (formData.password.length < 8 ? 'w-1/3 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' : formData.password.length < 12 ? 'w-2/3 bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]' : 'w-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]') : 'w-0'}`}></div>
+                                    </div>
+                                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-3 font-medium italic leading-tight">
+                                        {formData.password.length < 8 ? "Agrega más caracteres para proteger tu cuenta." : "¡Tu contraseña se ve muy robusta!"}
                                     </p>
-                                    <p className="text-xs text-indigo-800/80 dark:text-indigo-200/80 leading-relaxed font-semibold italic">"Usa al menos 8 caracteres para una cuenta protegida."</p>
                                 </div>
                             </div>
                         )}
@@ -211,9 +256,37 @@ const AuthRegister = () => {
                                                 <TextInput id="document_number" required value={formData.document_number} onChange={handleChange} placeholder="Número" className="mt-1 form-rounded-xl" />
                                             </div>
                                         </div>
-                                        <div>
-                                            <Label value="WhatsApp de Negocio" className="text-[11px] font-extrabold text-[#0A014A] uppercase tracking-wider ml-1 mb-1.5 block" />
-                                            <TextInput id="phone_number" required value={formData.phone_number} onChange={handleChange} placeholder="3xx xxxxxxx" className="mt-1 form-rounded-xl" />
+
+                                            <div>
+                                                <Label value="WhatsApp de Negocio" className="text-[11px] font-extrabold text-[#0A014A] uppercase tracking-wider ml-1 mb-1.5 block" />
+                                                <TextInput id="phone_number" required value={formData.phone_number} onChange={handleChange} placeholder="3xx xxxxxxx" className="mt-1 form-rounded-xl" />
+                                            </div>
+                                            <div>
+                                                <Label value="Fecha de Nacimiento" className="text-[11px] font-extrabold text-[#0A014A] uppercase tracking-wider ml-1 mb-1.5 block" />
+                                                <div className="flex gap-2">
+                                                    <TextInput 
+                                                        placeholder="DD" 
+                                                        maxLength={2} 
+                                                        value={dateParts.day} 
+                                                        onChange={(e) => setDateParts({...dateParts, day: e.target.value.replace(/\D/g, '')})} 
+                                                        className="w-16 form-rounded-xl text-center"
+                                                    />
+                                                    <TextInput 
+                                                        placeholder="MM" 
+                                                        maxLength={2} 
+                                                        value={dateParts.month} 
+                                                        onChange={(e) => setDateParts({...dateParts, month: e.target.value.replace(/\D/g, '')})} 
+                                                        className="w-16 form-rounded-xl text-center"
+                                                    />
+                                                    <TextInput 
+                                                        placeholder="AAAA" 
+                                                        maxLength={4} 
+                                                        value={dateParts.year} 
+                                                        onChange={(e) => setDateParts({...dateParts, year: e.target.value.replace(/\D/g, '')})} 
+                                                        className="flex-1 form-rounded-xl text-center"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </>
                                 )}
