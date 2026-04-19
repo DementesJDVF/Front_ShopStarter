@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../utils/axios';
+
 
 interface User {
   id: string;
@@ -29,8 +31,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (savedUser && savedToken) {
       try {
-        setUser(JSON.parse(savedUser));
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
         setToken(savedToken);
+        
+        // Validación silenciosa de sesión contra el servidor
+        api.get('users/list/').catch((err) => {
+          if (err.response?.status === 401) {
+            logout();
+          }
+        });
+
       } catch (e) {
         console.error("Error parsing saved user", e);
         localStorage.removeItem('user');

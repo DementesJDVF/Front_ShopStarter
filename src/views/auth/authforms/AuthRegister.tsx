@@ -14,7 +14,10 @@ const fieldLabels: Record<string, string> = {
     full_name: 'Nombre completo',
     national_id: 'Cédula',
     document_number: 'Número de documento',
+    document_type: 'Tipo de documento',
     phone_number: 'Teléfono',
+    birth_date: 'Fecha de nacimiento',
+    role: 'Rol de usuario',
 };
 
 const AuthRegister = () => {
@@ -52,6 +55,7 @@ const AuthRegister = () => {
         if (step === 1) {
             if (!formData.username.trim()) { setError("El usuario es obligatorio."); return false; }
             if (!formData.email.trim()) { setError("El correo es obligatorio."); return false; }
+            if (!/\S+@\S+\.\S+/.test(formData.email)) { setError("Formato de correo inválido."); return false; }
         }
         if (step === 2) {
             if (formData.password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres."); return false; }
@@ -59,6 +63,8 @@ const AuthRegister = () => {
         }
         return true;
     };
+
+    const passwordMismatch = step === 2 && formData.password_confirm.length > 0 && formData.password !== formData.password_confirm;
 
     const nextStep = () => { if (validateStep()) setStep(step + 1); };
     const prevStep = () => setStep(step - 1);
@@ -170,7 +176,8 @@ const AuthRegister = () => {
                                 </div>
                                 <div>
                                     <Label value="Confirmar Contraseña" className="text-[11px] font-extrabold text-[#0A014A] dark:text-slate-300 uppercase tracking-wider ml-1 mb-1.5 block" />
-                                    <CustomTextInput id="password_confirm" isPassword required value={formData.password_confirm} onChange={handleChange} className="mt-1 form-rounded-xl" placeholder="••••••••" />
+                                    <CustomTextInput id="password_confirm" isPassword required value={formData.password_confirm} onChange={handleChange} className={`mt-1 form-rounded-xl transition-colors ${passwordMismatch ? 'border-red-500 ring-red-500/20' : ''}`} placeholder="••••••••" />
+                                    {passwordMismatch && <p className="text-[10px] text-red-500 font-bold mt-1 ml-1 animate-fade-in uppercase tracking-tighter">Las contraseñas no coinciden</p>}
                                 </div>
 
                                 <div className="p-4 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800 mt-2">
@@ -258,20 +265,29 @@ const AuthRegister = () => {
                     </div>
                 </div>
 
-                <Modal show={showTerms} onClose={() => setShowTerms(false)} size="md">
-                    <Modal.Header className="bg-white border-b border-gray-100 p-6">
-                        <span className="font-black text-xl text-[#0A014A]">Acuerdo Legal</span>
+                <Modal show={showTerms} onClose={() => setShowTerms(false)} size="lg">
+                    <Modal.Header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 p-6 rounded-t-[2.5rem]">
+                        <span className="font-black text-xl text-[#0A014A] dark:text-white uppercase tracking-tighter">Acuerdo de Servicio y Datos</span>
                     </Modal.Header>
-                    <Modal.Body className="p-8">
-                        <div className="space-y-6 text-sm text-slate-700 leading-relaxed font-medium">
-                            <p className="font-black text-red-600 uppercase tracking-tighter italic border-l-4 border-red-600 pl-4">ShopStarter NO interviene en transacciones ni pagos.</p>
-                            <p><strong>1. Datos:</strong> Autorizas el tratamiento de tus datos para fines logísticos del catálogo.</p>
-                            <p><strong>2. Responsabilidad:</strong> El pago y entrega son un acuerdo privado entre tú y el cliente.</p>
+                    <Modal.Body className="p-8 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl">
+                        <div className="space-y-6 text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                            <div className="p-5 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-600 rounded-2xl">
+                                <p className="font-black text-red-600 dark:text-red-400 uppercase tracking-tight italic flex items-center gap-2 mb-2">
+                                    <Icon icon="solar:danger-bold" /> Aviso Importante
+                                </p>
+                                <p className="text-xs font-bold leading-tight">ShopStarter es una plataforma organizacional. NO procesamos pagos ni intervenimos en la logística de entrega.</p>
+                            </div>
+                            
+                            <div className="space-y-4">
+                               <p className="flex gap-3"><span className="font-black text-[#3A17E4]">1.</span> <strong>Tratamiento de Datos:</strong> Al registrarte, autorizas el uso de tus datos (Ley 1581 de 2012) exclusivamente para la gestión de pedidos y catálogo dentro de la plataforma.</p>
+                               <p className="flex gap-3"><span className="font-black text-[#3A17E4]">2.</span> <strong>Responsabilidad:</strong> El cumplimiento del pago y la entrega es un acuerdo privado entre el vendedor y el cliente.</p>
+                               <p className="flex gap-3"><span className="font-black text-[#3A17E4]">3.</span> <strong>Seguridad:</strong> Te comprometes a mantener la confidencialidad de tu contraseña.</p>
+                            </div>
                         </div>
                     </Modal.Body>
-                    <Modal.Footer className="bg-gray-50/50 justify-end p-6">
-                        <button onClick={() => setShowTerms(false)} className="bg-[#0A014A] text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all">
-                            Cerrar
+                    <Modal.Footer className="bg-gray-50/50 dark:bg-slate-900/80 justify-end p-6 backdrop-blur-md rounded-b-[2.5rem]">
+                        <button onClick={() => setShowTerms(false)} className="glass-button !bg-primary !text-white !px-10">
+                            He leído y acepto
                         </button>
                     </Modal.Footer>
                 </Modal>
