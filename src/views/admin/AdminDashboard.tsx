@@ -93,6 +93,13 @@ const AdminDashboard: React.FC = () => {
     setIsPreviewOpen(true);
   };
 
+  // Prepara el modal de rechazo para un producto específico.
+  const openRejectModal = (productId: string) => {
+    setRejectingProductId(productId);
+    setIsRejectModalOpen(true);
+  };
+
+
   // --- GESTIÓN DE USUARIOS ---
   // Trae la lista completa de personas registradas para que puedas gestionar sus permisos.
   const fetchUsers = async () => {
