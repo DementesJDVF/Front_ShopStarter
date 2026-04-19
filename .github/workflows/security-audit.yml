@@ -1,4 +1,4 @@
-name: Auditoría de Seguridad y Calidad
+name: Auditoría de Seguridad y Calidad Frontend
 
 on:
   push:
@@ -17,21 +17,7 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: './Front-ShopStarter/package-lock.json'
+        cache-dependency-path: 'package-lock.json'
 
     - name: Frontend Security Audit
-      working-directory: ./Front-ShopStarter
       run: npm audit
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-        cache: 'pip'
-        cache-dependency-path: './shop_starter/requirements.txt'
-
-    - name: Backend Security Audit
-      working-directory: ./shop_starter
-      run: |
-        pip install safety
-        safety check -r requirements.txt
