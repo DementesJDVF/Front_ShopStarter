@@ -285,7 +285,6 @@ const AuthRegister = () => {
                                                         onChange={(e) => setDateParts({...dateParts, year: e.target.value.replace(/\D/g, '')})} 
                                                         className="flex-1 form-rounded-xl text-center"
                                                     />
-                                                </div>
                                             </div>
                                         </div>
                                     </>
