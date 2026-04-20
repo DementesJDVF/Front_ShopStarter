@@ -68,14 +68,13 @@ const AdminDashboard = () => {
   const growthData = useMemo(() => {
     const map = {};
 
-      const today = new Date();
+      if (!filteredUsers.length) return [];
 
       // =========================
-      // 📅 MODO DÍAS
+      // 📅 DÍAS COMPLETOS (desde primer registro hasta HOY)
       // =========================
       if (period === "days") {
 
-        // contar usuarios por día
         filteredUsers.forEach(u => {
           if (!u.created_at) return;
 
@@ -85,68 +84,81 @@ const AdminDashboard = () => {
           map[key] = (map[key] || 0) + 1;
         });
 
+        const keys = Object.keys(map).sort();
+
+        const start = new Date(keys[0]);
+        const end = new Date(); // hoy
+
         const result = [];
 
-        const daysBack = 7;
+        const current = new Date(start);
 
-        for (let i = daysBack; i >= 0; i--) {
-          const d = new Date();
-          d.setDate(today.getDate() - i);
+        while (current <= end) {
 
-          const key = d.toISOString().split("T")[0];
+          const key = current.toISOString().split("T")[0];
 
           result.push({
-            time: d.toLocaleDateString("es-CO", {
+            time: current.toLocaleDateString("es-CO", {
               day: "2-digit",
               month: "short"
             }),
             users: map[key] || 0
           });
+
+          current.setDate(current.getDate() + 1);
         }
 
         return result;
       }
 
       // =========================
-      // 📆 MODO MESES
+      // 📆 MESES COMPLETOS (desde primer mes hasta HOY)
       // =========================
       if (period === "months") {
 
-        // contar usuarios por mes (YYYY-MM)
         filteredUsers.forEach(u => {
           if (!u.created_at) return;
 
           const d = new Date(u.created_at);
-          const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 
           map[key] = (map[key] || 0) + 1;
         });
 
+        const keys = Object.keys(map).sort();
+
+        const [startY, startM] = keys[0].split("-").map(Number);
+
+        const start = new Date(startY, startM - 1, 1);
+        const end = new Date(); // mes actual
+
         const result = [];
 
-        const monthsBack = 12;
+        const current = new Date(start);
 
-        for (let i = monthsBack; i >= 0; i--) {
-          const d = new Date();
-          d.setMonth(today.getMonth() - i);
+        while (current <= end) {
 
-          const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+          const key =
+            `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, "0")}`;
 
           result.push({
-            time: d.toLocaleDateString("es-CO", {
+            time: current.toLocaleDateString("es-CO", {
               month: "short",
               year: "numeric"
             }),
             users: map[key] || 0
           });
+
+          current.setMonth(current.getMonth() + 1);
         }
 
         return result;
       }
 
       return [];
-    }, [filteredUsers, period]); 
-
+    }, [filteredUsers, period]);
+    
   const kpis = [
     { title: "Usuarios", value: stats.total, data: filteredUsers },
     { title: "Vendedores", value: stats.vendors.length, data: stats.vendors },

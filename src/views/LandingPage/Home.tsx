@@ -3,7 +3,9 @@ import TopBanner from "./TopBanner";
 import { Link } from "react-router";
 import { Icon } from '@iconify/react';
 import { useEffect, useState, useRef } from "react";
+import { Helmet } from 'react-helmet-async';
 import api from "../../utils/axios";
+
 
 // --- Componentes Funcionales de Utilidad ---
 
@@ -446,6 +448,14 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-transparent font-sans text-slate-900 selection:bg-indigo-500/30 selection:text-indigo-900 overflow-x-hidden relative">
+      <Helmet>
+        <title>ShopStarter | Conecta tu Negocio Local con tu Comunidad</title>
+        <meta name="description" content="Digitaliza tu tienda de barrio o emprendimiento local. Gestiona pedidos, muestra tu catálogo y conéctate con tus vecinos sin comisiones." />
+        <meta property="og:title" content="ShopStarter - Impulsa tu Negocio Local" />
+        <meta property="og:description" content="La plataforma organizacional para emprendedores locales. Gratis, fácil y sin comisiones." />
+        <meta property="og:image" content="/og-image.jpg" />
+      </Helmet>
+
       
       {/* ✨ ATMÓSFERA GLOBAL: SEDA GALÁCTICA (SOLO MODO CLARO) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-gradient-to-br from-[#E0E7FF] via-[#F1F5FF] to-[#E0F2FE] dark:hidden">
