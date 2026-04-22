@@ -189,11 +189,10 @@ const Hero = () => {
           ? prodData.length 
           : (prodData?.results && Array.isArray(prodData.results) ? prodData.results.length : (prodData?.count || 0));
         
-        const usersRes = await api.get('users/list/');
-        const userData = usersRes.data;
-        const vendors = Array.isArray(userData) 
-          ? userData.filter((u: any) => u.role === "VENDEDOR").length 
-          : 0;
+        // Usamos el endpoint público de geo para contar vendedores activos (no el de admin)
+        const vendorsRes = await api.get('geo/vendors-locations/');
+        const vendorData = vendorsRes.data;
+        const vendors = Array.isArray(vendorData) ? vendorData.length : 0;
 
         setMetrics({ vendors, products: totalProds });
       } catch (err) {
