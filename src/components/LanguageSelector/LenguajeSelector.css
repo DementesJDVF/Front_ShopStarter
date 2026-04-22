@@ -4,17 +4,40 @@
 }
 
 .language-selector-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 16px;
   border-radius: 8px;
-  border: 1px solid #5b5959;  
-  background: #ffffff;
+  border: 1px solid rgba(20, 20, 178, 0.6);
+  background: rgba(4, 110, 197, 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   cursor: pointer;
   font-weight: 500;
   outline: none;
-  color: #333;
+  color: #000000;
+  white-space: nowrap;        
+  width: auto;                
+  min-width: -webkit-max-content;
+  min-width: -moz-max-content;
+  min-width: max-content;     
+  transition: background 0.2s, border-color 0.2s;
 }
 
+.language-selector-button:hover,
+.language-selector-button:focus {
+  background: rgba(144, 202, 249, 0.35);
+  border-color: rgba(100, 181, 246, 0.9);
+}
 
+.language-selector-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;             
+  -o-object-fit: contain;
+     object-fit: contain;
+}
 
 .language-selector-list {
   position: absolute;
@@ -22,13 +45,15 @@
   padding: 0;
   left: 0;
   list-style: none;
-  background-color: rgb(255, 255, 255);
-  border: 1px solid #080808;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 181, 246, 0.4);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 16px rgba(21, 101, 192, 0.1);
   z-index: 999;
   min-width: 120px;
-  color: #333;
+  color: #1565c0;
 }
 
 .language-selector-list li {
@@ -43,11 +68,13 @@
   text-align: left;
   cursor: pointer;
   outline: none;
+  color: #000000;
+  font-weight: 500;
+  white-space: nowrap;        /* ✅ También en las opciones */
   transition: background 0.16s;
 }
 
 .language-selector-option:hover,
 .language-selector-option:focus {
-  background: #f2f2f2;
+  background: rgba(144, 202, 249, 0.3);
 }
-

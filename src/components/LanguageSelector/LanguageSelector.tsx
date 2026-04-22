@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import 'src/components/LanguageSelector/LenguajeSelector.css';
+import globeIcon from 'src/assets/svgviewer-output.svg';
 
 const LanguageSelector: React.FC = () => {
   
@@ -22,9 +23,9 @@ const LanguageSelector: React.FC = () => {
       <button
         className="language-selector-button"
         onClick={() => setOpen((prev) => !prev)}
-        key={i18n.language} 
       >
-        🌐 {t('language')}
+        <img src={globeIcon} alt="language icon" className="language-selector-icon" />
+        {t('language')}
       </button>
       {open && (
         <ul className="language-selector-list">
