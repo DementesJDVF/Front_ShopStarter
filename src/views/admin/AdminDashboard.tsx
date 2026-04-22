@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, Table, Button, Select, Badge, Modal, Label, TextInput } from 'flowbite-react';
 import { HiUserCircle, HiCheck, HiX, HiLightningBolt } from 'react-icons/hi';
@@ -7,6 +7,7 @@ import { Icon } from '@iconify/react';
 import api from '../../utils/axios';
 import CategoryComponent from '../../components/categorias/category';
 import ImagePreviewModal from '../../components/shared/ImagePreviewModal';
+import UnauthorizedScreen from '../../components/shared/UnauthorizedScreen';
 import { useAuth } from '../../context/AuthContext';
 
 // Importaciones del tablero analítico (Colaborador)
@@ -71,14 +72,14 @@ const AdminDashboard: React.FC = () => {
   const [logsLoading, setLogsLoading] = useState(false);
 
   // --- SEGURIDAD: CONTROL DE ACCESO ---
-  // Esta función es vital: verifica si el usuario tiene el rango de ADMIN.
-  // Si alguien intenta entrar "por la fuerza" escribiendo la URL, este efecto 
-  // lo detectará y lo expulsará inmediatamente al inicio para proteger tus datos.
-  useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'ADMIN')) {
-      navigate('/');
-    }
-  }, [user, authLoading, navigate]);
+  // Muestra pantalla de acceso denegado si el usuario no es ADMIN.
+  // No redirigimos silenciosamente: el usuario verá exactamente por qué no puede entrar.
+  if (!authLoading && !user) {
+    return <UnauthorizedScreen code={401} />;
+  }
+  if (!authLoading && user && user.role !== 'ADMIN') {
+    return <UnauthorizedScreen code={403} message="Esta sección es exclusiva para Administradores del sistema." />;
+  }
 
   // --- NAVEGACIÓN INTELIGENTE ---
   // Mantiene la pestaña correcta activa basándose en la URL actual.
@@ -192,7 +193,7 @@ setPendingProducts(data as PendingProduct[]);
   };
 
 
-  if (authLoading || (user && user.role !== 'ADMIN')) {
+  if (authLoading) {
       return (
           <div className="flex h-screen items-center justify-center">
               <Icon icon="eos-icons:bubble-loading" className="text-secondary" width={60} />
