@@ -17,6 +17,19 @@ import ProductRevenue from 'src/components/dashboard/ProductRevenue';
 import DailyActivity from 'src/components/dashboard/DailyActivity';
 import BlogCards from 'src/components/dashboard/BlogCards';
 
+interface ProductImage {
+  url_image: string;
+}
+
+interface PendingProduct {
+  id: string;
+  name: string;
+  price: string;
+  category_name?: string;
+  vendor_name?: string;
+  vendor?: string;
+  images?: ProductImage[];
+}
 
 interface User {
   id: string;
@@ -52,7 +65,7 @@ const AdminDashboard: React.FC = () => {
   const [currentView, setCurrentView] = useState(0);
 
   const [users, setUsers] = useState<User[]>([]);
-  const [pendingProducts, setPendingProducts] = useState<any[]>([]);
+  const [pendingProducts, setPendingProducts] = useState<PendingProduct[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [logsLoading, setLogsLoading] = useState(false);
@@ -99,7 +112,6 @@ const AdminDashboard: React.FC = () => {
     setIsRejectModalOpen(true);
   };
 
-
   // --- GESTIÓN DE USUARIOS ---
   // Trae la lista completa de personas registradas para que puedas gestionar sus permisos.
   const fetchUsers = async () => {
@@ -120,7 +132,8 @@ const AdminDashboard: React.FC = () => {
     try {
       setLoading(true);
       const res = await api.get('products/create/?status=PENDING');
-      setPendingProducts(res.data.results || res.data);
+      const data = res.data.results || res.data;
+setPendingProducts(data as PendingProduct[]);
     } catch (err) {
       console.error("Error al cargar productos pendientes", err);
     } finally {
@@ -367,14 +380,17 @@ const AdminDashboard: React.FC = () => {
                                         src={p.images?.[0]?.url_image || "https://placehold.co/60x60?text=PS"} 
                                         alt={p.name} 
                                         className="h-12 w-12 object-cover rounded cursor-pointer hover:scale-110 transition-transform shadow-sm"
-                                        onClick={() => openPreview(p.images?.[0]?.url_image, p.name)}
+                                        onClick={() => openPreview(
+                                        p.images?.[0]?.url_image || "https://placehold.co/600x400?text=Sin+imagen",
+                                        p.name
+                                        )}
                                         />
                                     </Table.Cell>
                                     <Table.Cell className="font-bold text-gray-900 dark:text-white">{p.name}</Table.Cell>
                                     <Table.Cell>
                                         <Badge color="indigo" size="sm" className="whitespace-nowrap">{p.category_name || "Sin categoría"}</Badge>
                                     </Table.Cell>
-                                    <Table.Cell className="font-black text-primary">${parseFloat(p.price).toLocaleString()}</Table.Cell>
+                                    <Table.Cell className="font-black text-primary">${Number(p.price || 0).toLocaleString()}</Table.Cell>
                                     <Table.Cell className="text-xs">{p.vendor_name || p.vendor}</Table.Cell>
                                     <Table.Cell>
                                         <div className="flex justify-center gap-2">
