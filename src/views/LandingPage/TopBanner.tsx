@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { Icon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
 import FullLogo from '../../layouts/full/shared/logo/FullLogo';
-import LenguajeSelector from 'src/components/LanguageSelector/LenguajeSelector'; // Cambia la ruta si tu componente está en otro lado
+import LenguajeSelector from 'src/components/LanguageSelector/LanguageSelector.tsx'; // Cambia la ruta si tu componente está en otro lado
 
 interface NavbarProps {}
 
@@ -141,5 +141,4 @@ const TopBanner: React.FC<NavbarProps> = () => {
     </>
   );
 };
-
 export default TopBanner;
