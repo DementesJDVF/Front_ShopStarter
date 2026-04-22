@@ -215,7 +215,7 @@ export function ProductCatalog() {
             const canPurchase = !isOutOfStock && !isNotAvailable;
             
             return (
-              <article key={p.id} className={`product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100 bg-white ${!canPurchase ? 'opacity-75 grayscale-[0.3]' : ''}`}>
+              <article key={p.id} className={`product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100 bg-white ${!canPurchase ? 'opacity-70' : ''}`}>
                 <div className="relative aspect-square overflow-hidden bg-gray-50">
                   {mainImage ? (
                     <img
@@ -265,11 +265,12 @@ export function ProductCatalog() {
                     {p.description}
                   </p>
 
-                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
-                    <div className="text-xl font-black text-primary">
+                 <div className="text-xl font-black text-primary min-w-0 truncate">
                       ${parseFloat(p.price).toLocaleString()}
                     </div>
-                    <div className="flex gap-2 w-full max-w-[140px]">
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
+                    
+                    <div className="flex gap-2 flex-shrink-0">
                         <button
                           className="bg-gray-50 text-gray-400 p-2.5 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300 border border-gray-100 shadow-sm"
                           title="Ver detalle completo"
