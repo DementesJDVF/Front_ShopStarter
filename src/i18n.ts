@@ -23,6 +23,9 @@ import TradProductEN from 'src/components/products/locales/en.json';
 import TradSamplePageES from 'src/views/sample-page/locales/es.json';
 import TradSamplePageEN from 'src/views/sample-page/locales/en.json';
 
+import TradSidebarES from 'src/layouts/full/sidebar/locales/es.json';
+import TradSidebarEN from 'src/layouts/full/sidebar/locales/en.json';
+
 i18n
   .use(initReactI18next)
   .init({
@@ -36,6 +39,7 @@ i18n
         client: TradClientES,
         product: TradProductES,
         samplePage: TradSamplePageES,
+        sidebar: TradSidebarES,
       },
       en: {
         translation: en,
@@ -46,6 +50,7 @@ i18n
         client: TradClientEN,
         product: TradProductEN,
         samplePage: TradSamplePageEN,
+        sidebar: TradSidebarEN,
       },
     },
     lng: "es",
