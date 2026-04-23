@@ -1,0 +1,28 @@
+{
+  "myBookings": "My Reservations",
+  "yourReputation": "Your reputation as a customer:",
+  "update": "Update",
+  "noBookings": "You have no active reservations at the moment.",
+  "confirmCancel": "Are you sure you want to cancel this reservation?",
+  "cancelSuccess": "Reservation successfully cancelled.",
+  "cancelError": "Error cancelling the reservation.",
+  "confirmReport": "Do you confirm the seller sold the product to someone else? This will penalize the seller.",
+  "reportSent": "Report sent. We are sorry for the inconvenience.",
+  "reportError": "Error sending report.",
+  "errorLoadingData": "Error loading data:",
+  "table": {
+    "date": "Date",
+    "product": "Product",
+    "vendor": "Vendor",
+    "amount": "Amount",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "status": {
+    "PENDING": "Pending",
+    "COMPLETED": "Completed",
+    "CANCELLED": "Cancelled"
+  },
+  "cancel": "Cancel",
+  "report": "Seller sold it to another"
+}

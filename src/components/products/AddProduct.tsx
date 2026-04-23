@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import api from "../../utils/axios";
 import "./ProductCatalog.css";
 
@@ -16,6 +17,7 @@ type Vendor = {
 
 export default function AddProduct() {
     const navigate = useNavigate();
+    const { t } = useTranslation("product");
 
     const [categories, setCategories] = useState<Category[]>([]);
     const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -99,12 +101,11 @@ export default function AddProduct() {
             await api.post("/products/create/", body);
 
             setSuccess(true);
-            // ✅ Redirige al catálogo y cierra el formulario
             setTimeout(() => navigate("/products"), 1500);
         } catch (err: any) {
             const errorMsg = err.response?.data 
                 ? JSON.stringify(err.response.data, null, 2) 
-                : (err.message || "Error desconocido");
+                : (err.message || t("error"));
             setError(errorMsg);
         } finally {
             setLoading(false);
@@ -113,17 +114,16 @@ export default function AddProduct() {
 
     return (
         <div className="add-product">
-
             <div className="add-product__header">
                 <button className="add-product__back-btn" onClick={() => navigate(-1)}>
-                    ← Volver
+                    ← {t("back")}
                 </button>
-                <h1 className="add-product__title">Agregar producto</h1>
+                <h1 className="add-product__title">{t("addTitle")}</h1>
             </div>
 
             {success && (
                 <div className="add-product__alert add-product__alert--success">
-                    Producto creado correctamente. Redirigiendo al catálogo...
+                    {t("success")}
                 </div>
             )}
             {error && (
@@ -133,24 +133,23 @@ export default function AddProduct() {
             )}
 
             <form onSubmit={handleSubmit} className="add-product__form">
-
                 <div className="add-product__row">
                     <div className="add-product__field">
                         <label className="add-product__label">
-                            Vendedor <span className="add-product__required">*</span>
+                            {t("vendor")} <span className="add-product__required">*</span>
                         </label>
                         {loadingVendors ? (
-                            <p className="add-product__loading-text">Cargando vendedores...</p>
+                            <p className="add-product__loading-text">{t("loadingVendors")}</p>
                         ) : (
                             <select
                                 name="vendor"
                                 value={form.vendor}
                                 onChange={handleChange}
                                 required
-                                title="Selecciona un vendedor"
+                                title={t("selectVendor")}
                                 className="add-product__input"
                             >
-                                <option value="">Selecciona un vendedor</option>
+                                <option value="">{t("selectVendor")}</option>
                                 {vendors.map((v) => (
                                     <option key={v.id} value={v.id}>{v.username}</option>
                                 ))}
@@ -160,20 +159,20 @@ export default function AddProduct() {
 
                     <div className="add-product__field">
                         <label className="add-product__label">
-                            Categoría <span className="add-product__required">*</span>
+                            {t("category")} <span className="add-product__required">*</span>
                         </label>
                         {loadingCats ? (
-                            <p className="add-product__loading-text">Cargando categorías...</p>
+                            <p className="add-product__loading-text">{t("loadingCategories")}</p>
                         ) : (
                             <select
                                 name="category"
                                 value={form.category}
                                 onChange={handleChange}
                                 required
-                                title="Selecciona una categoría"
+                                title={t("selectCategory")}
                                 className="add-product__input"
                             >
-                                <option value="">Selecciona una categoría</option>
+                                <option value="">{t("selectCategory")}</option>
                                 {categories.map((c) => (
                                     <option key={c.id} value={c.id}>{c.name}</option>
                                 ))}
@@ -184,7 +183,7 @@ export default function AddProduct() {
 
                 <div className="add-product__field">
                     <label className="add-product__label">
-                        Nombre <span className="add-product__required">*</span>
+                        {t("name")} <span className="add-product__required">*</span>
                     </label>
                     <input
                         type="text"
@@ -192,14 +191,14 @@ export default function AddProduct() {
                         value={form.name}
                         onChange={handleChange}
                         required
-                        placeholder="Nombre del producto"
+                        placeholder={t("namePlaceholder")}
                         className="add-product__input"
                     />
                 </div>
 
                 <div className="add-product__field">
                     <label className="add-product__label">
-                        Descripción <span className="add-product__required">*</span>
+                        {t("description")} <span className="add-product__required">*</span>
                     </label>
                     <textarea
                         name="description"
@@ -207,7 +206,7 @@ export default function AddProduct() {
                         onChange={handleChange}
                         required
                         rows={3}
-                        placeholder="Descripción del producto"
+                        placeholder={t("descriptionPlaceholder")}
                         className="add-product__input add-product__textarea"
                     />
                 </div>
@@ -215,7 +214,7 @@ export default function AddProduct() {
                 <div className="add-product__row">
                     <div className="add-product__field">
                         <label className="add-product__label">
-                            Precio <span className="add-product__required">*</span>
+                            {t("price")} <span className="add-product__required">*</span>
                         </label>
                         <input
                             type="number"
@@ -230,7 +229,7 @@ export default function AddProduct() {
                         />
                     </div>
                     <div className="add-product__field">
-                        <label className="add-product__label">Stock</label>
+                        <label className="add-product__label">{t("stock")}</label>
                         <input
                             type="number"
                             name="stock"
@@ -251,17 +250,19 @@ export default function AddProduct() {
                         onChange={handleChange}
                         className="add-product__checkbox"
                     />
-                    Producto destacado
+                    {t("featuredProduct")}
                 </label>
 
                 <div className="add-product__image-box">
-                    <label className="add-product__label add-product__label--image">📷 Imagen 1</label>
+                    <label className="add-product__label add-product__label--image">
+                        📷 {t("image1")}
+                    </label>
                     <input
                         type="url"
                         name="image1_url"
                         value={form.image1_url}
                         onChange={handleChange}
-                        placeholder="https://ejemplo.com/imagen1.jpg"
+                        placeholder={t("image1Placeholder")}
                         className="add-product__input"
                     />
                     {form.image1_url && (
@@ -281,18 +282,20 @@ export default function AddProduct() {
                             onChange={handleChange}
                             className="add-product__checkbox"
                         />
-                        Imagen principal
+                        {t("mainImage")}
                     </label>
                 </div>
 
                 <div className="add-product__image-box">
-                    <label className="add-product__label add-product__label--image">📷 Imagen 2</label>
+                    <label className="add-product__label add-product__label--image">
+                        📷 {t("image2")}
+                    </label>
                     <input
                         type="url"
                         name="image2_url"
                         value={form.image2_url}
                         onChange={handleChange}
-                        placeholder="https://ejemplo.com/imagen2.jpg"
+                        placeholder={t("image2Placeholder")}
                         className="add-product__input"
                     />
                     {form.image2_url && (
@@ -312,7 +315,7 @@ export default function AddProduct() {
                             onChange={handleChange}
                             className="add-product__checkbox"
                         />
-                        Imagen principal
+                        {t("mainImage")}
                     </label>
                 </div>
 
@@ -321,9 +324,8 @@ export default function AddProduct() {
                     disabled={loading}
                     className={`add-product__submit${loading ? " add-product__submit--loading" : ""}`}
                 >
-                    {loading ? "Guardando..." : "Crear producto"}
+                    {loading ? t("saving") : t("create")}
                 </button>
-
             </form>
         </div>
     );

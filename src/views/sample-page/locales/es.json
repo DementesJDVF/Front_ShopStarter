@@ -1,0 +1,28 @@
+{
+  "myBookings": "Mis Reservas",
+  "yourReputation": "Tu reputación como cliente:",
+  "update": "Actualizar",
+  "noBookings": "No tienes reservas activas en este momento.",
+  "confirmCancel": "¿Estás seguro de que deseas cancelar esta reserva?",
+  "cancelSuccess": "Reserva cancelada con éxito.",
+  "cancelError": "Error al cancelar la reserva.",
+  "confirmReport": "¿Confirmas que el vendedor vendió el producto a otra persona? Esto activará una penalización para el vendedor.",
+  "reportSent": "Reporte enviado. Lamentamos el inconveniente.",
+  "reportError": "Error al enviar el reporte.",
+  "errorLoadingData": "Error al cargar datos:",
+  "table": {
+    "date": "Fecha",
+    "product": "Producto",
+    "vendor": "Vendedor",
+    "amount": "Monto",
+    "status": "Estado",
+    "actions": "Acciones"
+  },
+  "status": {
+    "PENDING": "Pendiente",
+    "COMPLETED": "Completada",
+    "CANCELLED": "Cancelada"
+  },
+  "cancel": "Cancelar",
+  "report": "Vendedor lo vendió a otro"
+}
