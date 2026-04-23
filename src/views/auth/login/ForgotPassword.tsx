@@ -15,8 +15,8 @@ const ForgotPassword = () => {
         setLoading(true);
 
         try {
-            // Intentamos enviar el correo al endpoint común de DRF/dj-rest-auth
-            await api.post("users/auth/password/reset/", { email });
+            // Intentamos enviar el correo al endpoint de recuperación
+            await api.post("auth/password-reset/", { email });
             setSent(true);
             toast.success("Enlace de recuperación enviado.");
         } catch (err: any) {

@@ -13,6 +13,7 @@ const LandingPage = lazy(() => import('../views/LandingPage/Home'));
 const Login = lazy(() => import('../views/auth/login/Login'));
 const Register = lazy(() => import('../views/auth/register/Register'));
 const ForgotPassword = lazy(() => import('../views/auth/login/ForgotPassword'));
+const ResetPassword = lazy(() => import('../views/auth/login/ResetPassword'));
 const Error = lazy(() => import('../views/auth/error/Error'));
 
 // Shared / Product Views
@@ -51,6 +52,8 @@ const Router = [
         children: [
           { path: 'login', element: <Login /> },
           { path: 'register', element: <Register /> },
+          { path: 'forgot-password', element: <ForgotPassword /> },
+          { path: 'reset-password', element: <ResetPassword /> },
           { path: '404', element: <Error /> },
         ]
       },

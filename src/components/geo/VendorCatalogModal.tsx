@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Spinner, Card, Badge } from 'flowbite-react';
 import { Icon } from '@iconify/react';
 import api from '../../utils/axios';
+import { useAuth } from '../../context/AuthContext'; // ADD THIS
+import StarRating from '../StarRating/StarRating'; // ADD THIS
 
 interface Product {
   id: string;
@@ -22,6 +24,7 @@ interface VendorCatalogModalProps {
 const VendorCatalogModal: React.FC<VendorCatalogModalProps> = ({ vendorId, isOpen, onClose, vendorName }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const { user, token } = useAuth(); // ADD THIS
 
   useEffect(() => {
     if (isOpen && vendorId) {
@@ -88,6 +91,8 @@ const VendorCatalogModal: React.FC<VendorCatalogModalProps> = ({ vendorId, isOpe
             ))}
           </div>
         )}
+        {/* ADD THIS */}
+        {vendorId && <StarRating vendorId={vendorId} interactive={!!user && user.role === 'CLIENTE'} token={token ?? undefined} username={user?.username} />}
       </Modal.Body>
     </Modal>
   );
