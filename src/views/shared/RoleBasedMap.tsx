@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useMap } from '../../context/MapContext';
 import { toast } from 'react-hot-toast';
 import VendorCatalogModal from '../../components/geo/VendorCatalogModal';
+import { useTranslation } from 'react-i18next';
 
 const RoleBasedMap: React.FC = () => {
     const { user } = useAuth();
@@ -14,6 +15,9 @@ const RoleBasedMap: React.FC = () => {
     const leafletMap = useRef<any>(null);
     const [loading, setLoading] = useState(true);
     const [locations, setLocations] = useState<any[]>([]);
+
+    // i18n
+    const { t } = useTranslation('map');
 
     // Estados para la gestión de ubicaciones (específico para el rol de VENDEDOR)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -80,11 +84,11 @@ const RoleBasedMap: React.FC = () => {
     const fetchAndRenderMarkers = async (L: any) => {
         try {
             setLoading(true);
-            
+
             // Selección dinámica del endpoint según el rol del usuario conectado
             let endpoint = 'geo/vendors-locations/';
             if (user?.role === 'VENDEDOR') endpoint = 'geo/my-locations/';
-            
+
             const response = await api.get(endpoint);
             const data = response.data;
             setLocations(data);
@@ -95,12 +99,13 @@ const RoleBasedMap: React.FC = () => {
                     .addTo(leafletMap.current)
                     .bindPopup(`
                         <div class="p-2">
-                            <b class="text-primary">${loc.user_name || 'Establecimiento'}</b><br/>
-                            <p class="text-xs text-gray-500 mb-2">${loc.description || 'Sin descripción'}</p>
+                            <b class="text-primary">${loc.user_name || t('map.establecimiento', 'Establecimiento')}</b><br/>
+                            <p class="text-xs text-gray-500 mb-2">${loc.description || t('map.sin_descripcion', 'Sin descripción')}</p>
                             ${user?.role === 'ADMIN' ? `<p class="text-[10px] text-red-400">Owner: ${loc.user_email}</p>` : ''}
-                            <button onclick="window.openVendorCatalog('${loc.user}', '${loc.user_name?.replace(/'/g, "\\'") || 'Vendedor'}')" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-1.5 px-3 rounded text-xs transition-colors shadow-sm">
+                            <button onclick="window.openVendorCatalog('${loc.user}', '${loc.user_name?.replace(/'/g, "\\'") || t('map.vendedor', 'Vendedor')}')" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-1.5 px-3 rounded text-xs transition-colors shadow-sm">
                                 <span style="display:flex; justify-content:center; align-items:center;">
-                                    Ver Catálogo <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                    ${t('ver_catalogo')}
+                                    <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                 </span>
                             </button>
                         </div>
@@ -129,15 +134,29 @@ const RoleBasedMap: React.FC = () => {
                 longitude: selectedPosition.lng,
                 description: locationDescription
             });
-            toast.success("Ubicación guardada con éxito");
+            toast.success(t('ubicacion_guardada', 'Ubicación guardada con éxito'));
             setIsEditModalOpen(false);
             setLocationDescription('');
             // Refrescar el mapa para mostrar el nuevo marcador
             const L = (window as any).L;
             fetchAndRenderMarkers(L);
         } catch (error) {
-            toast.error("Error al guardar ubicación");
+            toast.error(t('error_guardar', 'Error al guardar ubicación'));
         }
+    };
+
+    // Traducción dinámica para el título del mapa: admite componente <b> en <1>por ejemplo</1>
+    const getMapTitle = () => {
+        return (
+            <span
+                dangerouslySetInnerHTML={{
+                    __html: t('title', {
+                        1: '<span class="text-primary">',
+                        '/1': '</span>'
+                    })
+                }}
+            />
+        );
     };
 
     return (
@@ -145,29 +164,35 @@ const RoleBasedMap: React.FC = () => {
             <div className="flex justify-between items-end">
                 <div>
                     <h1 className="text-3xl font-black text-gray-800 dark:text-white uppercase tracking-tight">
-                        Mapa de <span className="text-primary">Negocios</span>
+                        {getMapTitle()}
                     </h1>
                     <p className="text-sm text-gray-500">
-                        {user?.role === 'VENDEDOR' 
-                            ? 'Gestiona las ubicaciones de tus puntos de venta. Haz clic en el mapa para añadir uno.' 
-                            : 'Explora los vendedores disponibles en tu zona.'}
+                        {user?.role === 'VENDEDOR'
+                            ? t('desc_vendedor')
+                            : t('desc_otro')}
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
                     {/* Botón interactivo para solicitar la geolocalización real del dispositivo */}
-                    <Button 
-                        color={userLocation ? "success" : "primary"} 
-                        size="sm" 
-                        onClick={requestLocation} 
+                    <Button
+                        color={userLocation ? "success" : "primary"}
+                        size="sm"
+                        onClick={requestLocation}
                         disabled={gettingLocation}
                     >
                         <div className="flex items-center gap-2">
-                            {gettingLocation ? <Spinner size="sm"/> : <Icon icon="solar:map-point-wave-linear" height={20}/>}
-                            <span>{userLocation ? "Mi Ubicación Activa" : "Activar mi Ubicación"}</span>
+                            {gettingLocation
+                                ? <Spinner size="sm"/>
+                                : <Icon icon="solar:map-point-wave-linear" height={20}/>}
+                            <span>
+                                {userLocation
+                                    ? t('ubicacion_activa')
+                                    : t('activar_ubicacion')}
+                            </span>
                         </div>
                     </Button>
                     <Badge color="primary" icon={() => <Icon icon="solar:map-point-bold-duotone" className="mr-1" />} className="px-3 py-1">
-                        {user?.role} VIEW
+                        {t('view', { role: user?.role })}
                     </Badge>
                 </div>
             </div>
@@ -184,20 +209,25 @@ const RoleBasedMap: React.FC = () => {
 
             {/* Modal para añadir ubicaciones (Solo visible para Vendedores) */}
             <Modal show={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} size="md">
-                <Modal.Header>Nueva Ubicación</Modal.Header>
+                <Modal.Header>{t('modal_nueva_ubicacion')}</Modal.Header>
                 <Modal.Body>
                    <div className="space-y-4">
                         <div className="flex gap-4 p-3 bg-gray-50 rounded-xl items-center border border-gray-100">
                             <Icon icon="solar:map-point-wave-bold-duotone" className="text-primary" height={24} />
                             <div>
-                                <p className="text-xs font-bold text-gray-700">Coordenadas Seleccionadas</p>
-                                <p className="text-[10px] text-gray-400">Lat: {selectedPosition?.lat.toFixed(6)}, Lng: {selectedPosition?.lng.toFixed(6)}</p>
+                                <p className="text-xs font-bold text-gray-700">{t('coordenadas')}</p>
+                                <p className="text-[10px] text-gray-400">
+                                    {t('latlng', {
+                                        lat: selectedPosition?.lat?.toFixed(6),
+                                        lng: selectedPosition?.lng?.toFixed(6)
+                                    })}
+                                </p>
                             </div>
                         </div>
                         <div>
-                            <Label value="Descripción del lugar" />
-                            <TextInput 
-                                placeholder="Ej: Sucursal Centro, Bodega Principal..." 
+                            <Label value={t('desc_lugar')} />
+                            <TextInput
+                                placeholder={t('placeholder_desc')}
                                 value={locationDescription}
                                 onChange={(e) => setLocationDescription(e.target.value)}
                             />
@@ -205,13 +235,13 @@ const RoleBasedMap: React.FC = () => {
                    </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button color="primary" onClick={handleSaveLocation} disabled={!locationDescription}>Guardar Punto</Button>
-                    <Button color="gray" onClick={() => setIsEditModalOpen(false)}>Cancelar</Button>
+                    <Button color="primary" onClick={handleSaveLocation} disabled={!locationDescription}>{t('guardar_punto')}</Button>
+                    <Button color="gray" onClick={() => setIsEditModalOpen(false)}>{t('cancelar')}</Button>
                 </Modal.Footer>
             </Modal>
 
             {/* Modal de Catálogo Inyectado para que viva sobre el mapa sin cambiar de página */}
-            <VendorCatalogModal 
+            <VendorCatalogModal
                 isOpen={isCatalogModalOpen}
                 onClose={() => setIsCatalogModalOpen(false)}
                 vendorId={selectedVendor?.id || null}

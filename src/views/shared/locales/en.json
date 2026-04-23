@@ -1,0 +1,16 @@
+{
+  "title": "Business Map",
+  "desc_vendedor": "Manage the locations of your sales points. Click on the map to add one.",
+  "desc_otro": "Explore the available vendors in your area.",
+  "activar_ubicacion": "Activate my Location",
+  "ubicacion_activa": "My Location Active",
+  "view": "{{role}} VIEW",
+  "modal_nueva_ubicacion": "New Location",
+  "coordenadas": "Selected Coordinates",
+  "latlng": "Lat: {{lat}}, Lng: {{lng}}",
+  "desc_lugar": "Place description",
+  "placeholder_desc": "E.g.: Downtown Branch, Main Warehouse...",
+  "guardar_punto": "Save Point",
+  "cancelar": "Cancel",
+  "ver_catalogo": "See Catalog"
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Mapa de Negocios",
+  "desc_vendedor": "Gestiona las ubicaciones de tus puntos de venta. Haz clic en el mapa para añadir uno.",
+  "desc_otro": "Explora los vendedores disponibles en tu zona.",
+  "activar_ubicacion": "Activar mi Ubicación",
+  "ubicacion_activa": "Mi Ubicación Activa",
+  "view": "{{role}} VIEW",
+  "modal_nueva_ubicacion": "Nueva Ubicación",
+  "coordenadas": "Coordenadas Seleccionadas",
+  "latlng": "Lat: {{lat}}, Lng: {{lng}}",
+  "desc_lugar": "Descripción del lugar",
+  "placeholder_desc": "Ej: Sucursal Centro, Bodega Principal...",
+  "guardar_punto": "Guardar Punto",
+  "cancelar": "Cancelar",
+  "ver_catalogo": "Ver Catálogo"
+}

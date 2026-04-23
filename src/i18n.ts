@@ -11,6 +11,9 @@ import TradHomeLandigPageES from "src/views/LandingPage/locales/es.json";
 import TrandHeaderEN from 'src/layouts/full/header/locales/en.json';
 import TrandHeaderES from 'src/layouts/full/header/locales/es.json';
 
+import TradMapEN from 'src/views/shared/locales/en.json';
+import TradMapES from 'src/views/shared/locales/es.json';
+
 i18n
   .use(initReactI18next)
   .init({
@@ -20,12 +23,14 @@ i18n
         languageSelector: es,  
         landingPage: TradHomeLandigPageES,
         header: TrandHeaderES,
+        map: TradMapES,
       },
       en: {
         translation: en,
         languageSelector: en,   
         landingPage: TradHomeLandigPageEN,
         header: TrandHeaderEN,
+        map: TradMapEN,
       },
     },
     lng: "es",
