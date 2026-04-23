@@ -17,25 +17,35 @@ import TradMapES from 'src/views/shared/locales/es.json';
 import TradClientES from 'src/views/cliente/locales/es.json';
 import TradClientEN from 'src/views/cliente/locales/en.json';
 
+import TradProductES from 'src/components/products/locales/en.json';
+import TradProductEN from 'src/components/products/locales/es.json';
+
+import TradSamplePageES from 'src/views/sample-page/locales/en.json';
+import TradSamplePageEN from 'src/views/sample-page/locales/es.json';
+
 i18n
   .use(initReactI18next)
   .init({
     resources: {
       es: {
         translation: es,
-        languageSelector: es,  
+        languageSelector: es,
         landingPage: TradHomeLandigPageES,
         header: TrandHeaderES,
         map: TradMapES,
         client: TradClientES,
+        product: TradProductES,
+        samplePage: TradSamplePageES,
       },
       en: {
         translation: en,
-        languageSelector: en,   
+        languageSelector: en,
         landingPage: TradHomeLandigPageEN,
         header: TrandHeaderEN,
         map: TradMapEN,
         client: TradClientEN,
+        product: TradProductEN,
+        samplePage: TradSamplePageEN,
       },
     },
     lng: "es",
