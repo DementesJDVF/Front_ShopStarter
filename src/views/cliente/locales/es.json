@@ -1,0 +1,25 @@
+{
+  "home": {
+    "welcome_badge": "Bienvenido a ShopStarter",
+    "hero_title_line1": "TODO LO QUE BUSCAS,",
+    "hero_title_line2": "MÁS CERCA DE TI.",
+    "hero_desc": "Descubre negocios locales, explora productos únicos y apoya el comercio de tu comunidad.",
+    "go_catalog": "IR AL CATÁLOGO",
+    "categories_title": "Categorías <span class='text-primary'>Populares</span>",
+    "categories_subtitle": "¿Qué estás buscando hoy?",
+    "see_all": "Ver todas",
+    "map_badge": "MAPA INTERACTIVO",
+    "map_title": "Explora negocios <br/><span class='text-primary'>en tiempo real</span>",
+    "map_desc": "Visualiza los puntos de venta más cercanos a tu ubicación. Encuentra tiendas físicas, locales de comida y mucho más en un mapa dinámico.",
+    "map_list1": "Búsqueda Georeferenciada",
+    "map_list2": "Información de Contacto",
+    "map_list3": "Rutas Directas",
+    "open_map": "ABRIR MAPA COMPLETO",
+    "call_to_action_title": "¿Listo para comprar?",
+    "call_to_action_desc": "Miles de productos esperan por ti. Únete a la red de comercio local más grande de la región."
+  },
+  "browse": {
+    "title": "Explorar Productos",
+    "desc": "Descubre productos increíbles de negocios cercanos."
+  }
+}
