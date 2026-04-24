@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Table, Badge, Button, Spinner } from 'flowbite-react';
 import { Icon as Iconify } from '@iconify/react';
 import api from '../../utils/axios';
+import { useTranslation } from 'react-i18next';
 
 interface Order {
   id: string;
@@ -13,6 +14,7 @@ interface Order {
 }
 
 const VendorOrders: React.FC = () => {
+  const { t } = useTranslation('vendedor');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -43,7 +45,8 @@ const VendorOrders: React.FC = () => {
       await fetchOrders();
     } catch (err) {
       console.error(`Error al ejecutar ${actionUrl}`, err);
-      alert(`⚠️ Problemas al intentar ${actionUrl === 'complete' ? 'completar' : 'cancelar'} el pedido.`);
+      const actionLabel = actionUrl === 'complete' ? t('orders.actionLabel.complete') : t('orders.actionLabel.cancel');
+      alert(t('orders.alert.problems', { action: actionLabel }));
     } finally {
       setActionLoading(null);
     }
@@ -54,12 +57,12 @@ const VendorOrders: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-black text-indigo-900 tracking-tighter uppercase mb-1">
-            Recepción de Pedidos
+            {t('orders.title')}
           </h1>
-          <p className="text-gray-500 font-medium">Gestiona y marca las entregas con tus clientes.</p>
+          <p className="text-gray-500 font-medium">{t('orders.subtitle')}</p>
         </div>
         <Button color="light" onClick={fetchOrders} disabled={loading} className="rounded-xl shadow-sm">
-          <Iconify icon="solar:refresh-circle-bold-duotone" className="mr-2" height={20} /> Refrescar
+          <Iconify icon="solar:refresh-circle-bold-duotone" className="mr-2" height={20} /> {t('orders.refresh')}
         </Button>
       </div>
 
@@ -74,24 +77,24 @@ const VendorOrders: React.FC = () => {
               <div className="bg-blue-50/50 inline-block p-6 rounded-full mb-4">
                 <Iconify icon="solar:box-minimalistic-outline" height={48} className="text-blue-300" />
               </div>
-              <h3 className="text-lg font-bold text-gray-700">Sin pedidos activos</h3>
-              <p className="text-gray-400 mt-2">Explora y gestiona tu catálogo para atraer ventas.</p>
+              <h3 className="text-lg font-bold text-gray-700">{t('orders.empty.title')}</h3>
+              <p className="text-gray-400 mt-2">{t('orders.empty.msg')}</p>
             </div>
           ) : (
             <Table hoverable className="text-center w-full">
               <Table.Head className="bg-gray-50 dark:bg-darkgray">
-                <Table.HeadCell className="py-4">Cliente</Table.HeadCell>
-                <Table.HeadCell>Producto Solicitado</Table.HeadCell>
-                <Table.HeadCell>Creación</Table.HeadCell>
-                <Table.HeadCell>Ingreso Total ($)</Table.HeadCell>
-                <Table.HeadCell>Estado</Table.HeadCell>
-                <Table.HeadCell>Acciones</Table.HeadCell>
+                <Table.HeadCell className="py-4">{t('orders.table.client')}</Table.HeadCell>
+                <Table.HeadCell>{t('orders.table.product')}</Table.HeadCell>
+                <Table.HeadCell>{t('orders.table.created')}</Table.HeadCell>
+                <Table.HeadCell>{t('orders.table.total')}</Table.HeadCell>
+                <Table.HeadCell>{t('orders.table.status')}</Table.HeadCell>
+                <Table.HeadCell>{t('orders.table.actions')}</Table.HeadCell>
               </Table.Head>
               <Table.Body className="divide-y">
                 {orders.map((order) => (
                   <Table.Row key={order.id} className="bg-white dark:bg-darkgray hover:bg-gray-50/50 transition">
                     <Table.Cell className="font-bold text-gray-900 dark:text-white capitalize">
-                      {order.client_name || "Anónimo"}
+                      {order.client_name || t('orders.anonymous')}
                     </Table.Cell>
                     <Table.Cell className="text-indigo-900 dark:text-indigo-400 font-semibold truncate max-w-[200px]" title={order.product_name}>
                       {order.product_name}
@@ -110,8 +113,8 @@ const VendorOrders: React.FC = () => {
                         }
                         className="inline-flex w-24 justify-center"
                       >
-                        {order.status === 'PENDING' ? '⏳ PENDIENTE' :
-                         order.status === 'COMPLETED' ? '✅ EFECTUADO' : '❌ CANCELADO'}
+                        {order.status === 'PENDING' ? `${t('orders.status.pending')}` :
+                         order.status === 'COMPLETED' ? `${t('orders.status.completed')}` : `${t('orders.status.cancelled')}`}
                       </Badge>
                     </Table.Cell>
                     <Table.Cell>
@@ -125,7 +128,7 @@ const VendorOrders: React.FC = () => {
                             onClick={() => handleAction(order.id, 'complete')}
                           >
                             <Iconify icon="solar:check-circle-bold" className="mr-1" />
-                            Entregado
+                            {t('orders.action.delivered')}
                           </Button>
                           <Button 
                             size="xs" 
@@ -135,7 +138,7 @@ const VendorOrders: React.FC = () => {
                             onClick={() => handleAction(order.id, 'cancel')}
                           >
                             <Iconify icon="solar:close-circle-bold" className="mr-1" />
-                            Falló
+                            {t('orders.action.failed')}
                           </Button>
                         </div>
                       ) : (

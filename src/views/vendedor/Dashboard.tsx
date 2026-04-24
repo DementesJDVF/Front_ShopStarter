@@ -4,8 +4,10 @@ import { Icon } from '@iconify/react';
 import { useState, useEffect } from "react";
 import api from "../../utils/axios";
 import LocationPicker from "../../components/geo/LocationPicker";
+import { useTranslation } from 'react-i18next';
 
 const Dashboard = () => {
+  const { t } = useTranslation('vendedor');
   const [vendorLocation, setVendorLocation] = useState<{lat: number, lng: number, description?: string} | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [savingLocation, setSavingLocation] = useState(false);
@@ -42,17 +44,17 @@ const Dashboard = () => {
       await api.post('geo/locations/', {
         latitude: parseFloat(lat.toFixed(6)),
         longitude: parseFloat(lng.toFixed(6)),
-        description: "Mi tienda" 
+        description: "Mi tienda"
       });
       setVendorLocation({ lat, lng });
       setShowLocationModal(false);
-      alert("¡Ubicación actualizada con éxito!");
+      alert(t('dashboard.alert.locationUpdated'));
     } catch (err: any) {
       console.error(err);
       if (err.response && err.response.data) {
-        alert("Error Backend: " + JSON.stringify(err.response.data));
+        alert(t('dashboard.alert.backendError') + " " + JSON.stringify(err.response.data));
       } else {
-        alert("Error Red o Interno: " + err.message);
+        alert(t('dashboard.alert.networkError') + " " + (err.message || ''));
       }
     } finally {
       setSavingLocation(false);
@@ -61,16 +63,16 @@ const Dashboard = () => {
 
   return (
     <div className="p-6">
-      <div className="bg-gradient-to-r from-[#CFFEFF] to-[#BBADFF] dark:bg-none dark:bg-transparent p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 shadow-sm border border-white/50 dark:border-gray-800">
+      <div className="bg-gradient-to-r from-[#CFFEFF] to-[#BBADFF] dark:bg-none dark:bg-transparent p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Panel de Gestión - Vendedor</h1>
-          <p className="text-slate-600 dark:text-gray-400 mt-1 italic font-medium">[ Funcionalidades completas próximamente ]</p>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{t('dashboard.title')}</h1>
+          <p className="text-slate-600 dark:text-gray-400 mt-1 italic font-medium">{t('dashboard.subtitle')}</p>
         </div>
         <div className="flex gap-2">
-            <Badge color="success" size="lg" className="px-4 py-2">Estado: Activo</Badge>
+            <Badge color="success" size="lg" className="px-4 py-2">{t('dashboard.statusActive')}</Badge>
             <Button size="sm" color="light" outline onClick={() => setShowLocationModal(true)}>
               <HiOutlineLocationMarker className="mr-2 h-4 w-4" />
-              {vendorLocation ? "Actualizar Ubicación" : "Establecer Ubicación"}
+              {vendorLocation ? t('dashboard.updateLocation') : t('dashboard.setLocation')}
             </Button>
         </div>
       </div>
@@ -83,7 +85,7 @@ const Dashboard = () => {
               <HiOutlineCube size={28} />
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Productos Activos</p>
+              <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('dashboard.productsActive')}</p>
               <p className="text-3xl font-black text-gray-900 dark:text-white">12</p>
             </div>
           </div>
@@ -97,7 +99,7 @@ const Dashboard = () => {
                 <HiOutlineLocationMarker size={28} />
               </div>
               <div className="flex flex-col">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Ubicación de tu Negocio</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{t('dashboard.locationTitle')}</p>
                 {loadingLocation ? (
                   <Spinner size="sm" />
                 ) : vendorLocation ? (
@@ -105,7 +107,7 @@ const Dashboard = () => {
                     {vendorLocation.lat.toFixed(5)}, {vendorLocation.lng.toFixed(5)}
                   </p>
                 ) : (
-                  <p className="text-xs text-red-500 font-bold">Sin ubicación asignada</p>
+                  <p className="text-xs text-red-500 font-bold">{t('dashboard.noLocation')}</p>
                 )}
               </div>
             </div>
@@ -116,7 +118,7 @@ const Dashboard = () => {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-xl text-xs font-black hover:bg-primary/20 transition"
               >
-                VER EN MAPS
+                {t('dashboard.viewInMaps')}
                 <HiOutlineExternalLink />
               </a>
             )}
@@ -138,18 +140,17 @@ const Dashboard = () => {
             </div>
             <div className="max-w-xl">
               <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic leading-none break-words">
-                Gestión Inteligente <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2CD4D9] to-[#3A17E4] dark:from-primary dark:to-indigo-500">Próximamente por Papayo</span>
+                {t('dashboard.heading.line1')} <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2CD4D9] to-[#3A17E4] dark:from-primary dark:to-indigo-500">{t('dashboard.heading.line2')}</span>
               </h2>
               <p className="text-gray-500 dark:text-gray-400 mt-6 text-base md:text-lg font-medium leading-relaxed">
-                Estamos construyendo el centro de mando más avanzado para tu negocio. 
-                Analiza tus ventas con IA, gestiona inventarios en segundos y escala como nunca antes.
+                {t('dashboard.description')}
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-3">
-               <Badge color="info" className="px-4 py-2 rounded-full font-black uppercase text-[10px]">Analíticas IA</Badge>
-               <Badge color="indigo" className="px-4 py-2 rounded-full font-black uppercase text-[10px]">Inventario Cloud</Badge>
-               <Badge color="purple" className="px-4 py-2 rounded-full font-black uppercase text-[10px]">Reportes ERP</Badge>
+               <Badge color="info" className="px-4 py-2 rounded-full font-black uppercase text-[10px]">{t('dashboard.badge.analytics')}</Badge>
+               <Badge color="indigo" className="px-4 py-2 rounded-full font-black uppercase text-[10px]">{t('dashboard.badge.inventory')}</Badge>
+               <Badge color="purple" className="px-4 py-2 rounded-full font-black uppercase text-[10px]">{t('dashboard.badge.reports')}</Badge>
             </div>
           </div>
         </Card>
@@ -157,11 +158,11 @@ const Dashboard = () => {
 
       {/* Modal para elegir ubicación */}
       <Modal show={showLocationModal} onClose={() => setShowLocationModal(false)} size="lg">
-        <Modal.Header>Fijar Ubicación del Negocio</Modal.Header>
+        <Modal.Header>{t('dashboard.modal.title')}</Modal.Header>
         <Modal.Body>
           <div className="space-y-4">
             <p className="text-sm text-gray-500">
-              Usa el mapa para marcar el punto exacto donde se encuentra tu tienda física. Esto permitirá que los clientes cercanos te encuentren.
+              {t('dashboard.modal.description')}
             </p>
             <LocationPicker 
               initialLat={vendorLocation?.lat} 
@@ -175,13 +176,13 @@ const Dashboard = () => {
           </div>
         </Modal.Body>
         <Modal.Footer className="flex justify-end p-2 px-6">
-           <Button color="gray" onClick={() => setShowLocationModal(false)}>Cerrar</Button>
+           <Button color="gray" onClick={() => setShowLocationModal(false)}>{t('dashboard.modal.close')}</Button>
            <Button 
               color="primary" 
               onClick={() => handleUpdateLocation(vendorLocation?.lat || 2.4419, vendorLocation?.lng || -76.6062)}
               disabled={savingLocation}
             >
-              {savingLocation ? <Spinner size="sm" /> : "Guardar Ubicación"}
+              {savingLocation ? <Spinner size="sm" /> : t('dashboard.modal.save')}
            </Button>
         </Modal.Footer>
       </Modal>

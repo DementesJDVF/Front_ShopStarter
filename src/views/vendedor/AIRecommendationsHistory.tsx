@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import api from '../../utils/axios';
+import { useTranslation } from 'react-i18next';
 
 interface AIHistoryEvent {
   id: number;
@@ -12,6 +13,7 @@ interface AIHistoryEvent {
 }
 
 const AIRecommendationsHistory: React.FC = () => {
+  const { t } = useTranslation('vendedor');
   const [history, setHistory] = useState<AIHistoryEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,8 +38,8 @@ const AIRecommendationsHistory: React.FC = () => {
           <Icon icon="solar:smart-home-line-duotone" width={28} />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-800 dark:text-white">Auditoría de IA</h2>
-          <p className="text-gray-500 text-sm">Historial de tus productos recomendados por el Asistente Inteligente.</p>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white">{t('ai.title')}</h2>
+          <p className="text-gray-500 text-sm">{t('ai.subtitle')}</p>
         </div>
       </div>
 
@@ -48,18 +50,18 @@ const AIRecommendationsHistory: React.FC = () => {
       ) : history.length === 0 ? (
         <div className="text-center p-12 py-20 bg-gray-50 dark:bg-dark rounded-2xl border border-dashed border-gray-200">
           <Icon icon="solar:ghost-bold-duotone" width={48} className="mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-bold text-gray-600 dark:text-gray-300">¡Aún no hay recomendaciones!</h3>
-          <p className="text-gray-500">Pronto la IA empezará a ofrecer tus productos a los clientes interesados.</p>
+          <h3 className="text-lg font-bold text-gray-600 dark:text-gray-300">{t('ai.empty.title')}</h3>
+          <p className="text-gray-500">{t('ai.empty.msg')}</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 dark:bg-dark text-gray-600 dark:text-gray-400 text-sm border-b border-gray-100 dark:border-gray-800">
-                <th className="p-4 font-semibold rounded-tl-xl">Fecha</th>
-                <th className="p-4 font-semibold">Producto Sugerido</th>
-                <th className="p-4 font-semibold">Cliente Buscaba...</th>
-                <th className="p-4 font-semibold rounded-tr-xl">Razonamiento IA</th>
+                <th className="p-4 font-semibold rounded-tl-xl">{t('ai.table.date')}</th>
+                <th className="p-4 font-semibold">{t('ai.table.product')}</th>
+                <th className="p-4 font-semibold">{t('ai.table.query')}</th>
+                <th className="p-4 font-semibold rounded-tr-xl">{t('ai.table.reasoning')}</th>
               </tr>
             </thead>
             <tbody>

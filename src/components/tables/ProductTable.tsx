@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import api from "../../utils/axios";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
+import { useTranslation } from "react-i18next";
 
 interface Product {
   id: string | number;
@@ -22,6 +23,7 @@ interface Category {
 }
 
 const ProductTable = () => {
+  const { t } = useTranslation("productTable");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -66,7 +68,7 @@ const ProductTable = () => {
       const response = await api.get('products/create/');
       setProducts(response.data.results || response.data);
     } catch (error) {
-      console.error("Error al cargar productos:", error);
+      console.error(t('fetch.errorProducts'), error);
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ const ProductTable = () => {
   const fetchCategories = async () => {
     try {
       const response = await api.get('products/get-categories/');
-      console.log("Categorías cargadas:", response.data);
+      console.log(t('fetch.categoriesLoaded'), response.data);
       
       let cats: Category[] = [];
       const data = response.data;
@@ -88,10 +90,10 @@ const ProductTable = () => {
 
       setCategories(cats);
       if (cats.length === 0) {
-        console.warn("La lista de categorías está vacía en el servidor.");
+        console.warn(t('fetch.noCategories'));
       }
     } catch (error: any) {
-      console.error("Error crítico al cargar categorías:", error.response?.data || error.message);
+      console.error(t('fetch.errorCategories'), error.response?.data || error.message);
     }
   };
 
@@ -101,13 +103,13 @@ const ProductTable = () => {
   }, []);
 
   const handleDelete = async (id: string | number) => {
-    if (!window.confirm("¿Estás seguro de que deseas eliminar este producto?")) return;
+    if (!window.confirm(t('confirm.delete'))) return;
     try {
       await api.delete(`products/create/${id}/`);
       fetchProducts();
     } catch (error) {
-      console.error("Error al eliminar producto:", error);
-      alert("Hubo un error al eliminar el producto.");
+      console.error(t('error.deleteProduct'), error);
+      alert(t('alert.deleteError'));
     }
   };
 
@@ -130,7 +132,7 @@ const ProductTable = () => {
   const handleSuggestAI = async () => {
     const hasImage = newProduct.image_file || newProduct.preview_url;
     if (!hasImage) {
-      alert("Por favor, selecciona una imagen primero.");
+      alert(t('form.selectImageFirst'));
       return;
     }
 
@@ -155,8 +157,8 @@ const ProductTable = () => {
         setNewProduct(prev => ({ ...prev, description: res.data.suggestion }));
       }
     } catch (err) {
-      console.error("Error IA:", err);
-      alert("No se pudo obtener sugerencia de la IA.");
+      console.error(t('error.ai'), err);
+      alert(t('alert.aiError'));
     } finally {
       setGeneratingAI(false);
     }
@@ -179,7 +181,7 @@ const ProductTable = () => {
         const base64 = await toBase64(newProduct.image_file);
         data.images = [{ url_image: base64, is_main: true }];
       } else if (!editingId) {
-        alert("La imagen es obligatoria.");
+        alert(t('form.imageRequired'));
         setSubmitting(false);
         return;
       }
@@ -203,8 +205,8 @@ const ProductTable = () => {
       });
       fetchProducts();
     } catch (error) {
-      console.error("Error al procesar producto:", error);
-      alert("Error al procesar el producto. Revisa los datos.");
+      console.error(t('error.processProduct'), error);
+      alert(t('alert.processError'));
     } finally {
       setSubmitting(false);
     }
@@ -238,7 +240,7 @@ const ProductTable = () => {
     <>
       <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray p-6 relative w-full break-words">
         <div className="flex justify-between items-center mb-4 font-[var(--main-font)]">
-            <h5 className="card-title text-xl font-bold">Gestión de Productos</h5>
+            <h5 className="card-title text-xl font-bold">{t('table.title')}</h5>
             <div className="flex gap-2">
               <Button color="primary" onClick={() => {
                 setEditingId(null);
@@ -255,7 +257,7 @@ const ProductTable = () => {
               }}>
                 <div className="flex items-center gap-2">
                   <Icon icon="solar:add-circle-outline" height={20} />
-                  <span>Añadir Producto</span>
+                  <span>{t('action.addProduct')}</span>
                 </div>
               </Button>
             </div>
@@ -264,17 +266,17 @@ const ProductTable = () => {
             <div className="overflow-x-auto font-[var(--main-font)]">
               <Table hoverable>
                 <Table.Head>
-                  <Table.HeadCell className="p-6">Producto</Table.HeadCell>
-                  <Table.HeadCell>Categoría</Table.HeadCell>
-                  <Table.HeadCell>Precio / Stock</Table.HeadCell>
-                  <Table.HeadCell>Estado</Table.HeadCell>
+                  <Table.HeadCell className="p-6">{t('table.head.product')}</Table.HeadCell>
+                  <Table.HeadCell>{t('table.head.category')}</Table.HeadCell>
+                  <Table.HeadCell>{t('table.head.priceStock')}</Table.HeadCell>
+                  <Table.HeadCell>{t('table.head.status')}</Table.HeadCell>
                   <Table.HeadCell></Table.HeadCell>
                 </Table.Head>
                 <Table.Body className="divide-y divide-border dark:divide-darkborder">
                   {products.length === 0 ? (
                     <Table.Row>
                       <Table.Cell colSpan={5} className="text-center py-10 opacity-50">
-                        No hay productos registrados aún.
+                        {t('table.noProducts')}
                       </Table.Cell>
                     </Table.Row>
                   ) : (
@@ -295,7 +297,7 @@ const ProductTable = () => {
                         </Table.Cell>
                         <Table.Cell>
                           <Badge color="info" className="capitalize">
-                            {product.category_name || 'Sin categoría'}
+                            {product.category_name || t('table.category.none')}
                           </Badge>
                         </Table.Cell>
                         <Table.Cell>
@@ -303,7 +305,7 @@ const ProductTable = () => {
                             ${parseFloat(product.price.toString()).toLocaleString()}
                           </h5>
                           <div className="text-xs font-medium text-dark opacity-70 mb-2">
-                             Stock: {product.stock} unidades
+                             {t('table.stock', { count: product.stock })}
                           </div>
                           <div className="me-5">
                             <Progress
@@ -318,7 +320,7 @@ const ProductTable = () => {
                             color={product.status === 'ACTIVE' ? 'success' : 'lightsecondary'}
                             className="uppercase"
                           >
-                            {product.status || 'SIN ESTADO'}
+                            {product.status || t('table.status.noStatus')}
                           </Badge>
                         </Table.Cell>
                         <Table.Cell>
@@ -346,7 +348,13 @@ const ProductTable = () => {
                                 }}
                               >
                                 <Icon icon={`${items.icon}`} height={18} />
-                                <span>{items.listtitle}</span>
+                                <span>
+                                  {items.listtitle === "Borrar" ? t('table.action.delete')
+                                    : items.listtitle === "Editar" ? t('table.action.edit')
+                                    : items.listtitle === "Ver Detalle" ? t('table.action.view')
+                                    : items.listtitle
+                                  }
+                                </span>
                               </Dropdown.Item>
                             ))}
                           </Dropdown>
@@ -362,12 +370,12 @@ const ProductTable = () => {
 
       {/* Modal para añadir producto */}
       <Modal show={showModal} onClose={() => { setShowModal(false); setEditingId(null); }} size="md">
-        <Modal.Header>{editingId ? 'Editar Producto' : 'Añadir Nuevo Producto'}</Modal.Header>
+        <Modal.Header>{editingId ? t('modal.editHeader') : t('modal.addHeader')}</Modal.Header>
         <Modal.Body>
           <form className="flex flex-col gap-4" onSubmit={handleCreate}>
             {/* 1. Nombre */}
             <div>
-              <Label htmlFor="name" value="Nombre del Producto" />
+              <Label htmlFor="name" value={t('form.name')} />
               <TextInput
                 id="name"
                 required
@@ -378,12 +386,12 @@ const ProductTable = () => {
 
             {/* 2. Imagen y Preview */}
             <div>
-              <Label htmlFor="image" value="Imagen del Producto" />
+              <Label htmlFor="image" value={t('form.image')} />
               <FileInput
                 id="image"
                 accept="image/*"
                 required={!editingId}
-                helperText="Selecciona una foto real de tu producto."
+                helperText={t('form.image.helper')}
                 onChange={(e) => {
                   if (e.target.files?.[0]) {
                     const file = e.target.files[0];
@@ -416,22 +424,22 @@ const ProductTable = () => {
                 disabled={generatingAI || (!newProduct.image_file && !newProduct.preview_url)}
                >
                  {generatingAI ? (
-                   <><Spinner size="sm" className="mr-2"/> Analizando...</>
+                   <><Spinner size="sm" className="mr-2"/> {t('ai.processing')}</>
                  ) : (
-                   <><Icon icon="solar:magic-stick-3-bold-duotone" className="mr-2 text-indigo-500" /> ✨ Sugerir descripción con IA</>
+                   <><Icon icon="solar:magic-stick-3-bold-duotone" className="mr-2 text-indigo-500" /> {t('ai.suggest')}</>
                  )}
                </Button>
             </div>
 
             {/* 4. Descripción */}
             <div>
-              <Label htmlFor="description" value="Descripción (Editable)" />
+              <Label htmlFor="description" value={t('form.descriptionLabel')} />
               <Textarea
                 id="description"
                 required
                 rows={4}
                 value={newProduct.description}
-                placeholder="Escribe aquí o usa la sugerencia de la IA..."
+                placeholder={t('form.descriptionPlaceholder')}
                 onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
               />
             </div>
@@ -439,7 +447,7 @@ const ProductTable = () => {
             {/* 5. Precio / Stock */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="price" value="Precio" />
+                <Label htmlFor="price" value={t('form.price')} />
                 <TextInput
                   id="price"
                   type="number"
@@ -449,7 +457,7 @@ const ProductTable = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="stock" value="Stock" />
+                <Label htmlFor="stock" value={t('form.stock')} />
                 <TextInput
                   id="stock"
                   type="number"
@@ -462,23 +470,23 @@ const ProductTable = () => {
 
             {/* 6. Categoría */}
             <div>
-              <Label htmlFor="category" value="Categoría" />
+              <Label htmlFor="category" value={t('form.category')} />
               <Select
                 id="category"
                 required
                 value={newProduct.category}
                 onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
               >
-                <option value="">Seleccionar categoría</option>
+                <option value="">{t('form.category.selectPlaceholder')}</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </Select>
             </div>
             <div className="flex justify-end gap-2 mt-4">
-              <Button color="gray" onClick={() => setShowModal(false)}>Cancelar</Button>
+              <Button color="gray" onClick={() => setShowModal(false)}>{t('form.cancel')}</Button>
               <Button color="primary" type="submit" disabled={submitting}>
-                {submitting ? <Spinner size="sm" /> : 'Guardar Producto'}
+                {submitting ? <Spinner size="sm" /> : t('form.save')}
               </Button>
             </div>
           </form>

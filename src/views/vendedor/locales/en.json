@@ -1,0 +1,86 @@
+{
+  "dashboard": {
+    "title": "Management Panel - Vendor",
+    "subtitle": "[ Full features coming soon ]",
+    "statusActive": "Status: Active",
+    "updateLocation": "Update Location",
+    "setLocation": "Set Location",
+    "productsActive": "Active Products",
+    "locationTitle": "Your Business Location",
+    "noLocation": "No location assigned",
+    "viewInMaps": "VIEW IN MAPS",
+    "heading": {
+      "line1": "Intelligent Management",
+      "line2": "Coming soon by Papayo"
+    },
+    "description": "We are building the most advanced control center for your business. Analyze your sales with AI, manage inventories in seconds and scale like never before.",
+    "badge": {
+      "analytics": "AI Analytics",
+      "inventory": "Cloud Inventory",
+      "reports": "ERP Reports"
+    },
+    "modal": {
+      "title": "Set Business Location",
+      "description": "Use the map to mark the exact point where your physical store is located. This will allow nearby customers to find you.",
+      "close": "Close",
+      "save": "Save Location"
+    },
+    "alert": {
+      "locationUpdated": "Location updated successfully!",
+      "backendError": "Backend Error:",
+      "networkError": "Network or Internal Error:"
+    }
+  },
+  "ai": {
+    "title": "AI Audit",
+    "subtitle": "History of your products recommended by the Intelligent Assistant.",
+    "empty": {
+      "title": "No recommendations yet!",
+      "msg": "Soon the AI will start suggesting your products to interested customers."
+    },
+    "table": {
+      "date": "Date",
+      "product": "Suggested Product",
+      "query": "Customer searched...",
+      "reasoning": "AI Reasoning"
+    }
+  },
+  "manage": {
+    "title": "Product Management",
+    "subtitle": "Manage, edit and add new products to your catalog."
+  },
+  "orders": {
+    "title": "Order Reception",
+    "subtitle": "Manage and mark deliveries with your customers.",
+    "refresh": "Refresh",
+    "empty": {
+      "title": "No active orders",
+      "msg": "Explore and manage your catalog to attract sales."
+    },
+    "table": {
+      "client": "Client",
+      "product": "Requested Product",
+      "created": "Created",
+      "total": "Total Income ($)",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "anonymous": "Anonymous",
+    "status": {
+      "pending": "⏳ PENDING",
+      "completed": "✅ COMPLETED",
+      "cancelled": "❌ CANCELLED"
+    },
+    "action": {
+      "delivered": "Delivered",
+      "failed": "Failed"
+    },
+    "actionLabel": {
+      "complete": "complete",
+      "cancel": "cancel"
+    },
+    "alert": {
+      "problems": "⚠️ Problems trying to {{action}} the order."
+    }
+  }
+}

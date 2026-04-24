@@ -26,6 +26,11 @@ import TradSamplePageEN from 'src/views/sample-page/locales/en.json';
 import TradSidebarES from 'src/layouts/full/sidebar/locales/es.json';
 import TradSidebarEN from 'src/layouts/full/sidebar/locales/en.json';
 
+import TradVendorsES from 'src/views/vendedor/locales/es.json';
+import TradVendorsEN from 'src/views/vendedor/locales/en.json';
+
+import TradProductTableES from 'src/components/tables/locales/es.json';
+import TradProductTableEN from 'src/components/tables/locales/en.json';
 i18n
   .use(initReactI18next)
   .init({
@@ -40,6 +45,8 @@ i18n
         product: TradProductES,
         samplePage: TradSamplePageES,
         sidebar: TradSidebarES,
+        vendedor: TradVendorsES,
+        productTable: TradProductTableES,  
       },
       en: {
         translation: en,
@@ -51,6 +58,8 @@ i18n
         product: TradProductEN,
         samplePage: TradSamplePageEN,
         sidebar: TradSidebarEN,
+        vendedor: TradVendorsEN,
+        productTable: TradProductTableEN,
       },
     },
     lng: "es",

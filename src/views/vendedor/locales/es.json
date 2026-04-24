@@ -1,0 +1,86 @@
+{
+  "dashboard": {
+    "title": "Panel de Gestión - Vendedor",
+    "subtitle": "[ Funcionalidades completas próximamente ]",
+    "statusActive": "Estado: Activo",
+    "updateLocation": "Actualizar Ubicación",
+    "setLocation": "Establecer Ubicación",
+    "productsActive": "Productos Activos",
+    "locationTitle": "Ubicación de tu Negocio",
+    "noLocation": "Sin ubicación asignada",
+    "viewInMaps": "VER EN MAPS",
+    "heading": {
+      "line1": "Gestión Inteligente",
+      "line2": "Próximamente por Papayo"
+    },
+    "description": "Estamos construyendo el centro de mando más avanzado para tu negocio. Analiza tus ventas con IA, gestiona inventarios en segundos y escala como nunca antes.",
+    "badge": {
+      "analytics": "Analíticas IA",
+      "inventory": "Inventario Cloud",
+      "reports": "Reportes ERP"
+    },
+    "modal": {
+      "title": "Fijar Ubicación del Negocio",
+      "description": "Usa el mapa para marcar el punto exacto donde se encuentra tu tienda física. Esto permitirá que los clientes cercanos te encuentren.",
+      "close": "Cerrar",
+      "save": "Guardar Ubicación"
+    },
+    "alert": {
+      "locationUpdated": "¡Ubicación actualizada con éxito!",
+      "backendError": "Error Backend:",
+      "networkError": "Error Red o Interno:"
+    }
+  },
+  "ai": {
+    "title": "Auditoría de IA",
+    "subtitle": "Historial de tus productos recomendados por el Asistente Inteligente.",
+    "empty": {
+      "title": "¡Aún no hay recomendaciones!",
+      "msg": "Pronto la IA empezará a ofrecer tus productos a los clientes interesados."
+    },
+    "table": {
+      "date": "Fecha",
+      "product": "Producto Sugerido",
+      "query": "Cliente Buscaba...",
+      "reasoning": "Razonamiento IA"
+    }
+  },
+  "manage": {
+    "title": "Gestión de Productos",
+    "subtitle": "Administra, edita y añade nuevos productos a tu catálogo."
+  },
+  "orders": {
+    "title": "Recepción de Pedidos",
+    "subtitle": "Gestiona y marca las entregas con tus clientes.",
+    "refresh": "Refrescar",
+    "empty": {
+      "title": "Sin pedidos activos",
+      "msg": "Explora y gestiona tu catálogo para atraer ventas."
+    },
+    "table": {
+      "client": "Cliente",
+      "product": "Producto Solicitado",
+      "created": "Creación",
+      "total": "Ingreso Total ($)",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "anonymous": "Anónimo",
+    "status": {
+      "pending": "⏳ PENDIENTE",
+      "completed": "✅ EFECTUADO",
+      "cancelled": "❌ CANCELADO"
+    },
+    "action": {
+      "delivered": "Entregado",
+      "failed": "Falló"
+    },
+    "actionLabel": {
+      "complete": "completar",
+      "cancel": "cancelar"
+    },
+    "alert": {
+      "problems": "⚠️ Problemas al intentar {{action}} el pedido."
+    }
+  }
+}

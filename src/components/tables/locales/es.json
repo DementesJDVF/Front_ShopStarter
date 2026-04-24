@@ -1,0 +1,69 @@
+{
+  "table": {
+    "title": "Gestión de Productos",
+    "head": {
+      "product": "Producto",
+      "category": "Categoría",
+      "priceStock": "Precio / Stock",
+      "status": "Estado"
+    },
+    "noProducts": "No hay productos registrados aún.",
+    "category": {
+      "none": "Sin categoría"
+    },
+    "stock": "Stock: {{count}} unidades",
+    "status": {
+      "noStatus": "SIN ESTADO"
+    },
+    "action": {
+      "view": "Ver Detalle",
+      "edit": "Editar",
+      "delete": "Borrar"
+    }
+  },
+  "action": {
+    "addProduct": "Añadir Producto"
+  },
+  "confirm": {
+    "delete": "¿Estás seguro de que deseas eliminar este producto?"
+  },
+  "alert": {
+    "deleteError": "Hubo un error al eliminar el producto.",
+    "processError": "Error al procesar el producto. Revisa los datos.",
+    "aiError": "No se pudo obtener sugerencia de la IA."
+  },
+  "fetch": {
+    "errorProducts": "Error al cargar productos:",
+    "categoriesLoaded": "Categorías cargadas:",
+    "noCategories": "La lista de categorías está vacía en el servidor.",
+    "errorCategories": "Error crítico al cargar categorías:"
+  },
+  "error": {
+    "deleteProduct": "Error al eliminar producto:",
+    "ai": "Error IA:",
+    "processProduct": "Error al procesar producto:"
+  },
+  "modal": {
+    "editHeader": "Editar Producto",
+    "addHeader": "Añadir Nuevo Producto"
+  },
+  "form": {
+    "name": "Nombre del Producto",
+    "image": "Imagen del Producto",
+    "image.helper": "Selecciona una foto real de tu producto.",
+    "descriptionLabel": "Descripción (Editable)",
+    "descriptionPlaceholder": "Escribe aquí o usa la sugerencia de la IA...",
+    "price": "Precio",
+    "stock": "Stock",
+    "category": "Categoría",
+    "category.selectPlaceholder": "Seleccionar categoría",
+    "cancel": "Cancelar",
+    "save": "Guardar Producto",
+    "imageRequired": "La imagen es obligatoria.",
+    "selectImageFirst": "Por favor, selecciona una imagen primero."
+  },
+  "ai": {
+    "processing": "Analizando...",
+    "suggest": "✨ Sugerir descripción con IA"
+  }
+}
