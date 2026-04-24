@@ -37,9 +37,9 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
       try {
         setLoading(true);
         const data = await getVendorReviews(vendorId);
-        setAverage(data.average);
-        setTotal(data.total);
-        setReviews(data.reviews);
+        setAverage(data?.average || 0);
+        setTotal(data?.total || 0);
+        setReviews(Array.isArray(data?.reviews) ? data.reviews : []);
 
         // Buscar la reseña del usuario actual
         if (username) {
@@ -363,7 +363,7 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
       )}
 
       {/* Lista de otras reseñas */}
-      {reviews.length > 0 && (
+      {(reviews?.length || 0) > 0 && (
         <div className="other-reviews">
           <h4 className="reviews-title">Otras reseñas</h4>
           {reviews

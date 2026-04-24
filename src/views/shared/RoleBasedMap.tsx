@@ -102,7 +102,7 @@ const RoleBasedMap: React.FC = () => {
 
             const markers: any[] = [];
             locations.forEach((loc: any) => {
-                if (!loc.latitude || !loc.longitude) return; // saltar entradas incompletas
+                if (!loc?.latitude || !loc?.longitude) return; // saltar entradas incompletas
 
                 const marker = L.marker([loc.latitude, loc.longitude])
                     .addTo(leafletMap.current)
@@ -121,7 +121,7 @@ const RoleBasedMap: React.FC = () => {
                 markers.push(marker);
             });
 
-            if (markers.length > 0 && leafletMap.current) {
+            if ((markers?.length || 0) > 0 && leafletMap.current) {
                 // Ajustar el zoom automáticamente para que todos los marcadores sean visibles
                 const group = L.featureGroup(markers);
                 leafletMap.current.fitBounds(group.getBounds().pad(0.2));

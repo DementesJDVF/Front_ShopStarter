@@ -23,7 +23,7 @@ interface Product {
 
 /** Picks the main image URL, falling back to the first approved image. */
 const getProductImage = (images: ProductImage[]): string | null => {
-  if (!Array.isArray(images) || images.length === 0) return null;
+  if (!Array.isArray(images) || (images?.length || 0) === 0) return null;
   const approved = images.filter(img => img.moderation_status !== 'REJECTED' && img.url_image);
   const main = approved.find(img => img.is_main);
   return (main ?? approved[0])?.url_image ?? null;
@@ -91,7 +91,7 @@ const VendorCatalogModal: React.FC<VendorCatalogModalProps> = ({ vendorId, isOpe
              <Icon icon="solar:danger-triangle-broken" className="mx-auto text-red-300 dark:text-red-500 mb-4" height={60}/>
              <p className="text-gray-500">Error al cargar el catálogo. Intenta de nuevo.</p>
           </div>
-        ) : products.length === 0 ? (
+        ) : (products?.length || 0) === 0 ? (
           <div className="text-center py-20">
              <Icon icon="solar:box-minimalistic-broken" className="mx-auto text-gray-300 dark:text-gray-600 mb-4" height={60}/>
              <p className="text-gray-500">Este vendedor aún no ha publicado productos activos.</p>
