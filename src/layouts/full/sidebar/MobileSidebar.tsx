@@ -1,6 +1,7 @@
 import { Sidebar } from "flowbite-react";
 import SidebarContent from "./Sidebaritems";
 import NavItems from "./NavItems";
+// @ts-ignore
 import SimpleBar from "simplebar-react";
 import React from "react";
 import FullLogo from "../shared/logo/FullLogo";
@@ -62,7 +63,7 @@ const MobileSidebar = () => {
                     <div className="caption" key={item.heading}>
                       <React.Fragment key={index}>
                         <h5 className="text-link dark:text-white/70 caption font-semibold leading-6 tracking-widest text-xs pb-2 uppercase">
-                          {t(item.heading)}
+                          {t(item.heading ?? "")}
                         </h5>
                         {item.children?.map((child, index) => (
                           <React.Fragment key={child.id && index}>

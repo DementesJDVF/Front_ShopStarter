@@ -1,6 +1,7 @@
 import { Sidebar } from "flowbite-react";
 import SidebarContent from "./Sidebaritems";
 import NavItems from "./NavItems";
+// @ts-ignore
 import SimpleBar from "simplebar-react";
 import React, { useState } from "react";
 import NavCollapse from "./NavCollapse";
