@@ -142,11 +142,11 @@ useEffect(() => {
 
   return (
       
-    <div className="p-2">
+    <div className="scale-80 origin-top">
 
       {/* HEADER */}
-      <Card className="p-7 mt-4 ">
-        <Card className="bg-gray-600 text-black shadow-lg border border-gray-700">
+     <Card className="!bg-gray-100 dark:!bg-gray-300 p-9 shadow-md rounded-xl">
+        <Card className="!bg-gray-600 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
       <div className="flex justify-between mb-8">
     
         <h1 className="mt-4 font-black text-3xl tracking-tight text-blue-400 flex items-center gap-3">
@@ -161,13 +161,13 @@ useEffect(() => {
       </div>
 
       {/* METRICS */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-5">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-9 mb-5">
        
         { /*ventas */}
-        <Card className="bg-gray-100 p-9 shadow-md rounded-xl">
+        <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
           <div className="flex gap-3 items-center">
              <Card className="w-[40px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
-             <Icon icon="solar:box-bold" width="30" color="#3b10a8" />
+             <Icon icon="solar:box-bold" width="30" color="#7963b0" />
             </Card>
             <div>
               <p className="font-black text-black text-2xl ">Ventas</p>
@@ -178,7 +178,7 @@ useEffect(() => {
         </Card>
       
        { /* pedidos */}
-        <Card  className="bg-gray-100 p-9 shadow-md rounded-xl">
+        <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
           <div className="flex gap-3 items-center">
              <Card className="w-[40px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
             <Icon icon="solar:cart-bold" width="30" color="#da701f" />
@@ -191,7 +191,7 @@ useEffect(() => {
         </Card>
 
        { /* usuarios */}
-        <Card  className="bg-gray-100 p-9 shadow-md rounded-xl">
+       <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
           <div className="flex gap-3 items-center">
             <Card className="w-[40px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
             <Icon icon="solar:users-group-rounded-bold" width="30" color="#b3177f" />
@@ -204,7 +204,7 @@ useEffect(() => {
         </Card>
 
        { /* estados de pedidos */}
-        <Card  className="bg-gray-100 p-9 shadow-md rounded-xl">
+       <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
           <div className="flex gap-3 items-center">
              <Card className="w-[40px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
             <Icon icon="solar:chart-bold" width="30" color="#ce1a1a"/> </Card>
@@ -227,7 +227,7 @@ useEffect(() => {
         {/* VENTAS */}
         <Card>
             
-          <Card className="bg-gray-600 text-black shadow-lg border border-gray-700">
+         <Card className="!bg-gray-700 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
           <h1 className="mb-2 font-black text-white text-2xl">Ventas</h1>
           <div className="my-1 h-[4px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 
@@ -257,7 +257,7 @@ useEffect(() => {
         </Card>
 
         {/* PEDIDOS */}
-        <Card>
+        <Card >
           <h2 className="mb-2 font-black text-black text-2xl">
             Pedidos
           </h2>
@@ -268,7 +268,7 @@ useEffect(() => {
               {/*  GRADIENTE */}
               <defs>
                 <linearGradient id="colorPedidos" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ea882d" stopOpacity={0.8} />
+                  <stop offset="5%" stopColor="#dc740d" stopOpacity={0.8} />
                   <stop offset="95%" stopColor="#ffffff" stopOpacity={0} />
                 </linearGradient>
               </defs>
@@ -276,15 +276,15 @@ useEffect(() => {
               {/*  EJE X */}
               <XAxis
                 dataKey="dia"
-                axisLine={{ stroke: "#111", strokeWidth: 2 }}
-                tick={{ fill: "#111", fontWeight: "bold" }}
+                axisLine={{ stroke: "#423e3e", strokeWidth: 2 }}
+                tick={{ fill: "#696464", fontWeight: "bold" }}
               />
 
               {/* EJE Y */}
               <YAxis
-                axisLine={{ stroke: "#111", strokeWidth: 2 }}
+                axisLine={{ stroke: "#696464", strokeWidth: 2 }}
                 tick={{
-                  fill: "#111",
+                  fill: "#696464",
                   fontWeight: "bold",
                   fontSize: 15
                 }}
@@ -315,21 +315,21 @@ useEffect(() => {
 
               <defs>
                 <linearGradient id="colorUsuarios" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#a21caf" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#a21caf" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#dd0fb796" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#dd0fb796" stopOpacity={0}/>
                 </linearGradient>
               </defs>
 
               <XAxis 
                 dataKey="mes"
-                axisLine={{ stroke: "#7d4374", strokeWidth: 2 }}
-                tick={{ fill: "#111", fontWeight: "bold" }}
+                axisLine={{ stroke: "#dd0fb796", strokeWidth: 2 }}
+                tick={{ fill: "#696464", fontWeight: "bold" }}
               />
 
               <YAxis 
-                axisLine={{ stroke: "#111", strokeWidth: 2}}
+                axisLine={{ stroke: "#696464", strokeWidth: 2}}
                  tick={{
-                  fill: "#111",
+                  fill: "#696464",
                   fontWeight: "bold",
                   fontSize: 14
                 }}
@@ -354,7 +354,7 @@ useEffect(() => {
         {/* ESTADOS DE PEDIDOS */}
      <Card>
       
- <Card className="bg-gray-600 text-black shadow-lg border border-gray-700">
+ <Card className="!bg-gray-700 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
   <h2 className="mb-2 font-black text-white text-2xl">
     Estado de Pedidos
   </h2>
