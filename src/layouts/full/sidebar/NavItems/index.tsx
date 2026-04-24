@@ -3,6 +3,7 @@ import { ChildItem } from "../Sidebaritems";
 import { Sidebar, Tooltip } from "flowbite-react";
 import { Icon } from "@iconify/react";
 import { Link, useLocation } from "react-router";
+import { useTranslation } from "react-i18next";
 
 interface NavItemsProps {
   item: ChildItem;
@@ -12,6 +13,7 @@ interface NavItemsProps {
 const NavItems: React.FC<NavItemsProps> = ({ item, isCollapsed = false }) => {
   const location = useLocation();
   const pathname = location.pathname;
+  const { t } = useTranslation("sidebar");
 
   const content = (
     <Sidebar.Item
@@ -23,7 +25,6 @@ const NavItems: React.FC<NavItemsProps> = ({ item, isCollapsed = false }) => {
           : "text-white/60 font-bold bg-transparent group/link hover:bg-white/10 hover:text-white"
         } ${isCollapsed ? 'px-2' : 'px-4 mb-1'}`}
     >
-
       <div className={`flex items-center gap-3 w-full transition-all duration-300`}>
         <div className="flex-shrink-0 flex items-center justify-center w-6 h-6">
           {item.icon ? (
@@ -31,20 +32,18 @@ const NavItems: React.FC<NavItemsProps> = ({ item, isCollapsed = false }) => {
           ) : (
             <span
               className={`${item.url == pathname
-                  ? "bg-white"
-                  : "bg-black/40 dark:bg-white/40"
+                ? "bg-white"
+                : "bg-black/40 dark:bg-white/40"
                 } h-1.5 w-1.5 rounded-full`}
             ></span>
           )}
         </div>
-        
         <span className={`transition-all duration-300 origin-left whitespace-nowrap ${
           isCollapsed ? 'opacity-0 w-0 scale-95 overflow-hidden' : 'opacity-100 w-auto scale-100'
         }`}>
-
-          {item.name}
+          {t(item.name ?? "")}
           {item.isPro && (
-            <span className="ml-2 py-0.5 px-2 text-[10px] bg-secondary/10 text-secondary rounded animate-pulse">Pro</span>
+            <span className="ml-2 py-0.5 px-2 text-[10px] bg-secondary/10 text-secondary rounded animate-pulse">{t("Pro")}</span>
           )}
         </span>
       </div>
@@ -52,7 +51,7 @@ const NavItems: React.FC<NavItemsProps> = ({ item, isCollapsed = false }) => {
   );
 
   return isCollapsed ? (
-    <Tooltip content={item.name} placement="right" style="light">
+    <Tooltip content={t(item.name ?? "")} placement="right" style="light">
       {content}
     </Tooltip>
   ) : content;

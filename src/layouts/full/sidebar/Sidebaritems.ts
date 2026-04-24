@@ -2,7 +2,7 @@ import { uniqueId } from "lodash";
 
 export interface ChildItem {
   id?: number | string;
-  name?: string;
+  name?: string; // clave de i18n, por ejemplo "Productos"
   icon?: any;
   children?: ChildItem[];
   item?: any;
@@ -12,10 +12,10 @@ export interface ChildItem {
 }
 
 export interface MenuItem {
-  heading?: string;
+  heading?: string; // clave de i18n, por ejemplo "VENDEDOR"
   name?: string;
   icon?: any;
-  id?: number;
+  id?: number | string;
   to?: string;
   items?: MenuItem[];
   children?: ChildItem[];
@@ -25,7 +25,7 @@ export interface MenuItem {
 
 /**
  * Definición de los ítems de navegación del Sidebar.
- * Los textos están definidos como claves para i18n.
+ * Los valores de `heading` y `name` aquí son las claves que están en tus JSON de i18n.
  */
 const SidebarContent: MenuItem[] = [
   {

@@ -11,9 +11,9 @@ interface NavItemsProps {
 }
 
 const NavItems: React.FC<NavItemsProps> = ({ item, isCollapsed = false }) => {
-  const { t } = useTranslation("sidebar");
   const location = useLocation();
   const pathname = location.pathname;
+  const { t } = useTranslation("sidebar");
 
   const content = (
     <Sidebar.Item
@@ -43,9 +43,7 @@ const NavItems: React.FC<NavItemsProps> = ({ item, isCollapsed = false }) => {
         }`}>
           {t(item.name ?? "")}
           {item.isPro && (
-            <span className="ml-2 py-0.5 px-2 text-[10px] bg-secondary/10 text-secondary rounded animate-pulse">
-              {t("Pro")}
-            </span>
+            <span className="ml-2 py-0.5 px-2 text-[10px] bg-secondary/10 text-secondary rounded animate-pulse">{t("Pro")}</span>
           )}
         </span>
       </div>

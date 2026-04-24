@@ -54,4 +54,4 @@ const CustomCollapse: React.FC<{
     );
   };
 
-export {CustomCollapse};
+export {CustomCollapse}

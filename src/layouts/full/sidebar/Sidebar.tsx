@@ -1,4 +1,4 @@
-import {  Sidebar } from "flowbite-react";
+import { Sidebar } from "flowbite-react";
 import SidebarContent from "./Sidebaritems";
 import NavItems from "./NavItems";
 // @ts-ignore
@@ -6,6 +6,7 @@ import SimpleBar from "simplebar-react";
 import React, { useState } from "react";
 import NavCollapse from "./NavCollapse";
 import { useAuth } from "../../../context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 interface SidebarProps {
   isHovered: boolean;
@@ -13,17 +14,15 @@ interface SidebarProps {
 
 const SidebarLayout: React.FC<SidebarProps> = ({ isHovered }) => {
   const { user } = useAuth();
+  const { t } = useTranslation("sidebar");
 
-  // Filtrar contenido del sidebar según el ROL
-  const filteredContent = SidebarContent?.filter(item => {
+  const filteredContent = SidebarContent?.filter((item) => {
     if (!user) return false;
-    
-    // El admin ve su sección y la sección de SISTEMA (UI)
-    if (user.role === 'ADMIN') {
-      return item.heading === 'ADMIN' || item.heading === 'SISTEMA (UI)';
+    if (user.role === "ADMIN") {
+      return item.heading === "heading.admin" || item.heading === "heading.system";
     }
-    
-    // Otros roles ven su sección correspondiente
+    // Otros roles: las claves heading en SidebarContent coinciden con user.role?
+    // Asegúrate que user.role use el mismo formato si estás filtrando por clave.
     return item.heading === user.role;
   });
 
@@ -44,10 +43,10 @@ const SidebarLayout: React.FC<SidebarProps> = ({ isHovered }) => {
         <Sidebar.Items className={`${isCollapsed ? 'px-1' : 'px-4'} transition-all duration-300 pt-2`}>
           <Sidebar.ItemGroup className="sidebar-nav">
             {filteredContent?.map((item, index) => (
-              <div className="mb-6 pt-2" key={item.heading || index}>
+              <div className="mb-6 pt-2" key={item.heading ?? index}>
                 {!isCollapsed && (
                   <h5 className="text-white/40 font-black text-[11px] mb-4 uppercase tracking-[0.2em] transition-opacity duration-300 px-2">
-                    {item.heading}
+                    {t(item.heading ?? "")}
                   </h5>
                 )}
                 {item.children?.map((child, idx) => (
@@ -67,6 +66,5 @@ const SidebarLayout: React.FC<SidebarProps> = ({ isHovered }) => {
     </Sidebar>
   );
 };
-
 
 export default SidebarLayout;
