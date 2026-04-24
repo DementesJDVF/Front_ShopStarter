@@ -1,10 +1,42 @@
 {
-  "openMenu": "Open menu",
-  "switchToLight": "Switch to light mode",
-  "switchToDark": "Switch to dark mode",
+  "goodNight": "Good night",
   "goodMorning": "Good morning",
   "goodAfternoon": "Good afternoon",
-  "goodNight": "Good evening",
-  "friend": "Friend",
-  "locale": "en-US"
+  "friend": "friend",
+  "locale": "en-US",
+  "openMenu": "Open menu",
+  "switchToLight": "Switch to light theme",
+  "switchToDark": "Switch to dark theme",
+  "cart": {
+    "ariaLabel": "Shopping Cart",
+    "title": "Your Cart",
+    "itemsSelected": "{{count}} items selected",
+    "empty": {
+      "title": "Empty Cart",
+      "message": "It looks like you haven't added anything yet. Browse the catalog to get started."
+    },
+    "vendor": "Vendor: {{vendorName}}",
+    "totalLabel": "Estimated total",
+    "process": "Checkout",
+    "processing": "Processing Reservation...",
+    "clear": "Clear cart",
+    "checkout": {
+      "success": "Order placed successfully! The seller has been notified and your product has been reserved.",
+      "error": "An error occurred while processing the order. Some products may have already been reserved by another customer."
+    }
+  },
+  "profile": {
+    "myProfile": "My Profile",
+    "myAccount": "My Account",
+    "security": "Security",
+    "logout": "Log Out",
+    "userFallback": "User"
+  },
+  "notification": {
+    "ariaLabel": "Notifications",
+    "title": "Notifications",
+    "newCount": "{{count}} new",
+    "noNotifications": "You have no notifications",
+    "viewAll": "View all activities"
+  }
 }

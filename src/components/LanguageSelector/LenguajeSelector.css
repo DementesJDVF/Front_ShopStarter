@@ -2,11 +2,11 @@
   --ls-bg: rgba(255, 255, 255, 0.72);        /* translucent panel */
   --ls-bg-compact: rgba(255, 255, 255, 0.85);
   --ls-text: #0b1220;                        /* dark text */
-  --ls-muted: rgba(11,18,32,0.6);
+  --ls-muted: rgba(26, 60, 127, 0.6);
   --ls-accent: #2563eb;                      /* blue-600 */
   --ls-accent-strong: #1e40af;               /* blue-800 */
   --ls-border: rgba(37,99,235,0.14);
-  --ls-shadow: 0 8px 24px rgba(6, 30, 66, 0.08);
+  --ls-shadow: 0 8px 24px rgba(9, 61, 139, 0.08);
   --ls-blur: 10px;
 }
 
@@ -82,13 +82,7 @@
 }
 
 
-.language-emoji {
-  display: inline-block;
-  font-size: 1rem;
-  line-height: 1;
-  opacity: 0.95;
-  margin-left: -0.18rem; 
-}
+
 
 
 .language-label {
@@ -100,7 +94,7 @@
 
 .language-selector-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(37,99,235,0.06);
+  box-shadow: 0 6px 18px rgba(49, 112, 247, 0.353);
   border-color: color-mix(in srgb, var(--ls-accent) 18%, transparent);
 }
 .language-selector-button:active {

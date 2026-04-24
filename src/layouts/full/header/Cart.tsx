@@ -3,12 +3,14 @@ import { Drawer, Button, Badge } from 'flowbite-react';
 import { useCart } from '../../../context/CartContext';
 import { Icon as Iconify } from '@iconify/react';
 import api from '../../../utils/axios';
+import { useTranslation } from 'react-i18next';
 
 const Cart = () => {
   // Controla si el panel lateral (Drawer) del carrito está desplegado o no
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { cart, removeFromCart, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
+  const { t } = useTranslation('header');
 
   const handleClose = () => setIsOpen(false);
 
@@ -20,11 +22,11 @@ const Cart = () => {
           await Promise.all(promises);
           
           clearCart();
-          alert("¡Pedido realizado con éxito! El vendedor ha sido notificado y tu producto ha sido reservado.");
+          alert(t('cart.checkout.success'));
           setIsOpen(false);
       } catch (error) {
           console.error("Error al procesar la orden", error);
-          alert("Ocurrió un error al procesar el pedido. Es posible que alguno de los productos ya haya sido reservado por otro cliente.");
+          alert(t('cart.checkout.error'));
       } finally {
           setLoading(false);
       }
@@ -36,7 +38,7 @@ const Cart = () => {
         <span
           onClick={() => setIsOpen(true)}
           className="h-10 w-10 rounded-full flex justify-center items-center cursor-pointer relative transition hover:text-primary hover:bg-lightprimary text-gray-600 dark:text-gray-300"
-          aria-label="Shopping Cart"
+          aria-label={t('cart.ariaLabel')}
         >
           <Iconify icon="solar:cart-large-2-linear" height={22} />
           {totalItems > 0 && (
@@ -51,8 +53,8 @@ const Cart = () => {
         {/* Encabezado del Carrito */}
         <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-darkgray">
           <div>
-            <h3 className="text-lg font-bold text-gray-800 dark:text-white">Tu Carrito</h3>
-            <p className="text-xs text-gray-500">{totalItems} productos seleccionados</p>
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white">{t('cart.title')}</h3>
+            <p className="text-xs text-gray-500">{t('cart.itemsSelected', { count: totalItems })}</p>
           </div>
           <button onClick={handleClose} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition">
             <Iconify icon="solar:close-circle-linear" height={24} className="text-gray-400" />
@@ -66,9 +68,9 @@ const Cart = () => {
               <div className="bg-gray-50 dark:bg-white/5 p-8 rounded-full mb-4">
                 <Iconify icon="solar:cart-cross-outline" height={64} className="text-gray-300" />
               </div>
-              <h4 className="text-base font-bold text-gray-700 dark:text-gray-200">Carrito vacío</h4>
+              <h4 className="text-base font-bold text-gray-700 dark:text-gray-200">{t('cart.empty.title')}</h4>
               <p className="text-sm text-gray-400 max-w-[200px] mt-2">
-                Parece que aún no has añadido nada. Explora el catálogo para empezar.
+                {t('cart.empty.message')}
               </p>
             </div>
           ) : (
@@ -94,7 +96,7 @@ const Cart = () => {
                         <Iconify icon="solar:trash-bin-trash-outline" height={18} />
                       </button>
                     </div>
-                    <span className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">Vendedor: {item.vendorName}</span>
+                    <span className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">{t('cart.vendor', { vendorName: item.vendorName })}</span>
                     <div className="flex justify-between items-center mt-auto">
                       <span className="text-sm font-bold text-primary">${item.price.toLocaleString()}</span>
                       <div className="flex items-center gap-2 bg-gray-50 dark:bg-white/5 rounded-lg p-1">
@@ -124,19 +126,18 @@ const Cart = () => {
         {cart.length > 0 && (
           <div className="p-5 bg-white dark:bg-dark border-t border-gray-100 dark:border-gray-700 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
             <div className="flex justify-between items-center mb-4">
-              <span className="text-gray-500 text-sm">Total estimado</span>
+              <span className="text-gray-500 text-sm">{t('cart.totalLabel')}</span>
               <span className="text-xl font-black text-dark dark:text-white">${totalPrice.toLocaleString()}</span>
             </div>
             <div className="grid grid-cols-1 gap-3">
                 <Button color="primary" className="w-full rounded-xl py-1 font-bold" onClick={handleCheckout} disabled={loading} isProcessing={loading}>
-                    {loading ? "Procesando Reserva..." : "Procesar Compra"}
+                    {loading ? t('cart.processing') : t('cart.process')}
                 </Button>
                 <button 
-
                     onClick={clearCart}
                     className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition underline underline-offset-4"
                 >
-                    Vaciar carrito
+                    {t('cart.clear')}
                 </button>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../../utils/axios";
 import { useAuth } from "../../../context/AuthContext";
+import { useTranslation } from 'react-i18next';
 
 interface NotificationItem {
     id: string;
@@ -22,6 +23,7 @@ const Notification = ({ variant = "dark" }: NotificationProps) => {
     const isDark = variant === "dark";
     const { isAuthenticated } = useAuth();
     const queryClient = useQueryClient();
+    const { t } = useTranslation('header');
 
     // Obtener notificaciones desde la API usando react-query para manejo de estado y caché
     const { data: notifications = [], isLoading } = useQuery<NotificationItem[]>({
@@ -63,7 +65,7 @@ const Notification = ({ variant = "dark" }: NotificationProps) => {
                         ? "hover:text-primary hover:bg-lightprimary text-gray-600 dark:text-gray-300" 
                         : "text-white hover:bg-white/10"
                     }`}
-                    aria-label="Notifications"
+                    aria-label={t('notification.ariaLabel')}
                 >
                     <Icon icon="solar:bell-linear" height={22} />
                     {unreadCount > 0 && (
@@ -75,10 +77,10 @@ const Notification = ({ variant = "dark" }: NotificationProps) => {
             )}
             >
                 <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-darkgray">
-                    <h3 className="text-sm font-bold text-gray-800 dark:text-white">Notificaciones</h3>
+                    <h3 className="text-sm font-bold text-gray-800 dark:text-white">{t('notification.title')}</h3>
                     {unreadCount > 0 && (
                         <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
-                            {unreadCount} nuevas
+                            {t('notification.newCount', { count: unreadCount })}
                         </span>
                     )}
                 </div>
@@ -91,13 +93,13 @@ const Notification = ({ variant = "dark" }: NotificationProps) => {
                     ) : notifications.length === 0 ? (
                         <div className="p-8 text-center">
                             <Icon icon="solar:bell-off-outline" className="mx-auto mb-2 text-gray-300" height={42} />
-                            <p className="text-sm text-gray-400">No tienes notificaciones</p>
+                            <p className="text-sm text-gray-400">{t('notification.noNotifications')}</p>
                         </div>
                     ) : (
                         notifications.map((item) => (
                             <div 
                                 key={item.id} 
-                                className={`px-4 py-3 flex flex-col gap-1 border-b border-gray-50 dark:border-gray-800 transition hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer ${!item.is_read ? 'bg-primary/5 dark:bg-primary/10' : ''}`}
+                                className={`px-4 py-3 flex flex-col gap-1 border-b border-gray-50 dark:border-gray-800 transition hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer ${!item.is_read ? 'bg-white' : ''}`}
                                 onClick={() => !item.is_read && markAsRead.mutate(item.id)}
                             >
                                 <div className="flex justify-between items-start">
@@ -120,7 +122,7 @@ const Notification = ({ variant = "dark" }: NotificationProps) => {
                 {notifications.length > 0 && (
                     <div className="p-2 bg-gray-50 dark:bg-darkgray text-center border-t border-gray-100 dark:border-gray-700">
                         <Link to="/cliente/notificaciones" className="text-[11px] font-bold text-primary hover:underline">
-                            Ver todas las actividades
+                            {t('notification.viewAll')}
                         </Link>
                     </div>
                 )}

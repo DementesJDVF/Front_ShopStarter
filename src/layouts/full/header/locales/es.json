@@ -1,10 +1,42 @@
 {
-  "openMenu": "Abrir menú",
-  "switchToLight": "Cambiar a modo claro",
-  "switchToDark": "Cambiar a modo oscuro",
+  "goodNight": "Buenas noches",
   "goodMorning": "Buenos días",
   "goodAfternoon": "Buenas tardes",
-  "goodNight": "Buenas noches",
-  "friend": "Amigo",
-  "locale": "es-CO"
+  "friend": "amigo",
+  "locale": "es-ES",
+  "openMenu": "Abrir menú",
+  "switchToLight": "Cambiar a tema claro",
+  "switchToDark": "Cambiar a tema oscuro",
+  "cart": {
+    "ariaLabel": "Carrito de compras",
+    "title": "Tu Carrito",
+    "itemsSelected": "{{count}} productos seleccionados",
+    "empty": {
+      "title": "Carrito vacío",
+      "message": "Parece que aún no has añadido nada. Explora el catálogo para empezar."
+    },
+    "vendor": "Vendedor: {{vendorName}}",
+    "totalLabel": "Total estimado",
+    "process": "Procesar Compra",
+    "processing": "Procesando Reserva...",
+    "clear": "Vaciar carrito",
+    "checkout": {
+      "success": "¡Pedido realizado con éxito! El vendedor ha sido notificado y tu producto ha sido reservado.",
+      "error": "Ocurrió un error al procesar el pedido. Es posible que alguno de los productos ya haya sido reservado por otro cliente."
+    }
+  },
+  "profile": {
+    "myProfile": "Mi Perfil",
+    "myAccount": "Mi Cuenta",
+    "security": "Seguridad",
+    "logout": "Cerrar Sesión",
+    "userFallback": "Usuario"
+  },
+  "notification": {
+    "ariaLabel": "Notificaciones",
+    "title": "Notificaciones",
+    "newCount": "{{count}} nuevas",
+    "noNotifications": "No tienes notificaciones",
+    "viewAll": "Ver todas las actividades"
+  }
 }
