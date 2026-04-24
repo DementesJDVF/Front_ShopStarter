@@ -43,7 +43,7 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
 
         // Buscar la reseña del usuario actual
         if (username) {
-          const found = data.reviews.find((r) => r.client === username);
+          const found = (Array.isArray(data?.reviews) ? data.reviews : []).find((r) => r.client === username);
           if (found) {
             setUserReview(found);
           }
@@ -72,13 +72,13 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
       
       // Actualizar la lista de reseñas
       const data = await getVendorReviews(vendorId);
-      setAverage(data.average);
-      setTotal(data.total);
-      setReviews(data.reviews);
+      setAverage(data?.average || 0);
+      setTotal(data?.total || 0);
+      setReviews(Array.isArray(data?.reviews) ? data.reviews : []);
       
       // Actualizar reseña del usuario
       if (username) {
-        const found = data.reviews.find((r) => r.client === username);
+        const found = (Array.isArray(data?.reviews) ? data.reviews : []).find((r) => r.client === username);
         if (found) {
           setUserReview(found);
         }
@@ -109,13 +109,13 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
 
       // Recargar reseñas
       const data = await getVendorReviews(vendorId);
-      setAverage(data.average);
-      setTotal(data.total);
-      setReviews(data.reviews);
+      setAverage(data?.average || 0);
+      setTotal(data?.total || 0);
+      setReviews(Array.isArray(data?.reviews) ? data.reviews : []);
 
       // Actualizar reseña del usuario
       if (username) {
-        const found = data.reviews.find((r) => r.client === username);
+        const found = (Array.isArray(data?.reviews) ? data.reviews : []).find((r) => r.client === username);
         if (found) {
           setUserReview(found);
         }
