@@ -1,7 +1,6 @@
 import { Sidebar } from "flowbite-react";
 import SidebarContent from "./Sidebaritems";
 import NavItems from "./NavItems";
-// @ts-ignore
 import SimpleBar from "simplebar-react";
 import React, { useState } from "react";
 import NavCollapse from "./NavCollapse";
@@ -16,14 +15,38 @@ const SidebarLayout: React.FC<SidebarProps> = ({ isHovered }) => {
   const { user } = useAuth();
   const { t } = useTranslation("sidebar");
 
+  
+  const resolveHeadingText = (heading?: string) => {
+    if (!heading) return "";
+    const translated = t(heading);
+    
+    return translated && translated !== heading ? translated : heading;
+  };
+
+  
   const filteredContent = SidebarContent?.filter((item) => {
     if (!user) return false;
+
+    const rawHeading = item.heading ?? "";
+    const headingText = resolveHeadingText(rawHeading).toString().trim();
+    const normalized = headingText.toUpperCase();
+
+    
     if (user.role === "ADMIN") {
-      return item.heading === "heading.admin" || item.heading === "heading.system";
+
+      return (
+        normalized.includes("ADMIN") ||
+        normalized.includes("SISTEMA") ||
+        rawHeading === "heading.admin" ||
+        rawHeading === "heading.system"
+      );
     }
-    // Otros roles: las claves heading en SidebarContent coinciden con user.role?
-    // Asegúrate que user.role use el mismo formato si estás filtrando por clave.
-    return item.heading === user.role;
+
+    if (normalized === user.role) return true;
+
+    if (rawHeading === user.role) return true;
+
+    return false;
   });
 
   const isCollapsed = !isHovered;

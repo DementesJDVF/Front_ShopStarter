@@ -1,11 +1,10 @@
 import { Sidebar } from "flowbite-react";
 import SidebarContent from "./Sidebaritems";
 import NavItems from "./NavItems";
-// @ts-ignore
 import SimpleBar from "simplebar-react";
 import React from "react";
 import FullLogo from "../shared/logo/FullLogo";
-import "simplebar-react/dist/simplebar.min.css";
+import 'simplebar-react/dist/simplebar.min.css';
 import Upgrade from "./Upgrade";
 import { useAuth } from "../../../context/AuthContext";
 import { useTranslation } from "react-i18next";
@@ -14,17 +13,44 @@ const MobileSidebar = () => {
   const { user } = useAuth();
   const { t } = useTranslation("sidebar");
 
-  const filteredContent = SidebarContent?.filter((item) => {
+
+  const resolveHeadingText = (heading?: string) => {
+    if (!heading) return "";
+    const translated = t(heading);
+    return translated && translated !== heading ? translated : heading;
+  };
+
+
+  const filteredContent = SidebarContent?.filter(item => {
     if (!user) return false;
-    if (item.heading === user.role) return true;
-    if (user.role === "ADMIN" && (item.heading === "heading.system" || item.heading === "Apps")) return true;
+
+    const rawHeading = item.heading ?? "";
+    const headingText = resolveHeadingText(rawHeading).toString().trim();
+    const normalized = headingText.toUpperCase();
+
+    if (user.role === 'ADMIN') {
+      return (
+        normalized.includes("ADMIN") ||
+        normalized.includes("SISTEMA") ||
+        rawHeading === "heading.admin" ||
+        rawHeading === "heading.system" ||
+        rawHeading === "SISTEMA (UI)"
+      );
+    }
+
+    if (normalized === user.role) return true;
+    if (rawHeading === user.role) return true;
+
     return false;
   });
 
   return (
     <>
       <div>
-        <Sidebar className="fixed menu-sidebar pt-0 bg-white dark:bg-darkgray transition-all" aria-label="Sidebar with multi-level dropdown example">
+        <Sidebar
+          className="fixed menu-sidebar pt-0 bg-white dark:bg-darkgray transition-all"
+          aria-label="Sidebar with multi-level dropdown example"
+        >
           <div className="px-5 py-4 pb-7 flex items-center sidebarlogo">
             <FullLogo />
           </div>
@@ -33,14 +59,14 @@ const MobileSidebar = () => {
               <Sidebar.ItemGroup className="sidebar-nav hide-menu">
                 {filteredContent &&
                   filteredContent?.map((item, index) => (
-                    <div className="caption" key={item.heading ?? index}>
+                    <div className="caption" key={item.heading}>
                       <React.Fragment key={index}>
                         <h5 className="text-link dark:text-white/70 caption font-semibold leading-6 tracking-widest text-xs pb-2 uppercase">
-                          {t(item.heading ?? "")}
+                          {t(item.heading)}
                         </h5>
                         {item.children?.map((child, index) => (
                           <React.Fragment key={child.id && index}>
-                            <NavItems item={child} />
+                              <NavItems item={child} />
                           </React.Fragment>
                         ))}
                       </React.Fragment>
@@ -49,7 +75,7 @@ const MobileSidebar = () => {
               </Sidebar.ItemGroup>
             </Sidebar.Items>
           </SimpleBar>
-          <Upgrade />
+          <Upgrade/>
         </Sidebar>
       </div>
     </>
