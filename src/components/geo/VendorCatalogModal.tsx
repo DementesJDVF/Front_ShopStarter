@@ -2,17 +2,32 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Spinner, Card, Badge } from 'flowbite-react';
 import { Icon } from '@iconify/react';
 import api from '../../utils/axios';
-import { useAuth } from '../../context/AuthContext'; // ADD THIS
-import StarRating from '../StarRating/StarRating'; // ADD THIS
+import { useAuth } from '../../context/AuthContext';
+import StarRating from '../StarRating/StarRating';
+
+interface ProductImage {
+  id: string;
+  url_image: string | null;
+  is_main: boolean;
+  moderation_status: string;
+}
 
 interface Product {
   id: string;
   name: string;
   description: string;
   price: string | number;
-  featured_image: string | null;
+  images: ProductImage[];
   category_name?: string;
 }
+
+/** Picks the main image URL, falling back to the first approved image. */
+const getProductImage = (images: ProductImage[]): string | null => {
+  if (!Array.isArray(images) || images.length === 0) return null;
+  const approved = images.filter(img => img.moderation_status !== 'REJECTED' && img.url_image);
+  const main = approved.find(img => img.is_main);
+  return (main ?? approved[0])?.url_image ?? null;
+};
 
 interface VendorCatalogModalProps {
   vendorId: string | null;
@@ -24,26 +39,38 @@ interface VendorCatalogModalProps {
 const VendorCatalogModal: React.FC<VendorCatalogModalProps> = ({ vendorId, isOpen, onClose, vendorName }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
-  const { user, token } = useAuth(); // ADD THIS
+  const [fetchError, setFetchError] = useState(false);
+  const { user, token } = useAuth();
 
   useEffect(() => {
     if (isOpen && vendorId) {
       fetchVendorProducts();
+    } else {
+      // Limpiar estado al cerrar el modal
+      setProducts([]);
+      setFetchError(false);
     }
   }, [isOpen, vendorId]);
 
   const fetchVendorProducts = async () => {
     try {
       setLoading(true);
-      // Asume que la API pública paginada tiene resultados dentro de "results"
+      setFetchError(false);
       const res = await api.get(`products/catalog/?vendor=${vendorId}`);
-      if (res.data && res.data.results) {
-        setProducts(res.data.results);
+      const payload = res.data;
+
+      // Garantizar siempre un array: paginated → .results, array plano → directo, otro → []
+      if (Array.isArray(payload?.results)) {
+        setProducts(payload.results);
+      } else if (Array.isArray(payload)) {
+        setProducts(payload);
       } else {
-        setProducts(res.data); // Por si no está paginado
+        setProducts([]);
       }
     } catch (error) {
       console.error("Error cargando el catálogo:", error);
+      setFetchError(true);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -59,6 +86,11 @@ const VendorCatalogModal: React.FC<VendorCatalogModalProps> = ({ vendorId, isOpe
           <div className="flex justify-center items-center py-20">
              <Spinner size="xl" />
           </div>
+        ) : fetchError ? (
+          <div className="text-center py-20">
+             <Icon icon="solar:danger-triangle-broken" className="mx-auto text-red-300 dark:text-red-500 mb-4" height={60}/>
+             <p className="text-gray-500">Error al cargar el catálogo. Intenta de nuevo.</p>
+          </div>
         ) : products.length === 0 ? (
           <div className="text-center py-20">
              <Icon icon="solar:box-minimalistic-broken" className="mx-auto text-gray-300 dark:text-gray-600 mb-4" height={60}/>
@@ -69,8 +101,8 @@ const VendorCatalogModal: React.FC<VendorCatalogModalProps> = ({ vendorId, isOpe
             {products.map((product) => (
               <Card key={product.id} className="border-none shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-40 bg-gray-100 dark:bg-gray-800 -m-4 mb-4 rounded-t-lg overflow-hidden flex items-center justify-center">
-                    {product.featured_image ? (
-                        <img src={product.featured_image} alt={product.name} className="w-full h-full object-cover" />
+                    {getProductImage(product.images) ? (
+                        <img src={getProductImage(product.images)} alt={product.name} className="w-full h-full object-cover" />
                     ) : (
                         <Icon icon="solar:camera-broken" className="text-gray-300" height={40}/>
                     )}
@@ -91,7 +123,6 @@ const VendorCatalogModal: React.FC<VendorCatalogModalProps> = ({ vendorId, isOpe
             ))}
           </div>
         )}
-        {/* ADD THIS */}
         {vendorId && <StarRating vendorId={vendorId} interactive={!!user && user.role === 'CLIENTE'} token={token ?? undefined} username={user?.username} />}
       </Modal.Body>
     </Modal>

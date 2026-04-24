@@ -86,11 +86,24 @@ const RoleBasedMap: React.FC = () => {
             if (user?.role === 'VENDEDOR') endpoint = 'geo/my-locations/';
             
             const response = await api.get(endpoint);
-            const data = response.data;
-            setLocations(data);
+            const payload = response.data;
+
+            // Normalizar siempre a array: paginado → .results, array plano → directo, otro → []
+            const locations: any[] = Array.isArray(payload?.results)
+                ? payload.results
+                : Array.isArray(payload)
+                    ? payload
+                    : [];
+
+            setLocations(locations);
+
+            // Guardia: el mapa pudo desmontarse mientras esperábamos la respuesta
+            if (!leafletMap.current) return;
 
             const markers: any[] = [];
-            data.forEach((loc: any) => {
+            locations.forEach((loc: any) => {
+                if (!loc.latitude || !loc.longitude) return; // saltar entradas incompletas
+
                 const marker = L.marker([loc.latitude, loc.longitude])
                     .addTo(leafletMap.current)
                     .bindPopup(`
@@ -98,7 +111,7 @@ const RoleBasedMap: React.FC = () => {
                             <b class="text-primary">${loc.user_name || 'Establecimiento'}</b><br/>
                             <p class="text-xs text-gray-500 mb-2">${loc.description || 'Sin descripción'}</p>
                             ${user?.role === 'ADMIN' ? `<p class="text-[10px] text-red-400">Owner: ${loc.user_email}</p>` : ''}
-                            <button onclick="window.openVendorCatalog('${loc.user}', '${loc.user_name?.replace(/'/g, "\\'") || 'Vendedor'}')" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-1.5 px-3 rounded text-xs transition-colors shadow-sm">
+                            <button onclick="window.openVendorCatalog('${loc.user}', '${loc.user_name?.replace(/'/g, "\\'") || 'Vendedor'}')\" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-1.5 px-3 rounded text-xs transition-colors shadow-sm">
                                 <span style="display:flex; justify-content:center; align-items:center;">
                                     Ver Catálogo <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                 </span>
@@ -108,7 +121,7 @@ const RoleBasedMap: React.FC = () => {
                 markers.push(marker);
             });
 
-            if (markers.length > 0) {
+            if (markers.length > 0 && leafletMap.current) {
                 // Ajustar el zoom automáticamente para que todos los marcadores sean visibles
                 const group = L.featureGroup(markers);
                 leafletMap.current.fitBounds(group.getBounds().pad(0.2));
