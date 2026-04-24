@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setToken(savedToken);
         
         // Validación silenciosa de sesión contra el servidor
-        api.get('users/list/').catch((err) => {
+        api.get('auth/me/').catch((err) => {
           if (err.response?.status === 401) {
             logout();
           }

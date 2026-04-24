@@ -90,11 +90,24 @@ const RoleBasedMap: React.FC = () => {
             if (user?.role === 'VENDEDOR') endpoint = 'geo/my-locations/';
 
             const response = await api.get(endpoint);
-            const data = response.data;
-            setLocations(data);
+            const payload = response.data;
+
+            // Normalizar siempre a array: paginado → .results, array plano → directo, otro → []
+            const locations: any[] = Array.isArray(payload?.results)
+                ? payload.results
+                : Array.isArray(payload)
+                    ? payload
+                    : [];
+
+            setLocations(locations);
+
+            // Guardia: el mapa pudo desmontarse mientras esperábamos la respuesta
+            if (!leafletMap.current) return;
 
             const markers: any[] = [];
-            data.forEach((loc: any) => {
+            locations.forEach((loc: any) => {
+                if (!loc?.latitude || !loc?.longitude) return; // saltar entradas incompletas
+
                 const marker = L.marker([loc.latitude, loc.longitude])
                     .addTo(leafletMap.current)
                     .bindPopup(`
@@ -113,7 +126,7 @@ const RoleBasedMap: React.FC = () => {
                 markers.push(marker);
             });
 
-            if (markers.length > 0) {
+            if ((markers?.length || 0) > 0 && leafletMap.current) {
                 // Ajustar el zoom automáticamente para que todos los marcadores sean visibles
                 const group = L.featureGroup(markers);
                 leafletMap.current.fitBounds(group.getBounds().pad(0.2));
