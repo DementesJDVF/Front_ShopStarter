@@ -1,4 +1,3 @@
-
 import { Sidebar } from "flowbite-react";
 import SidebarContent from "./Sidebaritems";
 import NavItems from "./NavItems";
@@ -9,20 +8,19 @@ import FullLogo from "../shared/logo/FullLogo";
 import 'simplebar-react/dist/simplebar.min.css';
 import Upgrade from "./Upgrade";
 import { useAuth } from "../../../context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const MobileSidebar = () => {
   const { user } = useAuth();
+  const { t } = useTranslation("sidebar");
 
   // Filtrar contenido del sidebar según el ROL
   const filteredContent = SidebarContent?.filter(item => {
     if (!user) return false;
-    
     // Si el encabezado coincide con el rol (VENDEDOR, CLIENTE)
     if (item.heading === user.role) return true;
-    
     // Si el usuario es ADMIN, ve todo lo de SISTEMA
-    if (user.role === 'ADMIN' && (item.heading === 'SISTEMA' || item.heading === 'Apps')) return true;
-    
+    if (user.role === 'ADMIN' && (item.heading === 'SISTEMA (UI)' || item.heading === 'Apps')) return true;
     return false;
   });
 
@@ -44,7 +42,7 @@ const MobileSidebar = () => {
                     <div className="caption" key={item.heading}>
                       <React.Fragment key={index}>
                         <h5 className="text-link dark:text-white/70 caption font-semibold leading-6 tracking-widest text-xs pb-2 uppercase">
-                          {item.heading}
+                          {t(item.heading ?? "")}
                         </h5>
                         {item.children?.map((child, index) => (
                           <React.Fragment key={child.id && index}>

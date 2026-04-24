@@ -8,7 +8,7 @@ export interface ChildItem {
   item?: any;
   url?: any;
   color?: string;
-  isPro?: boolean
+  isPro?: boolean;
 }
 
 export interface MenuItem {
@@ -20,12 +20,12 @@ export interface MenuItem {
   items?: MenuItem[];
   children?: ChildItem[];
   url?: any;
-  isPro?: boolean
+  isPro?: boolean;
 }
 
 /**
  * Definición de los ítems de navegación del Sidebar.
- * La estructura está organizada por grupos (headings) que corresponden a los roles del sistema.
+ * Los textos están definidos como claves para i18n.
  */
 const SidebarContent: MenuItem[] = [
   {
@@ -63,8 +63,6 @@ const SidebarContent: MenuItem[] = [
       },
     ],
   },
-  
-  // SECCIÓN PARA CLIENTES: Acceso al catálogo, mapa de negocios y reseñas
   {
     heading: "CLIENTE",
     children: [
@@ -94,8 +92,6 @@ const SidebarContent: MenuItem[] = [
       },
     ],
   },
-  
-  // SECCIÓN ADMINISTRATIVA: Moderación de productos, gestión de usuarios y categorías
   {
     heading: "ADMIN",
     children: [

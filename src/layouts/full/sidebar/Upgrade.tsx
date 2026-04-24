@@ -1,17 +1,19 @@
 import { Button } from "flowbite-react";
 import UpgradePlan from "/src/assets/images/backgrounds/upgrade.png";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
+
 const Upgrade = () => {
+  const { t } = useTranslation("sidebar");
   return (
     <>
       <div className="px-5 mt-2 relative">
         <div className="bg-lightprimary py-4 px-5 rounded-xl ">
           <div className="grid grid-cols-12">
             <div className="col-span-7">
-              <h6 className="text-base text-dark">Check Pro
-              Version</h6>
+              <h6 className="text-base text-dark">{t("Check Pro Version")}</h6>
               <Button color={"primary"} className="mt-3 rounded-xl" target="_blank" as={Link} to="https://adminmart.com/product/matdash-tailwind-react-admin-template/?ref=56#product-demo-section">
-                Check
+                {t("Check")}
               </Button>
             </div>
             <img src={UpgradePlan} alt="upgrade" className="absolute h-24 w-24 end-0" />

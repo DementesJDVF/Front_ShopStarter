@@ -1,72 +1,62 @@
-
-import  {useState, useEffect } from "react";
-import { ChildItem } from "../Sidebaritems";
-import NavItems from "../NavItems";
-import { useLocation } from "react-router";
-import { CustomCollapse } from "../CustomCollapse";
 import React from "react";
-import { Tooltip } from "flowbite-react";
+import { ChildItem } from "../Sidebaritems";
+import { Sidebar, Tooltip } from "flowbite-react";
+import { Icon } from "@iconify/react";
+import { Link, useLocation } from "react-router";
+import { useTranslation } from "react-i18next";
 
-interface NavCollapseProps {
+interface NavItemsProps {
   item: ChildItem;
   isCollapsed?: boolean;
 }
 
-const NavCollapse: React.FC<NavCollapseProps> = ({ item, isCollapsed = false }: any) => {
+const NavItems: React.FC<NavItemsProps> = ({ item, isCollapsed = false }) => {
+  const { t } = useTranslation("sidebar");
   const location = useLocation();
   const pathname = location.pathname;
 
-  const activeDD = item.children.find((t: { url: string }) => t.url === pathname);
-  const [isOpen, setIsOpen] = useState<boolean>(!!activeDD);
-
-  // Sync open state with active child but only when expanded
-  useEffect(() => {
-    if (!isCollapsed && activeDD) {
-      setIsOpen(true);
-    }
-  }, [isCollapsed, activeDD]);
-
-  const handleToggle = () => {
-    if (!isCollapsed) {
-      setIsOpen((prev) => !prev);
-    }
-  };
-
   const content = (
-    <CustomCollapse
-      label={item.name}
-      open={isCollapsed ? false : isOpen}
-      onClick={handleToggle}
-      icon={item.icon} 
-      isPro={item.isPro}
-      isCollapsed={isCollapsed}
-      className={
-        Boolean(activeDD)
-          ? "!text-white bg-primary rounded-xl shadow-md"
-          : "rounded-xl dark:text-white/80 hover:bg-gray-50 dark:hover:bg-white/5"
-      }
+    <Sidebar.Item
+      to={item.url}
+      target={item?.isPro ? "blank" : "_self"}
+      as={Link}
+      className={`transition-all duration-300 w-full block ${item.url == pathname
+          ? "text-white bg-white/20 backdrop-blur-md shadow-xl rounded-xl border border-white/20"
+          : "text-white/60 font-bold bg-transparent group/link hover:bg-white/10 hover:text-white"
+        } ${isCollapsed ? 'px-2' : 'px-4 mb-1'}`}
     >
-      {!isCollapsed && item.children && (
-        <div className="sidebar-dropdown ml-4 border-l border-gray-100 dark:border-white/10 mt-1 pl-2">
-          {item.children.map((child: any) => (
-            <React.Fragment key={child.id}>
-              {child.children ? (
-                <NavCollapse item={child} isCollapsed={isCollapsed} />
-              ) : (
-                <NavItems item={child} isCollapsed={isCollapsed} />
-              )}
-            </React.Fragment>
-          ))}
+      <div className={`flex items-center gap-3 w-full transition-all duration-300`}>
+        <div className="flex-shrink-0 flex items-center justify-center w-6 h-6">
+          {item.icon ? (
+            <Icon icon={item.icon} className={`text-[#2CD4D9] transition-transform duration-300 ${!isCollapsed ? 'scale-110' : ''}`} height={20} />
+          ) : (
+            <span
+              className={`${item.url == pathname
+                ? "bg-white"
+                : "bg-black/40 dark:bg-white/40"
+                } h-1.5 w-1.5 rounded-full`}
+            ></span>
+          )}
         </div>
-      )}
-    </CustomCollapse>
+        <span className={`transition-all duration-300 origin-left whitespace-nowrap ${
+          isCollapsed ? 'opacity-0 w-0 scale-95 overflow-hidden' : 'opacity-100 w-auto scale-100'
+        }`}>
+          {t(item.name ?? "")}
+          {item.isPro && (
+            <span className="ml-2 py-0.5 px-2 text-[10px] bg-secondary/10 text-secondary rounded animate-pulse">
+              {t("Pro")}
+            </span>
+          )}
+        </span>
+      </div>
+    </Sidebar.Item>
   );
 
   return isCollapsed ? (
-    <Tooltip content={item.name} placement="right" style="light">
-      <div className="mb-1">{content}</div>
+    <Tooltip content={t(item.name ?? "")} placement="right" style="light">
+      {content}
     </Tooltip>
   ) : content;
 };
 
-export default NavCollapse;
+export default NavItems;

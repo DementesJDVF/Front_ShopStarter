@@ -1,8 +1,8 @@
-
 import { twMerge } from "tailwind-merge";
 import { HiOutlineChevronDown } from "react-icons/hi";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const CustomCollapse: React.FC<{
     label: string;
@@ -14,6 +14,7 @@ const CustomCollapse: React.FC<{
     isPro?:boolean;
     isCollapsed?: boolean;
   }> = ({ label, open, onClick, icon, children, className, isPro, isCollapsed = false }) => {
+    const { t } = useTranslation("sidebar");
     return (
       <div className="transition-all duration-300">
         <div
@@ -31,18 +32,16 @@ const CustomCollapse: React.FC<{
             <span className={`transition-all duration-300 origin-left whitespace-nowrap ${
               isCollapsed ? 'opacity-0 w-0 scale-95' : 'opacity-100 w-auto scale-100'
             }`}>
-              {label}
+              {t(label)}
             </span>
           </div>
-          
           <div className={`flex items-center gap-0.5 transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>
-            {isPro && <span className="py-0.5 px-2 text-[10px] bg-secondary/10 text-secondary rounded mr-1">Pro</span>}
+            {isPro && <span className="py-0.5 px-2 text-[10px] bg-secondary/10 text-secondary rounded mr-1">{t("Pro")}</span>}
             <HiOutlineChevronDown
               className={twMerge("transform transition-transform", open ? "rotate-180" : "rotate-0")}
             />
           </div>
         </div>
-        
         <div
           className={twMerge(
             "overflow-hidden transition-all duration-300 ease-in-out",
@@ -55,4 +54,4 @@ const CustomCollapse: React.FC<{
     );
   };
 
-  export {CustomCollapse}
+export {CustomCollapse};
