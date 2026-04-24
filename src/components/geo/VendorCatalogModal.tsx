@@ -101,11 +101,12 @@ const VendorCatalogModal: React.FC<VendorCatalogModalProps> = ({ vendorId, isOpe
             {products.map((product) => (
               <Card key={product.id} className="border-none shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-40 bg-gray-100 dark:bg-gray-800 -m-4 mb-4 rounded-t-lg overflow-hidden flex items-center justify-center">
-                    {getProductImage(product.images) ? (
-                        <img src={getProductImage(product.images)} alt={product.name} className="w-full h-full object-cover" />
-                    ) : (
-                        <Icon icon="solar:camera-broken" className="text-gray-300" height={40}/>
-                    )}
+                    {(() => {
+                      const imgUrl = getProductImage(product.images) ?? undefined;
+                      return imgUrl
+                        ? <img src={imgUrl} alt={product.name} className="w-full h-full object-cover" />
+                        : <Icon icon="solar:camera-broken" className="text-gray-300" height={40}/>;
+                    })()}
                 </div>
                 <Badge color="light" size="xs" className="w-fit mb-2">
                     {product.category_name || 'General'}
