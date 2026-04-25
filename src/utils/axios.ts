@@ -38,7 +38,7 @@ api.interceptors.request.use(
 // Response interceptor for global error handling
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     const originalRequest = error.config;
     // Si hay un mensaje estructurado proveído por nuestro custom exception handler de DRF
     const serverMessage = error.response?.data?.message;
