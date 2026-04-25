@@ -12,17 +12,17 @@ const customTheme = {
       success: "bg-success text-white ",
       muted: "bg-muted text-dark dark:text-white dark:bg-darkmuted ",
       lighterror:
-        "bg-lighterror dark:bg-darkerror text-error hover:bg-error hover:text-white",
+        "bg-lighterror dark:bg-darkerror text-error dark:text-white hover:bg-error hover:text-white",
       lightprimary:
-        "bg-lightprimary text-primary hover:bg-primary dark:hover:bg-primary hover:text-white",
+        "bg-lightprimary text-primary dark:text-white hover:bg-primary dark:hover:bg-primary hover:text-white",
       lightsecondary:
-        "bg-lightsecondary dark:bg-darksecondary text-secondary hover:bg-secondary dark:hover:bg-secondary hover:text-white",
+        "bg-lightsecondary dark:bg-darksecondary text-secondary dark:text-white hover:bg-secondary dark:hover:bg-secondary hover:text-white",
       lightsuccess:
-        "bg-lightsuccess dark:bg-darksuccess text-success hover:bg-success dark:hover:bg-success hover:text-white",
+        "bg-lightsuccess dark:bg-darksuccess text-success dark:text-white hover:bg-success dark:hover:bg-success hover:text-white",
       lightinfo:
-        "bg-lightinfo dark:bg-darkinfo text-info hover:bg-info dark:hover:bg-info hover:text-white",
+        "bg-lightinfo dark:bg-darkinfo text-info dark:text-white hover:bg-info dark:hover:bg-info hover:text-white",
       lightwarning:
-        "bg-lightwarning dark:bg-darkwarning text-warning hover:bg-warning dark:hover:bg-warning hover:text-white",
+        "bg-lightwarning dark:bg-darkwarning text-warning dark:text-white hover:bg-warning dark:hover:bg-warning hover:text-white",
       outlineprimary:
         "border border-primary bg-transparent text-primary hover:bg-primary dark:hover:bg-primary hover:text-white ",
       outlinesecondary:

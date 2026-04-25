@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
-const flowbite = require("flowbite-react/tailwind");
+import flowbite from "flowbite-react/tailwind";
+import flowbitePlugin from "flowbite/plugin";
 
 const config: Config = {
   darkMode: "class",
@@ -41,7 +42,7 @@ const config: Config = {
         md: "0px 2px 4px -1px rgba(175, 182, 201, 0.2);",
         lg: "0 1rem 3rem rgba(0, 0, 0, 0.175)",
         "dark-md":
-          "rgba(145, 158, 171, 0.3) 0px 0px 2px 0px, rgba(145, 158, 171, 0.02) 0px 12px 24px -4px",
+          "rgba(0, 0, 0, 0.8) 0px 4px 10px, rgba(0, 0, 0, 0.6) 0px 2px 4px",
         sm: "0 6px 24.2px -10px rgba(41, 52, 61, .22)",
         "btn-shadow": "box-shadow: rgba(0, 0, 0, .05) 0 9px 17.5px",
         tw:"rgba(175, 182, 201, 0.2) 0px 2px 4px -1px",
@@ -72,26 +73,26 @@ const config: Config = {
         widest: "1.5px",
       },
       gap: {
-        "30": "30px",
+        "30": "1.875rem",
       },
       padding: {
-        "30": "30px",
+        "30": "1.875rem",
       },
       margin: {
-        "30": "30px",
+        "30": "1.875rem",
       },
       fontSize: {
-        "15": "15px",
-        "17": "17px",
-        "13": "13px",
-        "22": "22px",
-        "28": "28px",
-        "34": "34px",
-        "40": "40px",
-        "44": "44px",
-        "50": "50px",
-        "56": "56px",
-        "64": "64px",
+        "13": "0.8125rem",
+        "15": "0.9375rem",
+        "17": "1.0625rem",
+        "22": "1.375rem",
+        "28": "1.75rem",
+        "34": "2.125rem",
+        "40": "2.5rem",
+        "44": "2.75rem",
+        "50": "3.125rem",
+        "56": "3.5rem",
+        "64": "4rem",
       },
       colors: {
         cyan: {
@@ -140,7 +141,7 @@ const config: Config = {
   },
   plugins: [
     //Add Flowbite Plugin
-    require("flowbite/plugin"),
+    flowbitePlugin,
   ],
 };
 export default config;

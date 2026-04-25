@@ -3,6 +3,7 @@ import { Card, Table, Badge, Button, Spinner } from 'flowbite-react';
 import { Icon as Iconify } from '@iconify/react';
 import api from '../../utils/axios';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 
 interface Order {
   id: string;
@@ -34,7 +35,23 @@ const VendorOrders: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchOrders();
+    let isMounted = true;
+    const loadOrders = async () => {
+      try {
+        if (isMounted) setLoading(true);
+        const res = await api.get('orders/');
+        const data = res.data.results ? res.data.results : res.data;
+        if (isMounted) setOrders(data);
+      } catch (err) {
+        console.error("Error cargando pedidos:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+    loadOrders();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleAction = async (orderId: string, actionUrl: 'complete' | 'cancel') => {
@@ -46,7 +63,7 @@ const VendorOrders: React.FC = () => {
     } catch (err) {
       console.error(`Error al ejecutar ${actionUrl}`, err);
       const actionLabel = actionUrl === 'complete' ? t('orders.actionLabel.complete') : t('orders.actionLabel.cancel');
-      alert(t('orders.alert.problems', { action: actionLabel }));
+      toast.error(t('orders.alert.problems', { action: actionLabel }));
     } finally {
       setActionLoading(null);
     }

@@ -27,46 +27,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
-    const savedToken = localStorage.getItem('token');
     
-    if (savedUser && savedToken) {
+    if (savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser);
         setUser(parsedUser);
-        setToken(savedToken);
         
-        // Validación silenciosa de sesión contra el servidor
-        api.get('auth/me/').catch((err) => {
-          if (err.response?.status === 401) {
+        // Validación silenciosa obligatoria de sesión HttpOnly contra el servidor
+        api.get('auth/me/').then(res => {
+            setUser(res.data);
+        }).catch((err) => {
+          if (err.response?.status === 401 || err.response?.status === 403) {
             logout();
           }
         });
 
       } catch (e) {
-        console.error("Error parsing saved user", e);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        logout();
       }
+    } else {
+        // Tratar de recuperar la sesión silente si navegamos y hay una Cookie válida
+        api.get('auth/me/').then(res => {
+            setUser(res.data);
+            localStorage.setItem('user', JSON.stringify(res.data));
+        }).catch(() => {});
     }
     setLoading(false);
   }, []);
 
-  const login = (userData: User, token: string) => {
+  const login = (userData: User, dummyToken?: string) => {
     setUser(userData);
-    setToken(token);
     localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('token', token);
+    // NUNCA guardamos el Token en LocalStorage para evitar XSS.
+    // El servidor lo ha guardado en una Cookie HttpOnly de este origen.
   };
 
   const logout = () => {
     setUser(null);
-    setToken(null);
     localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    localStorage.removeItem('token'); // Limpieza de legados inseguros
+    sessionStorage.removeItem('access_token');
+    
+    // Opcional a futuro: Hacer llamada a api.post('auth/logout/') para eliminar cookie local
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token, loading }}>
+    <AuthContext.Provider value={{ user, token: "secure_httponly_token", login, logout, isAuthenticated: !!user, loading }}>
       {children}
     </AuthContext.Provider>
   );
