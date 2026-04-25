@@ -51,4 +51,18 @@ export default defineConfig({
     // })],
 
     plugins: [svgr(), react()],
+
+    // Configuración para silenciar el warning de tamaño de los chunks y separar dependencias grandes
+    build: {
+        chunkSizeWarningLimit: 1000,
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules')) {
+                        return 'vendor';
+                    }
+                }
+            }
+        }
+    }
 });
