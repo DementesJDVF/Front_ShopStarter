@@ -25,9 +25,21 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Request interceptor para monitoreo ligero
+// Request interceptor para inyectar Token automáticamente
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const userData = JSON.parse(userStr);
+        const token = userData.access || userData.token;
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      }
+    } catch (e) {
+      console.error("Error al inyectar token:", e);
+    }
     return config;
   },
   (error) => {
@@ -40,6 +52,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    
     // --- Helper para mapear errores técnicos a humanos ---
     const getFriendlyMessage = (data: any): string | null => {
       if (!data) return null;
@@ -47,6 +60,9 @@ api.interceptors.response.use(
       
       if (typeof data === 'object') {
         if (data.message) return data.message;
+        if (data.detail) return data.detail;
+
+        if (data.error) return data.error;
         if (data.detail) return data.detail;
 
         const errorMap: Record<string, string> = {
@@ -69,62 +85,57 @@ api.interceptors.response.use(
 
     const serverMessage = getFriendlyMessage(error.response?.data);
 
-    // Manejo Automático de Rotación de Tokens (401 Expirado)
-    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('auth/') && !originalRequest.url?.includes('token/refresh/')) {
-      if (isRefreshing) {
-        return new Promise(function(resolve, reject) {
-          failedQueue.push({resolve, reject})
-        }).then(() => {
-          return api(originalRequest);
-        }).catch(err => {
-          return Promise.reject(err);
-        });
+    // Manejo Automático de Rotación de Tokens (401 Expirado o Token Inválido)
+    const isInvalidToken = error.response?.data?.code === 'token_not_valid' || 
+                          (error.response?.data?.detail && error.response.data.detail.includes('token not valid'));
+
+    if (error.response?.status === 401 || isInvalidToken) {
+      if (isInvalidToken) {
+        // Si el token es basura/inválido, no intentamos refrescar, cerramos sesión de una.
+        localStorage.removeItem('user');
+        toast.error('Tu sesión es inválida. Inicia sesión de nuevo.');
+        window.location.href = '/auth/login';
+        return Promise.reject(error);
       }
 
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        // Solicitar rotación silenciosa al Backend FAANG (CustomTokenRefreshView)
-        // Usamos axios plano para no caer en el interceptor circular
-        await axios.post(`${api.defaults.baseURL}token/refresh/`, {}, { withCredentials: true, xsrfCookieName: 'csrftoken', xsrfHeaderName: 'X-CSRFToken' });
-        processQueue(null, 'refreshed');
-        return api(originalRequest); // Repetir la solicitud fallida transparente!
-      } catch (err) {
-        processQueue(err, null);
-        localStorage.removeItem('user');
-        
-        const isPublicPath = window.location.pathname === '/' || window.location.pathname.startsWith('/auth');
-        if (!isPublicPath) {
-          toast.error('Tu sesión ha finalizado por seguridad. Inicia de nuevo.');
-          window.location.href = '/auth/login';
+      if (!originalRequest._retry && !originalRequest.url?.includes('auth/') && !originalRequest.url?.includes('token/refresh/')) {
+        if (isRefreshing) {
+          return new Promise(function(resolve, reject) {
+            failedQueue.push({resolve, reject})
+          }).then(() => {
+            return api(originalRequest);
+          }).catch(err => {
+            return Promise.reject(err);
+          });
         }
-        return Promise.reject(err);
-      } finally {
-        isRefreshing = false;
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+          // Solicitar rotación silenciosa al Backend
+          await axios.post(`${api.defaults.baseURL}token/refresh/`, {}, { withCredentials: true, xsrfCookieName: 'csrftoken', xsrfHeaderName: 'X-CSRFToken' });
+          processQueue(null, 'refreshed');
+          return api(originalRequest); 
+        } catch (err) {
+          processQueue(err, null);
+          localStorage.removeItem('user');
+          
+          const isPublicPath = window.location.pathname === '/' || window.location.pathname.startsWith('/auth');
+          if (!isPublicPath) {
+            toast.error('Tu sesión ha finalizado por seguridad. Inicia de nuevo.');
+            window.location.href = '/auth/login';
+          }
+          return Promise.reject(err);
+        } finally {
+          isRefreshing = false;
+        }
       }
     }
     
-    // Si falla 401 directo en endpoints auth o login (no es rotatorio)
-    // 3. Manejo de Toasts para errores de autenticación
-    // No mostramos toast para login/register porque la vista maneja su propio mensaje de error
-    const isAuthPath = originalRequest.url?.includes('auth/login') || originalRequest.url?.includes('auth/register');
-    
-    if (error.response?.status === 401 && !isAuthPath) {
-      if (!originalRequest.url?.includes('me/')) {
-         toast.error(serverMessage || 'Acceso Denegado.');
-      }
-    } else if (error.response?.status === 403) {
-      toast.error(serverMessage || 'No tienes permisos para realizar esta acción.');
-    } else if (error.response?.status === 400) {
-      toast.error(serverMessage || 'Los datos enviados son incorrectos.');
-    } else if (error.response?.status >= 500) {
-      toast.error('Error interno del servidor. Intenta de nuevo más tarde.');
-    } else if (error.message === 'Network Error' || error.code === 'ECONNABORTED') {
-      // Ignoramos errores de red momentáneos para evitar cierres de sesión agresivos
-      console.warn('Micro-corte de red detectado. Reintentando silenciosamente o esperando estabilidad.');
-    } else {
-      toast.error(serverMessage || 'Ocurrió un error inesperado en la solicitud.');
+    // Si llegamos aquí y hay un mensaje de error, lo mostramos
+    if (serverMessage && !originalRequest.url?.includes('auth/')) {
+        toast.error(serverMessage);
     }
 
     return Promise.reject(error);
