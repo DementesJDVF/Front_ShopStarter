@@ -118,7 +118,6 @@ const SidebarContent: MenuItem[] = [
       },
     ],
   },
-  },
 ];
 
 export default SidebarContent;
