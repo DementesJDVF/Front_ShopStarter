@@ -13,13 +13,13 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import VendorMap from '../../components/geo/VendorMap';
 
-// Componentes Analíticos Premium
-import { RevenueForecast } from 'src/components/dashboard/RevenueForecast';
-import TotalIncome from 'src/components/dashboard/TotalIncome';
-import NewCustomers from 'src/components/dashboard/NewCustomers';
-import ProductRevenue from 'src/components/dashboard/ProductRevenue';
-import DailyActivity from 'src/components/dashboard/DailyActivity';
-import BlogCards from 'src/components/dashboard/BlogCards';
+// Componentes Analíticos Premium (Usando rutas relativas)
+import { RevenueForecast } from '../../components/dashboard/RevenueForecast';
+import { TotalIncome } from '../../components/dashboard/TotalIncome';
+import { NewCustomers } from '../../components/dashboard/NewCustomers';
+import { ProductRevenue } from '../../components/dashboard/ProductRevenue';
+import { DailyActivity } from '../../components/dashboard/DailyActivity';
+import { BlogCards } from '../../components/dashboard/BlogCards';
 
 interface User { id: string; email: string; username: string; role: string; status: string; }
 interface Product { id: string; name: string; price: string; status: string; vendor_name?: string; images?: any[]; }
@@ -123,13 +123,13 @@ const AdminDashboard: React.FC = () => {
 
       <div className="flex flex-wrap gap-2 mb-8">
           <Button color={currentView === 0 ? 'indigo' : 'light'} onClick={() => setCurrentView(0)} className="rounded-2xl shadow-sm">
-            <Icon icon="solar:chart-square-bold-duotone" className="mr-2" height={20} /> Resumen
+            <Icon icon="solar:chart-square-bold-duotone" className="mr-2" height="20" /> Resumen
           </Button>
           <Button color={currentView === 2 ? 'indigo' : 'light'} onClick={() => setCurrentView(2)} className="rounded-2xl shadow-sm">
             <HiUserCircle className="mr-2 h-5 w-5" /> Usuarios
           </Button>
           <Button color={currentView === 5 ? 'indigo' : 'light'} onClick={() => setCurrentView(5)} className="rounded-2xl shadow-sm">
-            <Icon icon="solar:map-point-wave-bold-duotone" className="mr-2" height={20} /> Mapa Global
+            <Icon icon="solar:map-point-wave-bold-duotone" className="mr-2" height="20" /> Mapa Global
           </Button>
           <Button color={currentView === 3 ? 'indigo' : 'light'} onClick={() => setCurrentView(3)} className="rounded-2xl shadow-sm">
             <MdOutlinePendingActions className="mr-2 h-5 w-5" /> Inventario {pendingProducts.length > 0 && <Badge color="failure" className="ml-2">{pendingProducts.length}</Badge>}
@@ -138,7 +138,7 @@ const AdminDashboard: React.FC = () => {
             <HiShoppingCart className="mr-2 h-5 w-5" /> Ventas
           </Button>
           <Button color={currentView === 1 ? 'indigo' : 'light'} onClick={() => setCurrentView(1)} className="rounded-2xl shadow-sm">
-            <Icon icon="solar:tag-bold-duotone" className="mr-2" height={20} /> Categorías
+            <Icon icon="solar:tag-bold-duotone" className="mr-2" height="20" /> Categorías
           </Button>
       </div>
       
@@ -149,13 +149,13 @@ const AdminDashboard: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl">
                     <div className="flex items-center gap-4">
-                        <div className="p-4 bg-primary/10 rounded-2xl"><Icon icon="solar:users-group-rounded-bold-duotone" className="text-primary" height={32} /></div>
+                        <div className="p-4 bg-primary/10 rounded-2xl"><Icon icon="solar:users-group-rounded-bold-duotone" className="text-primary" height="32" /></div>
                         <div><p className="text-sm font-bold text-gray-400 uppercase">Usuarios</p><h3 className="text-4xl font-black text-gray-900 dark:text-white">{users.length}</h3></div>
                     </div>
                   </Card>
                   <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl">
                     <div className="flex items-center gap-4">
-                        <div className="p-4 bg-secondary/10 rounded-2xl"><Icon icon="solar:box-minimalistic-bold-duotone" className="text-secondary" height={32} /></div>
+                        <div className="p-4 bg-secondary/10 rounded-2xl"><Icon icon="solar:box-minimalistic-bold-duotone" className="text-secondary" height="32" /></div>
                         <div><p className="text-sm font-bold text-gray-400 uppercase">Pendientes</p><h3 className="text-4xl font-black text-gray-900 dark:text-white">{pendingProducts.length}</h3></div>
                     </div>
                   </Card>
@@ -199,7 +199,7 @@ const AdminDashboard: React.FC = () => {
                                     {u.status === 'PENDING' && (
                                         <Button color="success" size="xs" onClick={() => handleUserStatus(u.id, 'ACTIVE')}><HiCheck className="mr-1"/> Aprobar</Button>
                                     )}
-                                    <Select size="sm" value={u.status} onChange={(e) => handleUserStatus(u.id, e.target.value)}>
+                                    <Select value={u.status} onChange={(e) => handleUserStatus(u.id, e.target.value)}>
                                         <option value="ACTIVE">Activo</option>
                                         <option value="INACTIVE">Inactivo</option>
                                         <option value="BLOCKED">Bloqueado</option>
