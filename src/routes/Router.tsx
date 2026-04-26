@@ -108,9 +108,11 @@ const Router = [
         element: <FullLayout />,
         children: [
           { index: true, element: <AdminDashboard /> },
-          { path: 'productos/aprobar', element: <AdminDashboard /> }, // Reuses dashboard with tabs
-          { path: 'usuarios', element: <AdminDashboard /> },         // Reuses dashboard with tabs
-          { path: 'categorias', element: <AdminDashboard /> },       // Reuses dashboard with tabs
+          { path: 'productos', element: <AdminDashboard /> },
+          { path: 'usuarios', element: <AdminDashboard /> },
+          { path: 'ventas', element: <AdminDashboard /> },
+          { path: 'mapa', element: <AdminDashboard /> },
+          { path: 'categorias', element: <AdminDashboard /> },
         ]
       }
     ]
