@@ -23,6 +23,7 @@ type ApiProduct = {
   price: string;
   stock: number;
   status: string;
+  vendor: string | number;
   vendor_name: string;
   category_name: string;
   is_featured: boolean;
