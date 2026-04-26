@@ -1,0 +1,67 @@
+{
+  "header": {
+    "title": "Centro de ",
+    "titleHighlight": "Control Maestro",
+    "subtitle": "Sesión blindada con Inmunidad Técnica activa.",
+    "systemOnline": "Sistema Online"
+  },
+  "stats": {
+    "totalUsers": "Usuarios Totales",
+    "pendingApproval": "Pendientes Aprobar",
+    "securityAlerts": "Alertas Seguridad"
+  },
+  "users": {
+    "title": "Usuarios en el Sistema",
+    "table": {
+      "email": "Email",
+      "username": "Usuario",
+      "role": "Rol",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "pending": "Pendiente",
+      "blocked": "Bloqueado"
+    },
+    "errorStatus": "Lo siento, no pudimos cambiar el estado del usuario. Intenta de nuevo."
+  },
+  "products": {
+    "title": "Productos Pendientes",
+    "table": {
+      "image": "Imagen",
+      "name": "Nombre",
+      "category": "Categoría",
+      "price": "Precio",
+      "vendor": "Vendedor",
+      "actions": "Acciones"
+    },
+    "noCategory": "Sin categoría",
+    "noPending": "No hay productos pendientes de aprobación.",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "errorUpdate": "Hubo un problema al actualizar el producto. Verifica tu conexión."
+  },
+  "security": {
+    "title": "Monitoreo de Seguridad",
+    "refresh": "Actualizar",
+    "table": {
+      "alert": "Alerta",
+      "object": "Objeto",
+      "ipOrigin": "IP Origen",
+      "date": "Fecha",
+      "risk": "Riesgo"
+    },
+    "noAlerts": "No se han detectado intrusiones sospechosas recientemente.",
+    "critical": "CRÍTICO"
+  },
+  "rejectModal": {
+    "header": "Motivo de Rechazo",
+    "description": "Informa al vendedor por qué se rechaza su producto.",
+    "label": "Razón de rechazo",
+    "placeholder": "Ej: Imagen insuficiente...",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar"
+  }
+}

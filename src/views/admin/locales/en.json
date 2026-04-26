@@ -1,0 +1,67 @@
+{
+  "header": {
+    "title": "Master ",
+    "titleHighlight": "Control Center",
+    "subtitle": "Session shielded with active Technical Immunity.",
+    "systemOnline": "System Online"
+  },
+  "stats": {
+    "totalUsers": "Total Users",
+    "pendingApproval": "Pending Approval",
+    "securityAlerts": "Security Alerts"
+  },
+  "users": {
+    "title": "Users in the System",
+    "table": {
+      "email": "Email",
+      "username": "Username",
+      "role": "Role",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "blocked": "Blocked"
+    },
+    "errorStatus": "Sorry, we couldn't change the user status. Please try again."
+  },
+  "products": {
+    "title": "Pending Products",
+    "table": {
+      "image": "Image",
+      "name": "Name",
+      "category": "Category",
+      "price": "Price",
+      "vendor": "Vendor",
+      "actions": "Actions"
+    },
+    "noCategory": "No category",
+    "noPending": "There are no products pending approval.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "errorUpdate": "There was a problem updating the product. Check your connection."
+  },
+  "security": {
+    "title": "Security Monitoring",
+    "refresh": "Refresh",
+    "table": {
+      "alert": "Alert",
+      "object": "Object",
+      "ipOrigin": "Source IP",
+      "date": "Date",
+      "risk": "Risk"
+    },
+    "noAlerts": "No suspicious intrusions have been detected recently.",
+    "critical": "CRITICAL"
+  },
+  "rejectModal": {
+    "header": "Rejection Reason",
+    "description": "Inform the vendor why their product is being rejected.",
+    "label": "Rejection reason",
+    "placeholder": "E.g.: Insufficient image...",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  }
+}

@@ -35,6 +35,8 @@ import TradProductTableEN from 'src/components/tables/locales/en.json';
 import TradAdminES from 'src/views/admin/locales/es.json'
 import TradAdminEN from 'src/views/admin/locales/en.json'
 
+import TradCategoryListES from 'src/components/categorias/locales/en.json'
+import TradCategoryListEN from 'src/components/categorias/locales/es.json'
 
 i18n
   .use(initReactI18next)
@@ -53,6 +55,7 @@ i18n
         vendedor: TradVendorsES,
         productTable: TradProductTableES,
         admin: TradAdminES,  
+        category: TradCategoryListES,
       },
       en: {
         translation: en,
@@ -67,6 +70,7 @@ i18n
         vendedor: TradVendorsEN,
         productTable: TradProductTableEN,
         admin: TradAdminEN,
+        category: TradCategoryListEN,
       },
     },
     lng: "es",

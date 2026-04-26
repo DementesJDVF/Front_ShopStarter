@@ -4,6 +4,7 @@ import { Card, Table, Button, Select, Badge, Modal, Label, TextInput } from 'flo
 import { HiUserCircle, HiCheck, HiX, HiLightningBolt } from 'react-icons/hi';
 import { MdOutlinePendingActions, MdSecurity } from 'react-icons/md';
 import { Icon } from '@iconify/react';
+import { useTranslation } from 'react-i18next';
 import api from '../../utils/axios';
 import CategoryComponent from '../../components/categorias/category';
 import ImagePreviewModal from '../../components/shared/ImagePreviewModal';
@@ -60,6 +61,7 @@ const TableSkeleton = () => (
 );
 
 const AdminDashboard: React.FC = () => {
+  const { t } = useTranslation('admin');
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -172,7 +174,7 @@ setPendingProducts(data as PendingProduct[]);
       await api.patch(`users/${userId}/status/`, { status: newStatus });
       fetchUsers(); // Refrescamos la lista para ver el cambio
     } catch (err) {
-      alert("Lo siento, no pudimos cambiar el estado del usuario. Intenta de nuevo.");
+      alert(t('users.errorStatus'));
     }
   };
 
@@ -188,7 +190,7 @@ setPendingProducts(data as PendingProduct[]);
       setRejectionComment('');
       setRejectingProductId(null);
     } catch (err) {
-      alert("Hubo un problema al actualizar el producto. Verifica tu conexión.");
+      alert(t('products.errorUpdate'));
     }
   };
 
@@ -206,13 +208,13 @@ setPendingProducts(data as PendingProduct[]);
       <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
             <h1 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic">
-            Centro de <span className="text-secondary">Control Maestro</span>
+            {t('header.title')}<span className="text-secondary">{t('header.titleHighlight')}</span>
             </h1>
-            <p className="text-gray-500 dark:text-gray-400 font-medium text-lg">Sesión blindada con Inmunidad Técnica activa.</p>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-lg">{t('header.subtitle')}</p>
         </div>
         <div className="flex gap-2">
             <Badge color="success" size="lg" className="px-4 py-2 border border-green-200">
-                <HiLightningBolt className="mr-1 inline" /> Sistema Online
+                <HiLightningBolt className="mr-1 inline" /> {t('header.systemOnline')}
             </Badge>
         </div>
       </div>
@@ -228,7 +230,7 @@ setPendingProducts(data as PendingProduct[]);
                     <div className="flex items-center gap-4">
                         <div className="p-4 bg-primary/10 rounded-2xl"><Icon icon="solar:users-group-rounded-bold-duotone" className="text-primary" height={32} /></div>
                         <div>
-                            <p className="text-sm font-bold text-gray-400 uppercase">Usuarios Totales</p>
+                            <p className="text-sm font-bold text-gray-400 uppercase">{t('stats.totalUsers')}</p>
                             <h3 className="text-4xl font-black text-gray-900 dark:text-white">{users.length}</h3>
                         </div>
                     </div>
@@ -237,7 +239,7 @@ setPendingProducts(data as PendingProduct[]);
                     <div className="flex items-center gap-4">
                         <div className="p-4 bg-secondary/10 rounded-2xl"><Icon icon="solar:box-minimalistic-bold-duotone" className="text-secondary" height={32} /></div>
                         <div>
-                            <p className="text-sm font-bold text-gray-400 uppercase">Pendientes Aprobar</p>
+                            <p className="text-sm font-bold text-gray-400 uppercase">{t('stats.pendingApproval')}</p>
                             <h3 className="text-4xl font-black text-gray-900 dark:text-white">{pendingProducts.length}</h3>
                         </div>
                     </div>
@@ -246,7 +248,7 @@ setPendingProducts(data as PendingProduct[]);
                     <div className="flex items-center gap-4">
                         <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-2xl"><MdSecurity className="text-red-600" size={32} /></div>
                         <div>
-                            <p className="text-sm font-bold text-gray-400 uppercase">Alertas Seguridad</p>
+                            <p className="text-sm font-bold text-gray-400 uppercase">{t('stats.securityAlerts')}</p>
                             <h3 className="text-4xl font-black text-red-600">{auditLogs.length}</h3>
                         </div>
                     </div>
@@ -293,17 +295,17 @@ setPendingProducts(data as PendingProduct[]);
           <div className="mt-4 animate-fade-in">
             <div className="glass-panel p-8 rounded-[2.5rem] overflow-visible">
               <h2 className="text-3xl font-black text-[#0A014A] dark:text-white mb-8 flex items-center gap-3 tracking-tighter italic uppercase">
-                <HiUserCircle className="text-primary text-4xl" /> Usuarios en el Sistema
+                <HiUserCircle className="text-primary text-4xl" /> {t('users.title')}
               </h2>
               {loading ? <TableSkeleton /> : (
                 <div className="overflow-visible">
                     <Table hoverable className="text-center">
                     <Table.Head className="bg-indigo-50/50 dark:bg-slate-800/50 border-b border-indigo-100 dark:border-white/5">
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">Email</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">Usuario</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">Rol</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">Estado</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">Acciones</Table.HeadCell>
+                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('users.table.email')}</Table.HeadCell>
+                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('users.table.username')}</Table.HeadCell>
+                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('users.table.role')}</Table.HeadCell>
+                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('users.table.status')}</Table.HeadCell>
+                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('users.table.actions')}</Table.HeadCell>
                     </Table.Head>
                     <Table.Body className="divide-y divide-gray-100/50 dark:divide-white/5">
                         {users.map((u) => (
@@ -334,10 +336,10 @@ setPendingProducts(data as PendingProduct[]);
                                 className="w-40"
                                 sizing="sm"
                                 >
-                                <option value="ACTIVE">Activo</option>
-                                <option value="INACTIVE">Inactivo</option>
-                                <option value="PENDING">Pendiente</option>
-                                <option value="BLOCKED">Bloqueado</option>
+                                <option value="ACTIVE">{t('users.status.active')}</option>
+                                <option value="INACTIVE">{t('users.status.inactive')}</option>
+                                <option value="PENDING">{t('users.status.pending')}</option>
+                                <option value="BLOCKED">{t('users.status.blocked')}</option>
                                 </Select>
                             </div>
                             </Table.Cell>
@@ -355,23 +357,23 @@ setPendingProducts(data as PendingProduct[]);
           <div className="mt-4 animate-fade-in">
             <div className="glass-panel p-8 rounded-[2.5rem] overflow-visible">
               <h2 className="text-3xl font-black text-[#0A014A] dark:text-white mb-8 flex items-center gap-3 tracking-tighter italic uppercase">
-                <MdOutlinePendingActions className="text-secondary text-4xl" /> Productos Pendientes
+                <MdOutlinePendingActions className="text-secondary text-4xl" /> {t('products.title')}
               </h2>
               {loading ? <TableSkeleton /> : (
                 <div className="overflow-visible">
                     <Table hoverable className="text-center">
                     <Table.Head className="bg-indigo-50/50 dark:bg-slate-800/50 border-b border-indigo-100 dark:border-white/5">
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">Imagen</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">Nombre</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">Categoría</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">Precio</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">Vendedor</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">Acciones</Table.HeadCell>
+                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('products.table.image')}</Table.HeadCell>
+                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('products.table.name')}</Table.HeadCell>
+                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('products.table.category')}</Table.HeadCell>
+                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('products.table.price')}</Table.HeadCell>
+                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('products.table.vendor')}</Table.HeadCell>
+                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('products.table.actions')}</Table.HeadCell>
                     </Table.Head>
                     <Table.Body className="divide-y divide-gray-100/50 dark:divide-white/5">
                         {pendingProducts.length === 0 ? (
                         <Table.Row>
-                            <Table.Cell colSpan={6} className="py-8 text-gray-500">No hay productos pendientes de aprobación.</Table.Cell>
+                            <Table.Cell colSpan={6} className="py-8 text-gray-500">{t('products.noPending')}</Table.Cell>
                         </Table.Row>
                         ) : (
                             pendingProducts.map((p) => (
@@ -389,17 +391,17 @@ setPendingProducts(data as PendingProduct[]);
                                     </Table.Cell>
                                     <Table.Cell className="font-bold text-gray-900 dark:text-white">{p.name}</Table.Cell>
                                     <Table.Cell>
-                                        <Badge color="indigo" size="sm" className="whitespace-nowrap">{p.category_name || "Sin categoría"}</Badge>
+                                        <Badge color="indigo" size="sm" className="whitespace-nowrap">{p.category_name || t('products.noCategory')}</Badge>
                                     </Table.Cell>
                                     <Table.Cell className="font-black text-primary">${Number(p.price || 0).toLocaleString()}</Table.Cell>
                                     <Table.Cell className="text-xs">{p.vendor_name || p.vendor}</Table.Cell>
                                     <Table.Cell>
                                         <div className="flex justify-center gap-2">
                                         <Button color="success" size="xs" onClick={() => handleProductStatusChange(p.id, 'ACTIVE')}>
-                                            <HiCheck className="mr-1 h-4 w-4" /> Aprobar
+                                            <HiCheck className="mr-1 h-4 w-4" /> {t('products.approve')}
                                         </Button>
                                         <Button color="failure" size="xs" onClick={() => openRejectModal(p.id)}>
-                                            <HiX className="mr-1 h-4 w-4" /> Rechazar
+                                            <HiX className="mr-1 h-4 w-4" /> {t('products.reject')}
                                         </Button>
                                         </div>
                                     </Table.Cell>
@@ -419,25 +421,25 @@ setPendingProducts(data as PendingProduct[]);
             <div className="glass-panel p-8 rounded-[2.5rem] overflow-visible">
               <div className="flex justify-between items-center mb-8">
                 <h2 className="text-3xl font-black text-red-700 dark:text-red-400 flex items-center gap-3 tracking-tighter italic uppercase">
-                    <MdSecurity className="text-4xl" /> Monitoreo de Seguridad
+                    <MdSecurity className="text-4xl" /> {t('security.title')}
                 </h2>
-                <Button color="light" size="sm" onClick={fetchSecurityLogs}>Actualizar</Button>
+                <Button color="light" size="sm" onClick={fetchSecurityLogs}>{t('security.refresh')}</Button>
               </div>
 
               {logsLoading ? <TableSkeleton /> : (
                 <div className="overflow-visible">
                     <Table hoverable className="text-center">
                         <Table.Head className="bg-red-50/50 dark:bg-red-900/10 border-b border-red-100 dark:border-white/5">
-                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">Alerta</Table.HeadCell>
-                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">Objeto</Table.HeadCell>
-                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">IP Origen</Table.HeadCell>
-                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">Fecha</Table.HeadCell>
-                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">Riesgo</Table.HeadCell>
+                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">{t('security.table.alert')}</Table.HeadCell>
+                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">{t('security.table.object')}</Table.HeadCell>
+                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">{t('security.table.ipOrigin')}</Table.HeadCell>
+                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">{t('security.table.date')}</Table.HeadCell>
+                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">{t('security.table.risk')}</Table.HeadCell>
                         </Table.Head>
                         <Table.Body className="divide-y divide-red-100/50 dark:divide-white/5">
                             {auditLogs.length === 0 ? (
                                 <Table.Row>
-                                    <Table.Cell colSpan={5} className="py-8 text-green-600 font-bold">No se han detectado intrusiones sospechosas recientemente.</Table.Cell>
+                                    <Table.Cell colSpan={5} className="py-8 text-green-600 font-bold">{t('security.noAlerts')}</Table.Cell>
                                 </Table.Row>
                             ) : (
                                 auditLogs.map((l) => (
@@ -447,7 +449,7 @@ setPendingProducts(data as PendingProduct[]);
                                         <Table.Cell className="font-mono text-xs">{l.ip_address}</Table.Cell>
                                         <Table.Cell className="text-xs">{new Date(l.timestamp).toLocaleString()}</Table.Cell>
                                         <Table.Cell>
-                                            <Badge color="failure" size="xs">CRÍTICO</Badge>
+                                            <Badge color="failure" size="xs">{t('security.critical')}</Badge>
                                         </Table.Cell>
                                     </Table.Row>
                                 ))
@@ -469,15 +471,15 @@ setPendingProducts(data as PendingProduct[]);
       />
 
       <Modal show={isRejectModalOpen} onClose={() => setIsRejectModalOpen(false)} size="md">
-        <Modal.Header>Motivo de Rechazo</Modal.Header>
+        <Modal.Header>{t('rejectModal.header')}</Modal.Header>
         <Modal.Body>
           <div className="space-y-4">
-            <p className="text-sm text-gray-500">Informa al vendedor por qué se rechaza su producto.</p>
+            <p className="text-sm text-gray-500">{t('rejectModal.description')}</p>
             <div>
-              <Label htmlFor="rejection-reason" value="Razón de rechazo" />
+              <Label htmlFor="rejection-reason" value={t('rejectModal.label')} />
               <TextInput
                 id="rejection-reason"
-                placeholder="Ej: Imagen insuficiente..."
+                placeholder={t('rejectModal.placeholder')}
                 value={rejectionComment}
                 onChange={(e) => setRejectionComment(e.target.value)}
                 required
@@ -486,8 +488,8 @@ setPendingProducts(data as PendingProduct[]);
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="failure" onClick={() => rejectingProductId && handleProductStatusChange(rejectingProductId, 'REJECTED', rejectionComment)}>Confirmar</Button>
-          <Button color="gray" onClick={() => setIsRejectModalOpen(false)}>Cancelar</Button>
+          <Button color="failure" onClick={() => rejectingProductId && handleProductStatusChange(rejectingProductId, 'REJECTED', rejectionComment)}>{t('rejectModal.confirm')}</Button>
+          <Button color="gray" onClick={() => setIsRejectModalOpen(false)}>{t('rejectModal.cancel')}</Button>
         </Modal.Footer>
       </Modal>
     </div>
