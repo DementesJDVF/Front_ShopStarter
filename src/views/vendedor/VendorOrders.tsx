@@ -24,7 +24,6 @@ const VendorOrders: React.FC = () => {
     try {
       setLoading(true);
       const res = await api.get('orders/');
-      // Manejar la posible respuesta paginada o lista directa
       const data = res.data.results ? res.data.results : res.data;
       setOrders(data);
     } catch (err) {
@@ -35,37 +34,35 @@ const VendorOrders: React.FC = () => {
   };
 
   useEffect(() => {
-    let isMounted = true;
-    const loadOrders = async () => {
-      try {
-        if (isMounted) setLoading(true);
-        const res = await api.get('orders/');
-        const data = res.data.results ? res.data.results : res.data;
-        if (isMounted) setOrders(data);
-      } catch (err) {
-        console.error("Error cargando pedidos:", err);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-    loadOrders();
-    return () => {
-      isMounted = false;
-    };
+    fetchOrders();
   }, []);
 
-  const handleAction = async (orderId: string, actionUrl: 'complete' | 'cancel') => {
+  const handleAction = async (orderId: string, actionUrl: 'mark-as-paid' | 'cancel') => {
     try {
       setActionLoading(orderId);
       await api.post(`orders/${orderId}/${actionUrl}/`);
-      // Refrescar órdenes tras estado exitoso
+      toast.success(actionUrl === 'mark-as-paid' ? "¡Venta completada con éxito!" : "Reserva cancelada");
       await fetchOrders();
     } catch (err) {
       console.error(`Error al ejecutar ${actionUrl}`, err);
-      const actionLabel = actionUrl === 'complete' ? t('orders.actionLabel.complete') : t('orders.actionLabel.cancel');
-      toast.error(t('orders.alert.problems', { action: actionLabel }));
+      toast.error("No se pudo completar la acción. Intenta de nuevo.");
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'PAID':
+        return <Badge color="success" className="rounded-lg px-3 py-1 font-bold">VENDIDO</Badge>;
+      case 'RESERVED':
+        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold">RESERVADO</Badge>;
+      case 'CANCELLED':
+        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">CANCELADO</Badge>;
+      case 'PENDING':
+        return <Badge color="indigo" className="rounded-lg px-3 py-1 font-bold">PENDIENTE</Badge>;
+      default:
+        return <Badge color="gray">{status}</Badge>;
     }
   };
 
@@ -98,71 +95,50 @@ const VendorOrders: React.FC = () => {
               <p className="text-gray-400 mt-2">{t('orders.empty.msg')}</p>
             </div>
           ) : (
-            <Table hoverable className="text-center w-full">
-              <Table.Head className="bg-gray-50 dark:bg-darkgray">
-                <Table.HeadCell className="py-4">{t('orders.table.client')}</Table.HeadCell>
-                <Table.HeadCell>{t('orders.table.product')}</Table.HeadCell>
-                <Table.HeadCell>{t('orders.table.created')}</Table.HeadCell>
-                <Table.HeadCell>{t('orders.table.total')}</Table.HeadCell>
-                <Table.HeadCell>{t('orders.table.status')}</Table.HeadCell>
-                <Table.HeadCell>{t('orders.table.actions')}</Table.HeadCell>
+            <Table hoverable>
+              <Table.Head className="bg-gray-50/50 border-b border-gray-100">
+                <Table.HeadCell className="py-4">Producto</Table.HeadCell>
+                <Table.HeadCell>Cliente</Table.HeadCell>
+                <Table.HeadCell>Estado</Table.HeadCell>
+                <Table.HeadCell>Total</Table.HeadCell>
+                <Table.HeadCell className="text-center">Acciones Reales</Table.HeadCell>
               </Table.Head>
-              <Table.Body className="divide-y">
+              <Table.Body className="divide-y divide-gray-100">
                 {orders.map((order) => (
-                  <Table.Row key={order.id} className="bg-white dark:bg-darkgray hover:bg-gray-50/50 transition">
-                    <Table.Cell className="font-bold text-gray-900 dark:text-white capitalize">
-                      {order.client_name || t('orders.anonymous')}
-                    </Table.Cell>
-                    <Table.Cell className="text-indigo-900 dark:text-indigo-400 font-semibold truncate max-w-[200px]" title={order.product_name}>
-                      {order.product_name}
-                    </Table.Cell>
-                    <Table.Cell className="text-xs text-gray-500 font-medium">
-                      {new Date(order.created_at).toLocaleDateString()}
-                    </Table.Cell>
-                    <Table.Cell className="font-black text-green-600">
-                      ${parseFloat(order.total.toString()).toLocaleString()}
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Badge 
-                        color={
-                          order.status === 'PENDING' ? 'warning' :
-                          order.status === 'COMPLETED' ? 'success' : 'failure'
-                        }
-                        className="inline-flex w-24 justify-center"
-                      >
-                        {order.status === 'PENDING' ? `${t('orders.status.pending')}` :
-                         order.status === 'COMPLETED' ? `${t('orders.status.completed')}` : `${t('orders.status.cancelled')}`}
-                      </Badge>
-                    </Table.Cell>
-                    <Table.Cell>
-                      {order.status === 'PENDING' ? (
-                        <div className="flex items-center justify-center gap-2">
+                  <Table.Row key={order.id} className="bg-white hover:bg-indigo-50/30 transition-colors">
+                    <Table.Cell className="font-black text-gray-900 py-5">{order.product_name}</Table.Cell>
+                    <Table.Cell className="font-medium text-gray-500">{order.client_name}</Table.Cell>
+                    <Table.Cell>{getStatusBadge(order.status)}</Table.Cell>
+                    <Table.Cell className="font-bold text-indigo-600">${Number(order.total).toLocaleString()}</Table.Cell>
+                    <Table.Cell className="flex justify-center gap-2">
+                      {order.status === 'RESERVED' && (
+                        <>
                           <Button 
                             size="xs" 
                             color="success" 
-                            className="rounded-lg font-bold"
+                            className="rounded-lg shadow-sm font-bold"
+                            onClick={() => handleAction(order.id, 'mark-as-paid')}
                             disabled={actionLoading === order.id}
-                            onClick={() => handleAction(order.id, 'complete')}
                           >
-                            <Iconify icon="solar:check-circle-bold" className="mr-1" />
-                            {t('orders.action.delivered')}
+                            {actionLoading === order.id ? <Spinner size="xs" /> : "Marcar PAGADO"}
                           </Button>
                           <Button 
                             size="xs" 
                             color="failure" 
-                            className="rounded-lg font-bold"
-                            disabled={actionLoading === order.id}
+                            className="rounded-lg shadow-sm font-bold"
                             onClick={() => handleAction(order.id, 'cancel')}
+                            disabled={actionLoading === order.id}
                           >
-                            <Iconify icon="solar:close-circle-bold" className="mr-1" />
-                            {t('orders.action.failed')}
+                            Cancelar
                           </Button>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-400 font-bold tracking-widest break-words overflow-hidden text-ellipsis whitespace-nowrap pl-4">{order.id.split('-')[0]}</span>
+                        </>
                       )}
-                    </Table.Cell>
-                  </Table.Row>
+                      {order.status === 'PAID' && (
+                        <span className="text-xs text-green-500 font-bold flex items-center gap-1">
+                          <Iconify icon="solar:check-read-linear" /> Venta Finalizada
+                        </span>
+                      )}
+                    </Table.Row>
                 ))}
               </Table.Body>
             </Table>

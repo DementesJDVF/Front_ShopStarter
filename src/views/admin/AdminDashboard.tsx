@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Card, Table, Button, Select, Badge, Modal, Label, TextInput } from 'flowbite-react';
-import { HiUserCircle, HiCheck, HiX, HiLightningBolt } from 'react-icons/hi';
+import { useLocation } from 'react-router-dom';
+import { Card, Table, Button, Select, Badge, Modal, Label, TextInput, Spinner } from 'flowbite-react';
+import { HiUserCircle, HiCheck, HiX, HiLightningBolt, HiTrash, HiShoppingCart } from 'react-icons/hi';
 import { MdOutlinePendingActions, MdSecurity } from 'react-icons/md';
 import { Icon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
@@ -10,488 +10,198 @@ import CategoryComponent from '../../components/categorias/category';
 import ImagePreviewModal from '../../components/shared/ImagePreviewModal';
 import UnauthorizedScreen from '../../components/shared/UnauthorizedScreen';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 
-// Importaciones del tablero analítico (Colaborador)
+// Componentes Analíticos
 import { RevenueForecast } from 'src/components/dashboard/RevenueForecast';
 import TotalIncome from 'src/components/dashboard/TotalIncome';
 import NewCustomers from 'src/components/dashboard/NewCustomers';
-import ProductRevenue from 'src/components/dashboard/ProductRevenue';
-import DailyActivity from 'src/components/dashboard/DailyActivity';
-import BlogCards from 'src/components/dashboard/BlogCards';
 
-interface ProductImage {
-  url_image: string;
-}
-
-interface PendingProduct {
-  id: string;
-  name: string;
-  price: string;
-  category_name?: string;
-  vendor_name?: string;
-  vendor?: string;
-  images?: ProductImage[];
-}
-
-interface User {
-  id: string;
-  email: string;
-  username: string;
-  role: string;
-  status: string;
-  is_active: boolean;
-}
-
-interface AuditLog {
-  id: string;
-  action_type: string;
-  object_repr: string;
-  timestamp: string;
-  ip_address: string;
-  is_suspicious: boolean;
-  new_data: any;
-}
-
-const TableSkeleton = () => (
-    <div className="animate-pulse space-y-4 py-4">
-        {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="h-12 bg-gray-200/50 dark:bg-slate-800/50 rounded-xl"></div>
-        ))}
-    </div>
-);
+interface User { id: string; email: string; username: string; role: string; status: string; }
+interface Product { id: string; name: string; price: string; status: string; vendor_name?: string; }
+interface Order { id: string; client_name: string; product_name: string; status: string; total: number; created_at: string; }
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation('admin');
   const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
   const [currentView, setCurrentView] = useState(0);
 
   const [users, setUsers] = useState<User[]>([]);
-  const [pendingProducts, setPendingProducts] = useState<PendingProduct[]>([]);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [logsLoading, setLogsLoading] = useState(false);
 
-  // --- SEGURIDAD: CONTROL DE ACCESO ---
-  // Muestra pantalla de acceso denegado si el usuario no es ADMIN.
-  // No redirigimos silenciosamente: el usuario verá exactamente por qué no puede entrar.
-  if (!authLoading && !user) {
-    return <UnauthorizedScreen code={401} />;
-  }
-  if (!authLoading && user && user.role !== 'ADMIN') {
-    return <UnauthorizedScreen code={403} message="Esta sección es exclusiva para Administradores del sistema." />;
+  if (!authLoading && (!user || user.role !== 'ADMIN')) {
+    return <UnauthorizedScreen code={403} message="Solo Administradores." />;
   }
 
-  // --- NAVEGACIÓN INTELIGENTE ---
-  // Mantiene la pestaña correcta activa basándose en la URL actual.
-  // Así, si refrescas la página en "Usuarios", volverás exactamente a donde estabas.
   useEffect(() => {
     if (location.pathname.includes('usuarios')) setCurrentView(2);
     else if (location.pathname.includes('categorias')) setCurrentView(1);
-    else if (location.pathname.includes('productos/aprobar')) setCurrentView(3);
-    else if (location.pathname.includes('seguridad')) setCurrentView(4);
-    else setCurrentView(0); // Resumen inicial
+    else if (location.pathname.includes('productos')) setCurrentView(3);
+    else if (location.pathname.includes('ventas')) setCurrentView(4);
+    else if (location.pathname.includes('seguridad')) setCurrentView(5);
+    else setCurrentView(0);
   }, [location.pathname]);
-  
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [previewTitle, setPreviewTitle] = useState('');
 
-  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-  const [rejectingProductId, setRejectingProductId] = useState<string | null>(null);
-  const [rejectionComment, setRejectionComment] = useState('');
-
-  // Abre el visor de imágenes para ver los productos en detalle antes de aprobarlos.
-  const openPreview = (url: string, title: string) => {
-    setPreviewUrl(url);
-    setPreviewTitle(title);
-    setIsPreviewOpen(true);
-  };
-
-  // Prepara el modal de rechazo para un producto específico.
-  const openRejectModal = (productId: string) => {
-    setRejectingProductId(productId);
-    setIsRejectModalOpen(true);
-  };
-
-  // --- GESTIÓN DE USUARIOS ---
-  // Trae la lista completa de personas registradas para que puedas gestionar sus permisos.
-  const fetchUsers = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await api.get('users/list/');
-      setUsers(res.data);
+      const [uRes, pRes, oRes] = await Promise.all([
+        api.get('users/list/'),
+        api.get('products/create/'), // El Admin ve todos
+        api.get('orders/') // El Admin ve todos
+      ]);
+      setUsers(uRes.data);
+      setProducts(pRes.data.results || pRes.data);
+      setOrders(oRes.data.results || oRes.data);
     } catch (err) {
-      console.error("Error al cargar usuarios", err);
+      console.error("Error cargando datos admin", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // --- CONTROL DE CALIDAD (Moderación) ---
-  // Busca todos los productos que los vendedores han subido y que aún no han sido aprobados.
-  const fetchPendingProducts = async () => {
+  useEffect(() => { fetchData(); }, []);
+
+  const handleDelete = async (type: 'users' | 'products', id: string) => {
+    if (!window.confirm("¿Estás seguro? Esta acción es irreversible y afectará la base de datos real.")) return;
     try {
-      setLoading(true);
-      const res = await api.get('products/create/?status=PENDING');
-      const data = res.data.results || res.data;
-setPendingProducts(data as PendingProduct[]);
+      await api.delete(`${type}/${type === 'users' ? id : 'create/' + id}/`);
+      toast.success("Eliminado correctamente.");
+      fetchData();
     } catch (err) {
-      console.error("Error al cargar productos pendientes", err);
-    } finally {
-        setLoading(false);
+      toast.error("Error al eliminar.");
     }
   };
 
-  // --- MONITOREO DE CIBERSEGURIDAD ---
-  // Esta es la "Caja Negra" del sistema. Trae los logs que el servidor marcó como sospechosos
-  // (ataques de bots, inyecciones XSS, etc.) para que puedas tomar acción preventiva.
-  const fetchSecurityLogs = async () => {
+  const handleProductStatus = async (id: string, status: string) => {
     try {
-      setLogsLoading(true);
-      const res = await api.get('audit/logs/?is_suspicious=true');
-      setAuditLogs(res.data.results || res.data);
-    } catch (err) {
-      console.error("Error al cargar logs de seguridad", err);
-    } finally {
-      setLogsLoading(false);
-    }
+      await api.patch(`products/create/${id}/`, { status });
+      toast.success(`Producto ${status === 'AVAILABLE' ? 'Aprobado' : 'Rechazado'}`);
+      fetchData();
+    } catch (err) { toast.error("Error al actualizar estado."); }
   };
-
-  // Se ejecuta al inicio para llenar el Dashboard con información fresca.
-  useEffect(() => {
-    if (user?.role === 'ADMIN') {
-        fetchUsers();
-        fetchPendingProducts();
-        fetchSecurityLogs();
-    }
-  }, [user]);
-
-  // Permite activar, desactivar o BLOQUEAR usuarios directamente desde la tabla.
-  const handleUserStatusChange = async (userId: string, newStatus: string) => {
-    try {
-      await api.patch(`users/${userId}/status/`, { status: newStatus });
-      fetchUsers(); // Refrescamos la lista para ver el cambio
-    } catch (err) {
-      alert(t('users.errorStatus'));
-    }
-  };
-
-  // La función maestra para decidir si un producto sale a la venta o se devuelve al vendedor.
-  const handleProductStatusChange = async (productId: string, newStatus: string, reason: string = '') => {
-    try {
-      await api.patch(`products/create/${productId}/`, { 
-        status: newStatus,
-        rejection_reason: reason 
-      });
-      fetchPendingProducts(); // Actualizamos la lista de pendientes
-      setIsRejectModalOpen(false);
-      setRejectionComment('');
-      setRejectingProductId(null);
-    } catch (err) {
-      alert(t('products.errorUpdate'));
-    }
-  };
-
-
-  if (authLoading) {
-      return (
-          <div className="flex h-screen items-center justify-center">
-              <Icon icon="eos-icons:bubble-loading" className="text-secondary" width={60} />
-          </div>
-      );
-  }
 
   return (
-    <div className="w-full">
-      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-            <h1 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic">
-            {t('header.title')}<span className="text-secondary">{t('header.titleHighlight')}</span>
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 font-medium text-lg">{t('header.subtitle')}</p>
-        </div>
-        <div className="flex gap-2">
-            <Badge color="success" size="lg" className="px-4 py-2 border border-green-200">
-                <HiLightningBolt className="mr-1 inline" /> {t('header.systemOnline')}
-            </Badge>
-        </div>
+    <div className="w-full p-4 font-[var(--main-font)]">
+      <div className="mb-8">
+        <h1 className="text-4xl font-black text-indigo-900 tracking-tighter uppercase italic">
+          CONTROL <span className="text-indigo-500">TOTAL</span>
+        </h1>
+        <p className="text-gray-500 font-medium">Gestión Maestra de ShopStarter</p>
       </div>
-      
-      {/* --- CONTENEDOR PRINCIPAL CON EFECTO CRISTAL --- */}
-      <div className="bg-white/40 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2.5rem] border border-gray-100 dark:border-slate-800 p-2 md:p-4 overflow-hidden shadow-2xl min-h-[600px]">
-        
-        {currentView === 0 && (
-          <div className="py-6 px-2 animate-fade-in space-y-6">
-              {/* --- CONTROL MAESTRO: ESTADÍSTICAS DE SEGURIDAD Y GESTIÓN --- */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl">
-                    <div className="flex items-center gap-4">
-                        <div className="p-4 bg-primary/10 rounded-2xl"><Icon icon="solar:users-group-rounded-bold-duotone" className="text-primary" height={32} /></div>
-                        <div>
-                            <p className="text-sm font-bold text-gray-400 uppercase">{t('stats.totalUsers')}</p>
-                            <h3 className="text-4xl font-black text-gray-900 dark:text-white">{users.length}</h3>
-                        </div>
-                    </div>
-                  </Card>
-                  <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl">
-                    <div className="flex items-center gap-4">
-                        <div className="p-4 bg-secondary/10 rounded-2xl"><Icon icon="solar:box-minimalistic-bold-duotone" className="text-secondary" height={32} /></div>
-                        <div>
-                            <p className="text-sm font-bold text-gray-400 uppercase">{t('stats.pendingApproval')}</p>
-                            <h3 className="text-4xl font-black text-gray-900 dark:text-white">{pendingProducts.length}</h3>
-                        </div>
-                    </div>
-                  </Card>
-                  <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl border-l-4 border-l-red-500">
-                    <div className="flex items-center gap-4">
-                        <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-2xl"><MdSecurity className="text-red-600" size={32} /></div>
-                        <div>
-                            <p className="text-sm font-bold text-gray-400 uppercase">{t('stats.securityAlerts')}</p>
-                            <h3 className="text-4xl font-black text-red-600">{auditLogs.length}</h3>
-                        </div>
-                    </div>
-                  </Card>
+
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-6">
+        <Button color={currentView === 0 ? 'indigo' : 'light'} onClick={() => setCurrentView(0)}>Resumen</Button>
+        <Button color={currentView === 2 ? 'indigo' : 'light'} onClick={() => setCurrentView(2)}>Usuarios</Button>
+        <Button color={currentView === 3 ? 'indigo' : 'light'} onClick={() => setCurrentView(3)}>Inventario</Button>
+        <Button color={currentView === 4 ? 'indigo' : 'light'} onClick={() => setCurrentView(4)}>Ventas</Button>
+        <Button color={currentView === 1 ? 'indigo' : 'light'} onClick={() => setCurrentView(1)}>Categorías</Button>
+      </div>
+
+      <Card className="rounded-[2rem] shadow-2xl border-none">
+        {loading ? <div className="flex justify-center py-20"><Spinner size="xl" /></div> : (
+          <>
+            {currentView === 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
+                 <Card className="bg-indigo-50 border-none">
+                    <h3 className="text-sm font-bold text-indigo-400">USUARIOS</h3>
+                    <p className="text-4xl font-black text-indigo-900">{users.length}</p>
+                 </Card>
+                 <Card className="bg-green-50 border-none">
+                    <h3 className="text-sm font-bold text-green-400">VENTAS TOTALES</h3>
+                    <p className="text-4xl font-black text-green-900">{orders.length}</p>
+                 </Card>
+                 <Card className="bg-orange-50 border-none">
+                    <h3 className="text-sm font-bold text-orange-400">PRODUCTOS</h3>
+                    <p className="text-4xl font-black text-orange-900">{products.length}</p>
+                 </Card>
+                 <div className="col-span-full mt-4">
+                    <RevenueForecast />
+                 </div>
               </div>
+            )}
 
-              {/* --- ANALÍTICA PREMIUM: TRABAJO DEL COLABORADOR --- */}
-              <div className="grid grid-cols-12 gap-6">
-                <div className="lg:col-span-8 col-span-12">
-                  <RevenueForecast/>
-                </div>
-                <div className="lg:col-span-4 col-span-12">
-                  <div className="grid grid-cols-12 h-full items-stretch gap-6">
-                    <div className="col-span-12">
-                      <NewCustomers />
-                    </div>
-                    <div className="col-span-12">
-                      <TotalIncome />
-                    </div>
-                  </div>
-                </div>
-                <div className="lg:col-span-8 col-span-12">
-                  <ProductRevenue />
-                </div>
-                <div className="lg:col-span-4 col-span-12 flex">
-                  <DailyActivity />
-                </div>
-                <div className="col-span-12">
-                  <BlogCards />
-                </div>
-              </div>
-          </div>
-        )}
+            {currentView === 2 && (
+              <Table hoverable>
+                <Table.Head>
+                  <Table.HeadCell>Usuario</Table.HeadCell>
+                  <Table.HeadCell>Rol</Table.HeadCell>
+                  <Table.HeadCell>Estado</Table.HeadCell>
+                  <Table.HeadCell>Acción</Table.HeadCell>
+                </Table.Head>
+                <Table.Body>
+                  {users.map(u => (
+                    <Table.Row key={u.id}>
+                      <Table.Cell className="font-bold">{u.username} <br/><span className="text-xs font-normal text-gray-400">{u.email}</span></Table.Cell>
+                      <Table.Cell><Badge color={u.role === 'ADMIN' ? 'purple' : 'info'}>{u.role}</Badge></Table.Cell>
+                      <Table.Cell>{u.status}</Table.Cell>
+                      <Table.Cell>
+                        <Button color="failure" size="xs" onClick={() => handleDelete('users', u.id)}><HiTrash/></Button>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
+            )}
 
-        {currentView === 1 && (
-          <div className="mt-4 animate-fade-in">
-            <div className="panel-card border-t-4 border-t-primary p-6">
-               <CategoryComponent showAdminManagement={true} />
-            </div>
-          </div>
-        )}
-
-        {currentView === 2 && (
-          <div className="mt-4 animate-fade-in">
-            <div className="glass-panel p-8 rounded-[2.5rem] overflow-visible">
-              <h2 className="text-3xl font-black text-[#0A014A] dark:text-white mb-8 flex items-center gap-3 tracking-tighter italic uppercase">
-                <HiUserCircle className="text-primary text-4xl" /> {t('users.title')}
-              </h2>
-              {loading ? <TableSkeleton /> : (
-                <div className="overflow-visible">
-                    <Table hoverable className="text-center">
-                    <Table.Head className="bg-indigo-50/50 dark:bg-slate-800/50 border-b border-indigo-100 dark:border-white/5">
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('users.table.email')}</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('users.table.username')}</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('users.table.role')}</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('users.table.status')}</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('users.table.actions')}</Table.HeadCell>
-                    </Table.Head>
-                    <Table.Body className="divide-y divide-gray-100/50 dark:divide-white/5">
-                        {users.map((u) => (
-                        <Table.Row key={u.id} className="bg-transparent hover:bg-white/40 dark:hover:bg-white/5 transition-colors">
-                            <Table.Cell className="font-medium text-gray-900 dark:text-white">{u.email}</Table.Cell>
-                            <Table.Cell>{u.username}</Table.Cell>
-                            <Table.Cell>
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                u.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
-                                u.role === 'VENDEDOR' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                            }`}>
-                                {u.role}
-                            </span>
-                            </Table.Cell>
-                            <Table.Cell>
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                u.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-                                u.status === 'BLOCKED' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
-                            }`}>
-                                {u.status}
-                            </span>
-                            </Table.Cell>
-                            <Table.Cell>
-                            <div className="flex justify-center">
-                                <Select
-                                value={u.status}
-                                onChange={(e) => handleUserStatusChange(u.id, e.target.value)}
-                                className="w-40"
-                                sizing="sm"
-                                >
-                                <option value="ACTIVE">{t('users.status.active')}</option>
-                                <option value="INACTIVE">{t('users.status.inactive')}</option>
-                                <option value="PENDING">{t('users.status.pending')}</option>
-                                <option value="BLOCKED">{t('users.status.blocked')}</option>
-                                </Select>
-                            </div>
-                            </Table.Cell>
-                        </Table.Row>
-                        ))}
-                    </Table.Body>
-                    </Table>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {currentView === 3 && (
-          <div className="mt-4 animate-fade-in">
-            <div className="glass-panel p-8 rounded-[2.5rem] overflow-visible">
-              <h2 className="text-3xl font-black text-[#0A014A] dark:text-white mb-8 flex items-center gap-3 tracking-tighter italic uppercase">
-                <MdOutlinePendingActions className="text-secondary text-4xl" /> {t('products.title')}
-              </h2>
-              {loading ? <TableSkeleton /> : (
-                <div className="overflow-visible">
-                    <Table hoverable className="text-center">
-                    <Table.Head className="bg-indigo-50/50 dark:bg-slate-800/50 border-b border-indigo-100 dark:border-white/5">
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('products.table.image')}</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('products.table.name')}</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('products.table.category')}</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('products.table.price')}</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('products.table.vendor')}</Table.HeadCell>
-                        <Table.HeadCell className="py-4 text-[#3A17E4] dark:text-indigo-300 font-extrabold text-xs uppercase tracking-widest">{t('products.table.actions')}</Table.HeadCell>
-                    </Table.Head>
-                    <Table.Body className="divide-y divide-gray-100/50 dark:divide-white/5">
-                        {pendingProducts.length === 0 ? (
-                        <Table.Row>
-                            <Table.Cell colSpan={6} className="py-8 text-gray-500">{t('products.noPending')}</Table.Cell>
-                        </Table.Row>
-                        ) : (
-                            pendingProducts.map((p) => (
-                                <Table.Row key={p.id} className="bg-transparent hover:bg-white/40 dark:hover:bg-white/5 transition-colors">
-                                    <Table.Cell className="flex justify-center">
-                                        <img 
-                                        src={p.images?.[0]?.url_image || "https://placehold.co/60x60?text=PS"} 
-                                        alt={p.name} 
-                                        className="h-12 w-12 object-cover rounded cursor-pointer hover:scale-110 transition-transform shadow-sm"
-                                        onClick={() => openPreview(
-                                        p.images?.[0]?.url_image || "https://placehold.co/600x400?text=Sin+imagen",
-                                        p.name
-                                        )}
-                                        />
-                                    </Table.Cell>
-                                    <Table.Cell className="font-bold text-gray-900 dark:text-white">{p.name}</Table.Cell>
-                                    <Table.Cell>
-                                        <Badge color="indigo" size="sm" className="whitespace-nowrap">{p.category_name || t('products.noCategory')}</Badge>
-                                    </Table.Cell>
-                                    <Table.Cell className="font-black text-primary">${Number(p.price || 0).toLocaleString()}</Table.Cell>
-                                    <Table.Cell className="text-xs">{p.vendor_name || p.vendor}</Table.Cell>
-                                    <Table.Cell>
-                                        <div className="flex justify-center gap-2">
-                                        <Button color="success" size="xs" onClick={() => handleProductStatusChange(p.id, 'ACTIVE')}>
-                                            <HiCheck className="mr-1 h-4 w-4" /> {t('products.approve')}
-                                        </Button>
-                                        <Button color="failure" size="xs" onClick={() => openRejectModal(p.id)}>
-                                            <HiX className="mr-1 h-4 w-4" /> {t('products.reject')}
-                                        </Button>
-                                        </div>
-                                    </Table.Cell>
-                                </Table.Row>
-                            ))
+            {currentView === 3 && (
+              <Table hoverable>
+                <Table.Head>
+                  <Table.HeadCell>Producto</Table.HeadCell>
+                  <Table.HeadCell>Precio</Table.HeadCell>
+                  <Table.HeadCell>Estado</Table.HeadCell>
+                  <Table.HeadCell>Moderación</Table.HeadCell>
+                </Table.Head>
+                <Table.Body>
+                  {products.map(p => (
+                    <Table.Row key={p.id}>
+                      <Table.Cell className="font-bold">{p.name}</Table.Cell>
+                      <Table.Cell>${Number(p.price).toLocaleString()}</Table.Cell>
+                      <Table.Cell>
+                        <Badge color={p.status === 'AVAILABLE' ? 'success' : 'warning'}>{p.status}</Badge>
+                      </Table.Cell>
+                      <Table.Cell className="flex gap-2">
+                        {p.status === 'PENDING' && (
+                          <Button color="success" size="xs" onClick={() => handleProductStatus(p.id, 'AVAILABLE')}><HiCheck/></Button>
                         )}
-                    </Table.Body>
-                    </Table>
-                </div>
-              )}
-            </div>
-          </div>
+                        <Button color="failure" size="xs" onClick={() => handleDelete('products', p.id)}><HiTrash/></Button>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
+            )}
+
+            {currentView === 4 && (
+              <Table hoverable>
+                <Table.Head>
+                  <Table.HeadCell>ID Orden</Table.HeadCell>
+                  <Table.HeadCell>Cliente</Table.HeadCell>
+                  <Table.HeadCell>Producto</Table.HeadCell>
+                  <Table.HeadCell>Estado</Table.HeadCell>
+                  <Table.HeadCell>Total</Table.HeadCell>
+                </Table.Head>
+                <Table.Body>
+                  {orders.map(o => (
+                    <Table.Row key={o.id}>
+                      <Table.Cell className="text-xs font-mono">{o.id.slice(0,8)}</Table.Cell>
+                      <Table.Cell>{o.client_name}</Table.Cell>
+                      <Table.Cell className="font-bold">{o.product_name}</Table.Cell>
+                      <Table.Cell>
+                        <Badge color={o.status === 'PAID' ? 'success' : 'warning'}>{o.status}</Badge>
+                      </Table.Cell>
+                      <Table.Cell className="font-black text-indigo-600">${Number(o.total).toLocaleString()}</Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
+            )}
+          </>
         )}
-
-        {currentView === 4 && (
-          <div className="mt-4 animate-fade-in">
-            <div className="glass-panel p-8 rounded-[2.5rem] overflow-visible">
-              <div className="flex justify-between items-center mb-8">
-                <h2 className="text-3xl font-black text-red-700 dark:text-red-400 flex items-center gap-3 tracking-tighter italic uppercase">
-                    <MdSecurity className="text-4xl" /> {t('security.title')}
-                </h2>
-                <Button color="light" size="sm" onClick={fetchSecurityLogs}>{t('security.refresh')}</Button>
-              </div>
-
-              {logsLoading ? <TableSkeleton /> : (
-                <div className="overflow-visible">
-                    <Table hoverable className="text-center">
-                        <Table.Head className="bg-red-50/50 dark:bg-red-900/10 border-b border-red-100 dark:border-white/5">
-                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">{t('security.table.alert')}</Table.HeadCell>
-                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">{t('security.table.object')}</Table.HeadCell>
-                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">{t('security.table.ipOrigin')}</Table.HeadCell>
-                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">{t('security.table.date')}</Table.HeadCell>
-                            <Table.HeadCell className="py-4 text-red-800 dark:text-red-300 font-extrabold text-xs uppercase tracking-widest">{t('security.table.risk')}</Table.HeadCell>
-                        </Table.Head>
-                        <Table.Body className="divide-y divide-red-100/50 dark:divide-white/5">
-                            {auditLogs.length === 0 ? (
-                                <Table.Row>
-                                    <Table.Cell colSpan={5} className="py-8 text-green-600 font-bold">{t('security.noAlerts')}</Table.Cell>
-                                </Table.Row>
-                            ) : (
-                                auditLogs.map((l) => (
-                                    <Table.Row key={l.id} className="bg-red-50/20 dark:hover:bg-red-900/10 transition-colors">
-                                        <Table.Cell className="font-bold text-red-700 dark:text-red-400">{l.action_type}</Table.Cell>
-                                        <Table.Cell className="text-xs">{l.object_repr}</Table.Cell>
-                                        <Table.Cell className="font-mono text-xs">{l.ip_address}</Table.Cell>
-                                        <Table.Cell className="text-xs">{new Date(l.timestamp).toLocaleString()}</Table.Cell>
-                                        <Table.Cell>
-                                            <Badge color="failure" size="xs">{t('security.critical')}</Badge>
-                                        </Table.Cell>
-                                    </Table.Row>
-                                ))
-                            )}
-                        </Table.Body>
-                    </Table>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <ImagePreviewModal 
-        isOpen={isPreviewOpen} 
-        onClose={() => setIsPreviewOpen(false)} 
-        imageUrl={previewUrl} 
-        title={previewTitle} 
-      />
-
-      <Modal show={isRejectModalOpen} onClose={() => setIsRejectModalOpen(false)} size="md">
-        <Modal.Header>{t('rejectModal.header')}</Modal.Header>
-        <Modal.Body>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-500">{t('rejectModal.description')}</p>
-            <div>
-              <Label htmlFor="rejection-reason" value={t('rejectModal.label')} />
-              <TextInput
-                id="rejection-reason"
-                placeholder={t('rejectModal.placeholder')}
-                value={rejectionComment}
-                onChange={(e) => setRejectionComment(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button color="failure" onClick={() => rejectingProductId && handleProductStatusChange(rejectingProductId, 'REJECTED', rejectionComment)}>{t('rejectModal.confirm')}</Button>
-          <Button color="gray" onClick={() => setIsRejectModalOpen(false)}>{t('rejectModal.cancel')}</Button>
-        </Modal.Footer>
-      </Modal>
+      </Card>
     </div>
   );
 };
