@@ -93,22 +93,35 @@ const SidebarContent: MenuItem[] = [
     heading: "ADMIN",
     children: [
       {
-        name: "Panel de Control",
+        name: "Resumen",
         icon: "solar:widget-add-line-duotone",
         id: uniqueId(),
         url: "/admin",
       },
       {
-        name: "Aprobación Productos",
+        name: "Aprobación",
         icon: "solar:clipboard-check-outline",
         id: uniqueId(),
-        url: "/admin/productos/aprobar",
+        url: "/admin/productos",
       },
       {
-        name: "Gestión Usuarios",
+        name: "Usuarios",
         icon: "solar:users-group-two-rounded-outline",
         id: uniqueId(),
+        id: uniqueId(),
         url: "/admin/usuarios",
+      },
+      {
+        name: "Ventas",
+        icon: "solar:cart-large-linear",
+        id: uniqueId(),
+        url: "/admin/ventas",
+      },
+      {
+        name: "Mapa Global",
+        icon: "solar:map-point-wave-linear",
+        id: uniqueId(),
+        url: "/admin/mapa",
       },
       {
         name: "Categorías",

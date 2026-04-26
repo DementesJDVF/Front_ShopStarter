@@ -13,7 +13,7 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import VendorMap from '../../components/geo/VendorMap';
 
-// Componentes Analíticos Premium (Usando rutas relativas e imports por defecto)
+// Componentes Analíticos Premium
 import { RevenueForecast } from '../../components/dashboard/RevenueForecast';
 import TotalIncome from '../../components/dashboard/TotalIncome';
 import NewCustomers from '../../components/dashboard/NewCustomers';
@@ -49,6 +49,7 @@ const AdminDashboard: React.FC = () => {
     return <UnauthorizedScreen code={403} message="Solo Administradores." />;
   }
 
+  // Sincronización con las rutas del Sidebar
   useEffect(() => {
     if (location.pathname.includes('usuarios')) setCurrentView(2);
     else if (location.pathname.includes('categorias')) setCurrentView(1);
@@ -97,7 +98,7 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleDelete = async (type: 'users' | 'products', id: string) => {
-    if (!window.confirm("¿Eliminar permanentemente de la base de datos?")) return;
+    if (!window.confirm("¿Eliminar permanentemente? Esta acción afectará la base de datos real.")) return;
     try {
       await api.delete(`${type}/${type === 'users' ? id : 'create/' + id}/`);
       toast.success("Eliminado correctamente.");
@@ -107,39 +108,18 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="w-full font-[var(--main-font)]">
-      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
             <h1 className="text-3xl md:text-5xl font-black text-indigo-900 dark:text-white tracking-tighter uppercase italic">
             ADMIN<span className="text-indigo-500"> DASHBOARD</span>
             </h1>
-            <p className="text-gray-500 font-medium">Gestión Maestra de ShopStarter</p>
+            <p className="text-gray-500 font-medium italic">Control Maestro y Moderación</p>
         </div>
         <div className="flex gap-2">
             <Badge color="success" size="lg" className="px-4 py-2 border border-green-200">
                 <HiLightningBolt className="mr-1 inline" /> SISTEMA ONLINE
             </Badge>
         </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2 mb-8">
-          <Button color={currentView === 0 ? 'indigo' : 'light'} onClick={() => setCurrentView(0)} className="rounded-2xl shadow-sm">
-            <Icon icon="solar:chart-square-bold-duotone" className="mr-2" height="20" /> Resumen
-          </Button>
-          <Button color={currentView === 2 ? 'indigo' : 'light'} onClick={() => setCurrentView(2)} className="rounded-2xl shadow-sm">
-            <HiUserCircle className="mr-2 h-5 w-5" /> Usuarios
-          </Button>
-          <Button color={currentView === 5 ? 'indigo' : 'light'} onClick={() => setCurrentView(5)} className="rounded-2xl shadow-sm">
-            <Icon icon="solar:map-point-wave-bold-duotone" className="mr-2" height="20" /> Mapa Global
-          </Button>
-          <Button color={currentView === 3 ? 'indigo' : 'light'} onClick={() => setCurrentView(3)} className="rounded-2xl shadow-sm">
-            <MdOutlinePendingActions className="mr-2 h-5 w-5" /> Inventario {pendingProducts.length > 0 && <Badge color="failure" className="ml-2">{pendingProducts.length}</Badge>}
-          </Button>
-          <Button color={currentView === 4 ? 'indigo' : 'light'} onClick={() => setCurrentView(4)} className="rounded-2xl shadow-sm">
-            <HiShoppingCart className="mr-2 h-5 w-5" /> Ventas
-          </Button>
-          <Button color={currentView === 1 ? 'indigo' : 'light'} onClick={() => setCurrentView(1)} className="rounded-2xl shadow-sm">
-            <Icon icon="solar:tag-bold-duotone" className="mr-2" height="20" /> Categorías
-          </Button>
       </div>
       
       <div className="bg-white/40 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2.5rem] border border-gray-100 dark:border-slate-800 p-2 md:p-6 shadow-2xl min-h-[600px]">
@@ -216,26 +196,29 @@ const AdminDashboard: React.FC = () => {
 
         {currentView === 3 && (
           <div className="animate-fade-in space-y-6">
-            <h2 className="text-3xl font-black text-indigo-900 uppercase italic flex items-center gap-3"><MdOutlinePendingActions className="text-secondary text-4xl" /> Inventario Global</h2>
+            <h2 className="text-3xl font-black text-indigo-900 uppercase italic flex items-center gap-3"><MdOutlinePendingActions className="text-secondary text-4xl" /> Aprobación de Productos</h2>
+            <p className="text-gray-500 font-medium">Revisa y aprueba los productos enviados por los vendedores antes de que salgan al catálogo público.</p>
             {loading ? <TableSkeleton /> : (
                 <Table hoverable>
                     <Table.Head className="bg-indigo-50">
                         <Table.HeadCell>Producto</Table.HeadCell>
                         <Table.HeadCell>Vendedor</Table.HeadCell>
+                        <Table.HeadCell>Precio</Table.HeadCell>
                         <Table.HeadCell>Estado</Table.HeadCell>
                         <Table.HeadCell>Moderación</Table.HeadCell>
                     </Table.Head>
                     <Table.Body className="divide-y">
-                        {allProducts.map(p => (
+                        {allProducts.filter(p => p.status === 'PENDING' || p.status === 'AVAILABLE').map(p => (
                             <Table.Row key={p.id}>
                                 <Table.Cell className="font-bold">{p.name}</Table.Cell>
                                 <Table.Cell className="text-xs">{p.vendor_name}</Table.Cell>
-                                <Table.Cell><Badge color={p.status === 'AVAILABLE' ? 'success' : p.status === 'PENDING' ? 'warning' : 'gray'}>{p.status}</Badge></Table.Cell>
+                                <Table.Cell className="font-bold">${Number(p.price).toLocaleString()}</Table.Cell>
+                                <Table.Cell><Badge color={p.status === 'AVAILABLE' ? 'success' : 'warning'}>{p.status}</Badge></Table.Cell>
                                 <Table.Cell className="flex gap-2">
                                     {p.status === 'PENDING' && (
-                                        <Button color="success" size="xs" onClick={() => handleProductStatus(p.id, 'AVAILABLE')}><HiCheck/></Button>
+                                        <Button color="success" size="xs" onClick={() => handleProductStatus(p.id, 'AVAILABLE')}><HiCheck className="mr-1"/> Aprobar</Button>
                                     )}
-                                    <Button color="failure" size="xs" onClick={() => handleDelete('products', p.id)}><HiTrash/></Button>
+                                    <Button color="failure" size="xs" onClick={() => handleDelete('products', p.id)}><HiTrash className="mr-1"/> Eliminar</Button>
                                 </Table.Cell>
                             </Table.Row>
                         ))}
