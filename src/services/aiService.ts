@@ -14,16 +14,16 @@ export async function suggestDescription(
 
 export async function pollTaskStatus(
   taskId: string,
-  maxAttempts = 80, // Aumentamos intentos por si acaso
-  intervalMs = 1500, // Reducido de 3000ms a 1500ms para mayor agilidad
+  maxAttempts = 80,
+  intervalMs = 500, // Empezamos muy rápido (0.5s)
   signal?: AbortSignal
 ): Promise<string> {
   let attempts = 0;
+  let currentInterval = intervalMs;
 
   while (attempts < maxAttempts) {
     if (signal?.aborted) throw new Error('Operación cancelada por el usuario.');
 
-    // Pausar si la pestaña no está visible para ahorrar recursos
     if (document.visibilityState === 'hidden') {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       continue;
@@ -42,11 +42,14 @@ export async function pollTaskStatus(
       }
     } catch (err: any) {
       if (err.name === 'CanceledError' || err.name === 'AbortError') throw err;
-      console.warn("Retrying task status poll due to network error...");
+      console.warn("Retrying task status poll...");
     }
 
-    // Si sigue en PROCESSING o PENDING, esperamos
-    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    // Polling Dinámico: Aumentamos el intervalo gradualmente para no saturar si tarda mucho
+    if (attempts > 10) currentInterval = 1500; // Después de 5s, bajamos a 1.5s
+    if (attempts > 30) currentInterval = 3000; // Después de 30s, bajamos a 3s
+
+    await new Promise((resolve) => setTimeout(resolve, currentInterval));
     attempts++;
   }
 
