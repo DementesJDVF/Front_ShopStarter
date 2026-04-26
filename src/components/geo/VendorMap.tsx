@@ -45,13 +45,32 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
             let popupContent = `<b>${loc.description || loc.vendor_name || 'Vendedor'}</b>`;
             
             if (isAdmin) {
+                const productsHtml = loc.products?.map((p: any) => `
+                  <div class="flex items-center gap-2 bg-gray-50 dark:bg-slate-800 rounded-lg p-1 border border-gray-100 dark:border-slate-700 mb-1">
+                    <img src="${p.image || 'https://via.placeholder.com/100'}" class="w-10 h-10 rounded object-cover shadow-sm" />
+                    <div class="overflow-hidden">
+                        <p class="text-[10px] font-bold text-gray-800 dark:text-gray-200 truncate">${p.name}</p>
+                        <p class="text-[9px] text-green-600 font-black">$${Number(p.price).toLocaleString()}</p>
+                    </div>
+                  </div>
+                `).join('') || '<p class="text-xs text-gray-400 italic">Sin productos activos</p>';
+
                 popupContent = `
-                  <div class="p-2 min-w-[200px] font-sans">
-                    <h3 class="font-black text-indigo-900 border-b border-indigo-100 mb-2 uppercase italic text-lg">${loc.user_name || 'VENDEDOR'}</h3>
-                    <p class="text-xs text-gray-500 mb-1"><b>Email:</b> ${loc.user_email || 'Sin email'}</p>
-                    <p class="text-xs text-gray-500 mb-1"><b>Estado:</b> <span class="px-2 py-0.5 rounded-full ${loc.user_status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${loc.user_status || 'N/A'}</span></p>
-                    <p class="text-xs text-gray-400 mt-2"><b>Ubicación:</b> ${Number(loc.latitude).toFixed(4)}, ${Number(loc.longitude).toFixed(4)}</p>
-                    <p class="text-[10px] text-gray-300 mt-1 italic">Moderación ShopStarter</p>
+                  <div class="p-2 min-w-[220px] font-sans">
+                    <h3 class="font-black text-indigo-900 dark:text-white border-b border-indigo-100 dark:border-slate-700 mb-2 uppercase italic text-lg leading-tight">${loc.user_name || 'VENDEDOR'}</h3>
+                    <p class="text-[11px] text-gray-500 mb-2"><b>Email:</b> ${loc.user_email}</p>
+                    
+                    <div class="mb-3">
+                        <p class="text-[10px] font-bold text-indigo-500 uppercase mb-1 tracking-wider">Catálogo Destacado</p>
+                        <div class="max-h-[160px] overflow-y-auto pr-1">
+                            ${productsHtml}
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between border-t border-gray-100 dark:border-slate-700 pt-2 mt-2">
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${loc.user_status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${loc.user_status}</span>
+                        <span class="text-[9px] text-gray-400 italic">ShopStarter Admin</span>
+                    </div>
                   </div>
                 `;
             }
