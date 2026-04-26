@@ -138,7 +138,8 @@ const VendorOrders: React.FC = () => {
                           <Iconify icon="solar:check-read-linear" /> Venta Finalizada
                         </span>
                       )}
-                    </Table.Row>
+                    </Table.Cell>
+                  </Table.Row>
                 ))}
               </Table.Body>
             </Table>
