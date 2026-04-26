@@ -40,8 +40,34 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    // Si hay un mensaje estructurado proveído por nuestro custom exception handler de DRF
-    const serverMessage = error.response?.data?.message;
+    // --- Helper para mapear errores técnicos a humanos ---
+    const getFriendlyMessage = (data: any): string | null => {
+      if (!data) return null;
+      if (typeof data === 'string') return data;
+      
+      if (typeof data === 'object') {
+        if (data.message) return data.message;
+        if (data.detail) return data.detail;
+
+        const errorMap: Record<string, string> = {
+          'non_field_errors': 'Credenciales o datos inválidos',
+          'email': 'Correo electrónico',
+          'username': 'Nombre de usuario',
+          'password': 'Contraseña',
+          'required': 'Este campo es obligatorio',
+        };
+
+        for (const key in data) {
+          const fieldError = data[key];
+          const friendlyKey = errorMap[key] || key;
+          if (Array.isArray(fieldError)) return `${friendlyKey}: ${fieldError[0]}`;
+          if (typeof fieldError === 'string') return fieldError;
+        }
+      }
+      return null;
+    };
+
+    const serverMessage = getFriendlyMessage(error.response?.data);
 
     // Manejo Automático de Rotación de Tokens (401 Expirado)
     if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('auth/') && !originalRequest.url?.includes('token/refresh/')) {
@@ -86,16 +112,15 @@ api.interceptors.response.use(
       }
     } else if (error.response?.status === 403) {
       toast.error(serverMessage || 'No tienes permisos para realizar esta acción.');
+    } else if (error.response?.status === 400) {
+      toast.error(serverMessage || 'Los datos enviados son incorrectos.');
     } else if (error.response?.status >= 500) {
       toast.error('Error interno del servidor. Intenta de nuevo más tarde.');
-    } else if (serverMessage) {
-      // Cualquier otro error manejado por el backend con mensaje válido (Ej: 400 Bad Request)
-      toast.error(serverMessage);
     } else if (error.message === 'Network Error' || error.code === 'ECONNABORTED') {
       // Ignoramos errores de red momentáneos para evitar cierres de sesión agresivos
       console.warn('Micro-corte de red detectado. Reintentando silenciosamente o esperando estabilidad.');
     } else {
-      toast.error('Ocurrió un error inesperado en la solicitud.');
+      toast.error(serverMessage || 'Ocurrió un error inesperado en la solicitud.');
     }
 
     return Promise.reject(error);

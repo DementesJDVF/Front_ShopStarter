@@ -1,4 +1,4 @@
-import { Badge, Dropdown, Progress, Table, Spinner, Button, Modal, Label, TextInput, Select, Textarea, FileInput } from "flowbite-react";
+import { Badge, Dropdown, Progress, Table, Spinner, Button, Modal, Label, TextInput, Select, Textarea, FileInput, Tooltip } from "flowbite-react";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { Icon } from "@iconify/react";
 import { useState, useEffect } from "react";
@@ -22,6 +22,8 @@ interface Category {
   id: string | number;
   name: string;
 }
+
+const PLACEHOLDER_IMAGE = "https://placehold.co/400x400?text=Imagen+no+disponible";
 
 const ProductTable = () => {
   const { t } = useTranslation("productTable");
@@ -286,10 +288,11 @@ const ProductTable = () => {
                         <Table.Cell className="whitespace-nowrap ps-6">
                           <div className="flex gap-3 items-center">
                             <img
-                              src={product.images?.[0]?.url_image || "https://placehold.co/60x60?text=PS"}
+                              src={product.images?.[0]?.url_image || PLACEHOLDER_IMAGE}
                               alt="product"
                               className="h-[60px] w-[60px] rounded-md object-cover shadow-sm bg-gray-50 cursor-zoom-in"
-                              onClick={() => openPreview(product.images?.[0]?.url_image || "https://placehold.co/60x60?text=PS", product.name)}
+                              onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
+                              onClick={() => openPreview(product.images?.[0]?.url_image || PLACEHOLDER_IMAGE, product.name)}
                             />
                             <div className="truncat line-clamp-2 sm:text-wrap max-w-56">
                               <h6 className="text-sm font-semibold">{product.name}</h6>
@@ -410,6 +413,7 @@ const ProductTable = () => {
                     src={newProduct.preview_url} 
                     alt="preview" 
                     className="h-32 mx-auto rounded-lg border shadow-sm object-cover"
+                    onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
                    />
                 </div>
               )}
@@ -417,6 +421,10 @@ const ProductTable = () => {
 
             {/* 3. Botón IA */}
             <div className="flex justify-center">
+              <Tooltip 
+                content={!newProduct.image_file && !newProduct.preview_url ? "Sube una imagen para habilitar la sugerencia de IA" : "Generar descripción automática"}
+                placement="top"
+              >
                <Button
                 color="light"
                 pill
@@ -430,6 +438,7 @@ const ProductTable = () => {
                    <><Icon icon="solar:magic-stick-3-bold-duotone" className="mr-2 text-indigo-500" /> {t('ai.suggest')}</>
                  )}
                </Button>
+              </Tooltip>
             </div>
 
             {/* 4. Descripción */}
