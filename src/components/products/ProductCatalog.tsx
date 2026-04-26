@@ -60,7 +60,7 @@ export function ProductCatalog() {
   const handleReserve = async (productId: number) => {
     if (!window.confirm(t("reserveConfirm"))) return;
     try {
-      await api.post('orders/', { product_id: productId });
+      await api.post('orders/', { product: productId });
       toast.success(t("reserveSuccess"));
       loadData(userLocation?.lat, userLocation?.lng);
     } catch (e: any) {
@@ -79,7 +79,7 @@ export function ProductCatalog() {
       price: parseFloat(p.price),
       quantity: 1,
       image: mainImage,
-      vendorId: '1', // Placeholder: El backend debería proveer el ID del vendedor en el futuro
+      vendorId: p.vendor.toString(),
       vendorName: p.vendor_name
     });
     toast.success(t("addedToCart", { name: p.name }), {

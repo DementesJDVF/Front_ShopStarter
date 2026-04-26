@@ -106,7 +106,11 @@ api.interceptors.response.use(
     }
     
     // Si falla 401 directo en endpoints auth o login (no es rotatorio)
-    if (error.response?.status === 401 && originalRequest.url?.includes('auth/')) {
+    // 3. Manejo de Toasts para errores de autenticación
+    // No mostramos toast para login/register porque la vista maneja su propio mensaje de error
+    const isAuthPath = originalRequest.url?.includes('auth/login') || originalRequest.url?.includes('auth/register');
+    
+    if (error.response?.status === 401 && !isAuthPath) {
       if (!originalRequest.url?.includes('me/')) {
          toast.error(serverMessage || 'Acceso Denegado.');
       }

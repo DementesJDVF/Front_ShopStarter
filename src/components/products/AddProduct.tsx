@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import api from "../../utils/axios";
+import { useAuth } from "../../context/AuthContext";
 import "./ProductCatalog.css";
 
 type Category = {
@@ -18,20 +19,22 @@ type Vendor = {
 export default function AddProduct() {
     const navigate = useNavigate();
     const { t } = useTranslation("product");
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'ADMIN';
 
     const [categories, setCategories] = useState<Category[]>([]);
     const [vendors, setVendors] = useState<Vendor[]>([]);
     const [loadingCats, setLoadingCats] = useState(true);
-    const [loadingVendors, setLoadingVendors] = useState(true);
+    const [loadingVendors, setLoadingVendors] = useState(false);
 
     const [form, setForm] = useState({
-        vendor: "",
+        vendor: user?.id || "",
         category: "",
         name: "",
         description: "",
         price: "",
         stock: "",
-        status: "",
+        status: "PENDING", // Los productos nuevos nacen pendientes de aprobación
         is_featured: false,
         image1_url: "",
         image1_main: true,
@@ -54,15 +57,18 @@ export default function AddProduct() {
     }, []);
 
     useEffect(() => {
-        api.get("/users/list/")
-            .then((res) => {
-                const data = res.data;
-                const all: Vendor[] = Array.isArray(data) ? data : data.results ?? [];
-                setVendors(all.filter((u) => u.role === "VENDEDOR"));
-            })
-            .catch(() => setVendors([]))
-            .finally(() => setLoadingVendors(false));
-    }, []);
+        if (isAdmin) {
+            setLoadingVendors(true);
+            api.get("/users/list/")
+                .then((res) => {
+                    const data = res.data;
+                    const all: Vendor[] = Array.isArray(data) ? data : data.results ?? [];
+                    setVendors(all.filter((u) => u.role === "VENDEDOR"));
+                })
+                .catch(() => setVendors([]))
+                .finally(() => setLoadingVendors(false));
+        }
+    }, [isAdmin]);
 
     function handleChange(
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -79,6 +85,10 @@ export default function AddProduct() {
         setLoading(true);
         setError(null);
 
+        // Validación básica
+        if (!form.category) { setError("Debes seleccionar una categoría."); setLoading(false); return; }
+        if (isAdmin && !form.vendor) { setError("Debes seleccionar un vendedor."); setLoading(false); return; }
+
         const images: { url_image: string; is_main: boolean }[] = [];
         if (form.image1_url.trim())
             images.push({ url_image: form.image1_url.trim(), is_main: form.image1_main });
@@ -86,14 +96,14 @@ export default function AddProduct() {
             images.push({ url_image: form.image2_url.trim(), is_main: form.image2_main });
 
         const body: Record<string, unknown> = {
-            vendor: form.vendor,
+            vendor: isAdmin ? form.vendor : user?.id,
             category: Number(form.category),
             name: form.name,
             description: form.description,
             price: form.price,
             stock: form.stock ? Number(form.stock) : 0,
             is_featured: form.is_featured,
-            status: "ACTIVE",
+            status: "PENDING",
         };
         if (images.length) body.images = images;
 
@@ -101,11 +111,9 @@ export default function AddProduct() {
             await api.post("/products/create/", body);
 
             setSuccess(true);
-            setTimeout(() => navigate("/products"), 1500);
+            setTimeout(() => navigate("/vendedor/manage-products"), 1500);
         } catch (err: any) {
-            const errorMsg = err.response?.data 
-                ? JSON.stringify(err.response.data, null, 2) 
-                : (err.message || t("error"));
+            const errorMsg = err.response?.data?.message || err.message || t("error");
             setError(errorMsg);
         } finally {
             setLoading(false);
@@ -134,28 +142,30 @@ export default function AddProduct() {
 
             <form onSubmit={handleSubmit} className="add-product__form">
                 <div className="add-product__row">
-                    <div className="add-product__field">
-                        <label className="add-product__label">
-                            {t("vendor")} <span className="add-product__required">*</span>
-                        </label>
-                        {loadingVendors ? (
-                            <p className="add-product__loading-text">{t("loadingVendors")}</p>
-                        ) : (
-                            <select
-                                name="vendor"
-                                value={form.vendor}
-                                onChange={handleChange}
-                                required
-                                title={t("selectVendor")}
-                                className="add-product__input"
-                            >
-                                <option value="">{t("selectVendor")}</option>
-                                {vendors.map((v) => (
-                                    <option key={v.id} value={v.id}>{v.username}</option>
-                                ))}
-                            </select>
+                        {isAdmin && (
+                            <div className="add-product__field">
+                                <label className="add-product__label">
+                                    {t("vendor")} <span className="add-product__required">*</span>
+                                </label>
+                                {loadingVendors ? (
+                                    <p className="add-product__loading-text">{t("loadingVendors")}</p>
+                                ) : (
+                                    <select
+                                        name="vendor"
+                                        value={form.vendor}
+                                        onChange={handleChange}
+                                        required
+                                        title={t("selectVendor")}
+                                        className="add-product__input"
+                                    >
+                                        <option value="">{t("selectVendor")}</option>
+                                        {vendors.map((v) => (
+                                            <option key={v.id} value={v.id}>{v.username}</option>
+                                        ))}
+                                    </select>
+                                )}
+                            </div>
                         )}
-                    </div>
 
                     <div className="add-product__field">
                         <label className="add-product__label">

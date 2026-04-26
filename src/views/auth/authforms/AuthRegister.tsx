@@ -80,8 +80,22 @@ const AuthRegister = () => {
             if (!/\S+@\S+\.\S+/.test(formData.email)) { setError("Formato de correo inválido."); return false; }
         }
         if (step === 2) {
-            if (formData.password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres."); return false; }
-            if (formData.password !== formData.password_confirm) { setError("Las contraseñas no coinciden."); return false; }
+            if (formData.password.length < 8) { 
+                setError("La contraseña debe tener al menos 8 caracteres."); 
+                return false; 
+            }
+            if (!/[A-Z]/.test(formData.password)) {
+                setError("La contraseña debe incluir al menos una letra mayúscula.");
+                return false;
+            }
+            if (!/[0-9]/.test(formData.password)) {
+                setError("La contraseña debe incluir al menos un número.");
+                return false;
+            }
+            if (formData.password !== formData.password_confirm) { 
+                setError("Las contraseñas no coinciden."); 
+                return false; 
+            }
         }
         if (step === 3 && formData.role === 'VENDEDOR') {
             if (!formData.birth_date) { setError("La fecha de nacimiento es obligatoria."); return false; }
