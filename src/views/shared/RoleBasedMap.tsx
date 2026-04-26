@@ -88,6 +88,7 @@ const RoleBasedMap: React.FC = () => {
             // Selección dinámica del endpoint según el rol del usuario conectado
             let endpoint = 'geo/vendors-locations/';
             if (user?.role === 'VENDEDOR') endpoint = 'geo/my-locations/';
+            if (user?.role === 'ADMIN') endpoint = 'geo/locations/all_locations/';
 
             const response = await api.get(endpoint);
             const payload = response.data;

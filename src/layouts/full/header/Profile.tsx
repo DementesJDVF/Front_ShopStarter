@@ -48,25 +48,25 @@ const Profile = ({ variant = "dark" }: ProfileProps) => {
         <Dropdown.Item
           as={Link}
           to="#"
-          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-dark"
+          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-white hover:bg-primary/20"
         >
-          <Icon icon="solar:user-circle-outline" height={20} />
+          <Icon icon="solar:user-circle-outline" className="text-white" height={20} />
           {t('profile.myProfile')}
         </Dropdown.Item>
         <Dropdown.Item
           as={Link}
           to="#"
-          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-dark"
+          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-white hover:bg-primary/20"
         >
-          <Icon icon="solar:letter-linear" height={20} />
+          <Icon icon="solar:letter-linear" className="text-white" height={20} />
           {t('profile.myAccount')}
         </Dropdown.Item>
         <Dropdown.Item
           as={Link}
           to="/usuario/seguridad"
-          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-dark"
+          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-white hover:bg-primary/20"
         >
-          <Icon icon="solar:shield-keyhole-linear" height={20} />
+          <Icon icon="solar:shield-keyhole-linear" className="text-white" height={20} />
           {t('profile.security')}
         </Dropdown.Item>
 
@@ -74,7 +74,7 @@ const Profile = ({ variant = "dark" }: ProfileProps) => {
           <Button 
             onClick={handleLogout}
             size={'sm'} 
-            className="w-full mt-2 border border-primary text-primary bg-transparent hover:bg-lightprimary outline-none focus:outline-none"
+            className="w-full mt-2 border border-white/50 text-white bg-primary/20 hover:bg-primary transition-all duration-300"
           >
             {t('profile.logout')}
           </Button>

@@ -124,8 +124,8 @@ const Header = () => {
         <Navbar fluid className="bg-transparent dark:bg-transparent px-4">
           <div className="flex items-center justify-between w-full h-12">
 
-            {/* Sección Izquierda: Botón de menú móvil y Logo (Solo visible en móvil) */}
-            <div className="flex items-center gap-4 w-1/4">
+            {/* Sección Izquierda: Botón de menú móvil y Logo */}
+            <div className="flex items-center gap-4 flex-none min-w-[50px] xl:min-w-0">
               <button
                 onClick={() => setIsOpen(true)}
                 className="h-10 w-10 flex text-white xl:hidden hover:bg-white/10 rounded-xl justify-center items-center transition-all shadow-sm bg-white/10 backdrop-blur-md border border-white/10"
@@ -146,15 +146,16 @@ const Header = () => {
             </div>
 
             {/* 🔥 Sección Central: Reloj Animado Premium (Oculto en móviles peq) */}
-            <div className="hidden md:flex flex-1 justify-center">
+            <div className="hidden lg:flex flex-1 justify-center px-4 overflow-hidden">
               <GreetingClock user={user} />
             </div>
 
-            {/* Sección Derecha: Selector de idioma, Notificaciones, Carrito, Tema y Perfil */}
-            <div className="flex items-center justify-end gap-2 sm:gap-4 w-1/4">
-
-              {/* Selector de idioma */}
-              <LanguageSelector />
+            {/* Sección Derecha: Acciones */}
+            <div className="flex items-center justify-end gap-1.5 sm:gap-3 flex-none ml-auto">
+              {/* Selector de idioma - Con espacio preventivo */}
+              <div className="mr-1">
+                <LanguageSelector />
+              </div>
 
               {user?.role === "CLIENTE" && (
                 <div className="flex items-center">
@@ -169,7 +170,7 @@ const Header = () => {
               {/* Botón de cambio de tema */}
               <button
                 onClick={toggleMode}
-                className="group h-10 w-10 flex text-white hover:bg-white/20 rounded-full justify-center items-center transition-all duration-500 active:scale-95 bg-white/10 shadow-sm border border-white/10 backdrop-blur-sm"
+                className="group h-9 w-9 sm:h-10 sm:w-10 flex text-white hover:bg-white/20 rounded-full justify-center items-center transition-all duration-500 active:scale-95 bg-white/10 shadow-sm border border-white/10 backdrop-blur-sm"
                 title={mode === "dark" ? t("switchToLight") : t("switchToDark")}
               >
                 <div
@@ -180,22 +181,21 @@ const Header = () => {
                   {mode === "dark" ? (
                     <Icon
                       icon="solar:sun-2-line-duotone"
-                      height={22}
+                      height={20}
                       className="text-yellow-500 group-hover:scale-110 transition-transform drop-shadow"
                     />
                   ) : (
                     <Icon
                       icon="solar:moon-line-duotone"
-                      height={20}
+                      height={18}
                       className="text-indigo-500 group-hover:scale-110 transition-transform drop-shadow"
                     />
                   )}
                 </div>
               </button>
 
-              <div className="h-8 w-[1px] bg-white/10 mx-1 hidden sm:block"></div>
+              <div className="h-8 w-[1px] bg-white/10 mx-1 hidden md:block"></div>
               <Profile />
-
             </div>
           </div>
         </Navbar>
