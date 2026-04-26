@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import api from "../../utils/axios";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
 import { useTranslation } from "react-i18next";
+import { generateAIDescription } from "../../services/aiService";
 
 interface Product {
   id: string | number;
@@ -54,6 +55,7 @@ const ProductTable = () => {
   });
 
   const [generatingAI, setGeneratingAI] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const toBase64 = (file: File) => new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -137,6 +139,8 @@ const ProductTable = () => {
     }
 
     setGeneratingAI(true);
+    setAiError(null);
+
     try {
       const formData = new FormData();
       if (newProduct.image_file) {
@@ -149,54 +153,14 @@ const ProductTable = () => {
         formData.append('product_id', editingId.toString());
       }
 
-      // 1. Llamada inicial al endpoint asíncrono (HTTP 202 Accepted)
-      const resBase = await api.post("products/suggest_description/", formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-
-      const { task_id } = resBase.data;
-      
-      // 2. Polling con Circuit Breaker (Máximo 20 intentos ~ 60 segundos)
-      let attempts = 0;
-      const maxAttempts = 20;
-
-      const pollTask = async () => {
-        try {
-          const resTask = await api.get(`products/tasks/${task_id}/`);
-          
-          if (resTask.data.status === 'DONE') {
-            // Éxito: inyectamos la descripción generada
-            setNewProduct(prev => ({ ...prev, description: resTask.data.result }));
-            setGeneratingAI(false);
-          } else if (resTask.data.status === 'FAILED') {
-            // Error en el worker
-            console.error("AI Task Failed", resTask.data.error);
-            alert(t('alert.aiError'));
-            setGeneratingAI(false);
-          } else {
-            // Sigue procesando
-            attempts++;
-            if (attempts < maxAttempts) {
-              setTimeout(pollTask, 3000); // Re-consultar en 3 segundos
-            } else {
-              // Circuit Breaker disparado
-              alert("La IA está tardando demasiado. Se procesará en segundo plano.");
-              setGeneratingAI(false);
-            }
-          }
-        } catch (err) {
-          console.error("Polling error", err);
-          alert(t('alert.aiError'));
-          setGeneratingAI(false);
-        }
-      };
-
-      // Iniciar el ciclo de polling
-      pollTask();
-
-    } catch (err) {
+      const result = await generateAIDescription(formData);
+      setNewProduct(prev => ({ ...prev, description: result }));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t('alert.aiError');
       console.error(t('error.ai'), err);
-      alert(t('alert.aiError'));
+      alert(message);
+      setAiError(message);
+    } finally {
       setGeneratingAI(false);
     }
   };
