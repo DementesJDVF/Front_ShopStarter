@@ -1,4 +1,5 @@
 import { Badge, Dropdown, Progress, Table, Spinner, Button, Modal, Label, TextInput, Select, Textarea, FileInput, Tooltip } from "flowbite-react";
+import { resizeImageForAI } from "../../utils/clientResizer";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { Icon } from "@iconify/react";
 import React, { useState, useEffect, memo } from "react";
@@ -423,18 +424,31 @@ const ProductTable = () => {
                 accept="image/*"
                 required={!editingId}
                 helperText={t('form.image.helper')}
-                onChange={(e) => {
+                onChange={async (e) => {
                   if (e.target.files?.[0]) {
-                    const file = e.target.files[0];
-                    // Revocar URL anterior si existe para liberar memoria
-                    if (newProduct.preview_url && newProduct.preview_url.startsWith('blob:')) {
-                      URL.revokeObjectURL(newProduct.preview_url);
+                    const originalFile = e.target.files[0];
+                    try {
+                      // Redimensionar en el cliente para proteger la RAM de Railway
+                      const resizedBlob = await resizeImageForAI(originalFile);
+                      const file = new File([resizedBlob], originalFile.name, { type: 'image/jpeg' });
+                      
+                      // Revocar URL anterior si existe para liberar memoria
+                      if (newProduct.preview_url && newProduct.preview_url.startsWith('blob:')) {
+                        URL.revokeObjectURL(newProduct.preview_url);
+                      }
+                      setNewProduct({
+                        ...newProduct, 
+                        image_file: file,
+                        preview_url: URL.createObjectURL(file)
+                      });
+                    } catch (err) {
+                      console.error("Error al redimensionar imagen:", err);
+                      setNewProduct({
+                        ...newProduct, 
+                        image_file: originalFile,
+                        preview_url: URL.createObjectURL(originalFile)
+                      });
                     }
-                    setNewProduct({
-                      ...newProduct, 
-                      image_file: file,
-                      preview_url: URL.createObjectURL(file)
-                    });
                   }
                 }}
               />
