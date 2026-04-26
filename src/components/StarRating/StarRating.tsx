@@ -11,6 +11,7 @@ interface StarRatingProps {
 }
 
 const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, username }) => {
+  const { user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [average, setAverage] = useState(0);
   const [total, setTotal] = useState(0);
@@ -18,6 +19,9 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Determinar si el usuario tiene permiso para interactuar (Los Admins son neutros)
+  const canInteract = interactive && user?.role !== 'ADMIN';
 
   // States para crear nueva reseña
   const [showNewReviewForm, setShowNewReviewForm] = useState(false);
@@ -231,7 +235,7 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
               <h4 className="username">{userReview.client}</h4>
               <p className="review-date">{formatDate(userReview.created_at)}</p>
             </div>
-            {interactive && (
+            {canInteract && (
               <button
                 className="edit-btn"
                 onClick={handleStartEdit}
@@ -299,7 +303,7 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
       )}
 
       {/* Formulario para nueva reseña */}
-      {interactive && !userReview && !isEditing && (
+      {canInteract && !userReview && !isEditing && (
         <>
           {!showNewReviewForm ? (
             <button
