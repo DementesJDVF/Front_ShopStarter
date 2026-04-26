@@ -14,8 +14,8 @@ export async function suggestDescription(
 
 export async function pollTaskStatus(
   taskId: string,
-  maxAttempts = 60, // 60 intentos * 3s = 180s (3 minutos)
-  intervalMs = 3000,
+  maxAttempts = 80, // Aumentamos intentos por si acaso
+  intervalMs = 1500, // Reducido de 3000ms a 1500ms para mayor agilidad
   signal?: AbortSignal
 ): Promise<string> {
   let attempts = 0;
