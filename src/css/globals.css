@@ -28,6 +28,7 @@
   }
 
   /* --- ADAPTIVE ANIMATIONS & GLOWS --- */
+  /* --- PREMIUM BACKGROUND (OPTIMIZED) --- */
   body::before {
     content: '';
     position: fixed;
@@ -35,30 +36,13 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 50% -20%, var(--glow-color), transparent 85%);
+    background: radial-gradient(circle at 50% -20%, var(--glow-color, #6366f1), transparent 85%);
     pointer-events: none;
     z-index: 0;
-    animation: glow-pulse 15s ease-in-out infinite alternate;
+    opacity: 0.15; /* Color sutil pero presente */
   }
 
-  .dark body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-      radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
-      radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
-      radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
-    background-size: 550px 550px, 350px 350px, 250px 250px;
-    background-position: 0 0, 40px 60px, 130px 270px;
-    opacity: 0.05;
-    pointer-events: none;
-    z-index: 0;
-    animation: stars-twinkle 60s linear infinite;
-  }
+  /* Estrellas eliminadas para optimizar GPU */
 
   @keyframes glow-pulse {
     from { transform: scale(1); opacity: 0.5; }
@@ -169,34 +153,46 @@
     100% { transform: translate(0px, 0px) scale(1); }
   }
 
-  .animate-blob {
-    animation: ambient-blob 7s infinite;
-  }
+  /* Animación eliminada para liberar memoria */
 
   /* --- UTILIDADES PREMIUM PÚRPURA --- */
   .input-minimalist input, .input-minimalist select {
     @apply !bg-white/40 !border-white/20 !text-gray-800 placeholder-gray-500 !rounded-2xl focus:!bg-white/60 focus:!ring-purple-200 transition-all;
   }
 
-  /* --- ESTANDARIZACIÓN DE PANELES (UI STYLE GUIDE) --- */
+  /* --- ESTANDARIZACIÓN DE PANELES (UI STYLE GUIDE - PREMIUM) --- */
   .panel-card {
-    @apply bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-white/40 dark:border-white/5 rounded-[2.5rem] overflow-visible transition-all duration-500 hover:shadow-2xl;
+    @apply bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl shadow-xl border border-white/20 dark:border-white/5 rounded-[2.5rem] overflow-visible transition-all duration-500 hover:shadow-2xl;
   }
 
   .panel-header {
-    @apply p-8 border-b border-white/20 flex items-center justify-between;
+    @apply p-8 border-b border-white/10 flex items-center justify-between;
   }
   
   .glass-panel {
-    @apply bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/20 dark:border-white/5 shadow-2xl transition-all duration-300;
+    @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/20 dark:border-white/5 shadow-2xl transition-all duration-300;
   }
 
   .glass-card-premium {
-    @apply bg-white/60 dark:bg-slate-900/80 backdrop-blur-3xl border border-white/40 dark:border-white/10 shadow-2xl rounded-[2.5rem] relative overflow-hidden;
+    @apply bg-white/70 dark:bg-slate-900/90 backdrop-blur-3xl border border-white/40 dark:border-white/10 shadow-2xl rounded-[2.5rem] relative overflow-hidden;
   }
 
   .glass-button {
-    @apply bg-white/40 dark:bg-white/5 backdrop-blur-lg border border-white/20 dark:border-white/10 text-dark dark:text-white rounded-2xl px-6 py-3 font-bold hover:bg-white/60 dark:hover:bg-white/10 transition-all duration-300 shadow-lg hover:shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2;
+    @apply bg-white/50 dark:bg-white/5 backdrop-blur-lg border border-white/20 dark:border-white/10 text-dark dark:text-white rounded-2xl px-6 py-3 font-bold hover:bg-white/70 dark:hover:bg-white/10 transition-all duration-300 shadow-lg hover:shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  /* Desactivar efectos costosos en móviles */
+  @media (max-width: 768px) {
+    .backdrop-blur-xl, .backdrop-blur-2xl, .backdrop-blur-3xl {
+      backdrop-filter: none !important;
+      background-color: rgba(255, 255, 255, 0.98) !important;
+    }
+    .hover\:shadow-2xl:hover {
+      shadow: none !important;
+    }
+    .active\:scale-95:active {
+      transform: none !important;
+    }
   }
 
   /* Utilidades de texto y colores generales */

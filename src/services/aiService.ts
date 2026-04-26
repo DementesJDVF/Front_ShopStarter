@@ -1,11 +1,13 @@
 import api from '../utils/axios';
 
 export async function suggestDescription(
-  payload: FormData | { image_url: string; product_id?: string }
+  payload: FormData | { image_url: string; product_id?: string },
+  signal?: AbortSignal
 ): Promise<string> {
   const isFormData = payload instanceof FormData;
   const response = await api.post('products/suggest_description/', payload, {
     headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
+    signal
   });
   return response.data.task_id;
 }
@@ -13,20 +15,34 @@ export async function suggestDescription(
 export async function pollTaskStatus(
   taskId: string,
   maxAttempts = 60, // 60 intentos * 3s = 180s (3 minutos)
-  intervalMs = 3000
+  intervalMs = 3000,
+  signal?: AbortSignal
 ): Promise<string> {
   let attempts = 0;
 
   while (attempts < maxAttempts) {
-    const response = await api.get(`products/tasks/${taskId}/`);
-    const { status, result, error } = response.data;
+    if (signal?.aborted) throw new Error('Operación cancelada por el usuario.');
 
-    if (status === 'DONE') {
-      return result;
+    // Pausar si la pestaña no está visible para ahorrar recursos
+    if (document.visibilityState === 'hidden') {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      continue;
     }
 
-    if (status === 'FAILED') {
-      throw new Error(error || 'La tarea de IA falló en el servidor.');
+    try {
+      const response = await api.get(`products/tasks/${taskId}/`, { signal });
+      const { status, result, error } = response.data;
+
+      if (status === 'DONE') {
+        return result;
+      }
+
+      if (status === 'FAILED') {
+        throw new Error(error || 'La tarea de IA falló en el servidor.');
+      }
+    } catch (err: any) {
+      if (err.name === 'CanceledError' || err.name === 'AbortError') throw err;
+      console.warn("Retrying task status poll due to network error...");
     }
 
     // Si sigue en PROCESSING o PENDING, esperamos
@@ -38,8 +54,9 @@ export async function pollTaskStatus(
 }
 
 export async function generateAIDescription(
-  payload: FormData | { image_url: string; product_id?: string }
+  payload: FormData | { image_url: string; product_id?: string },
+  signal?: AbortSignal
 ): Promise<string> {
-  const taskId = await suggestDescription(payload);
-  return await pollTaskStatus(taskId);
+  const taskId = await suggestDescription(payload, signal);
+  return await pollTaskStatus(taskId, 60, 3000, signal);
 }

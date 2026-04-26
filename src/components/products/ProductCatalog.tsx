@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { optimizeImageUrl } from "../../utils/imageOptimizer";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Label, Select, Spinner } from "flowbite-react";
@@ -123,12 +124,14 @@ export function ProductCatalog() {
     loadData(userLocation?.lat, userLocation?.lng);
   }, [userLocation]);
 
-  // Filtrado reactivo basado en categoría seleccionada y radio de distancia
-  const filteredProducts = products.filter(p => {
-    const categoryMatch = !selectedCategory || p.category_name === selectedCategory;
-    const distanceMatch = radius === 0 || (p.distance !== undefined && p.distance <= radius);
-    return categoryMatch && distanceMatch;
-  });
+  // Filtrado reactivo optimizado
+  const filteredProducts = useMemo(() => {
+    return products.filter(p => {
+      const categoryMatch = !selectedCategory || p.category_name === selectedCategory;
+      const distanceMatch = radius === 0 || (p.distance !== undefined && p.distance <= radius);
+      return categoryMatch && distanceMatch;
+    });
+  }, [products, selectedCategory, radius]);
 
   if (loading) return (
     <div className="flex justify-center p-20 font-[var(--main-font)]">
@@ -213,7 +216,7 @@ export function ProductCatalog() {
                   {mainImage ? (
                     <img
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-zoom-in"
-                      src={mainImage}
+                      src={optimizeImageUrl(mainImage, 600)}
                       alt={p.name}
                       onClick={() => openPreview(mainImage, p.name)}
                       loading="lazy"

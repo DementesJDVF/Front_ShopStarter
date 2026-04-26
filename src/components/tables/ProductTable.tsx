@@ -1,12 +1,13 @@
 import { Badge, Dropdown, Progress, Table, Spinner, Button, Modal, Label, TextInput, Select, Textarea, FileInput, Tooltip } from "flowbite-react";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { Icon } from "@iconify/react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { useNavigate } from "react-router";
 import api from "../../utils/axios";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
 import { useTranslation } from "react-i18next";
 import { generateAIDescription } from "../../services/aiService";
+import { optimizeImageUrl } from "../../utils/imageOptimizer";
 
 interface Product {
   id: string | number;
@@ -24,6 +25,101 @@ interface Category {
 }
 
 const PLACEHOLDER_IMAGE = "https://placehold.co/400x400?text=Imagen+no+disponible";
+
+const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handleEdit, navigate, tableActionData }: any) => (
+  <Table.Body className="divide-y divide-border dark:divide-darkborder">
+    {products.length === 0 ? (
+      <Table.Row>
+        <Table.Cell colSpan={5} className="text-center py-10 opacity-50">
+          {t('table.noProducts')}
+        </Table.Cell>
+      </Table.Row>
+    ) : (
+      products.map((product: any, index: number) => (
+        <Table.Row key={product.id || index}>
+          <Table.Cell className="whitespace-nowrap ps-6">
+            <div className="flex gap-3 items-center">
+              <img
+                src={optimizeImageUrl(product.images?.[0]?.url_image || PLACEHOLDER_IMAGE, 200)}
+                alt="product"
+                className="h-[60px] w-[60px] rounded-md object-cover shadow-sm bg-gray-50 cursor-zoom-in"
+                onError={(e: any) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
+                onClick={() => openPreview(product.images?.[0]?.url_image || PLACEHOLDER_IMAGE, product.name)}
+              />
+              <div className="truncat line-clamp-2 sm:text-wrap max-w-56">
+                <h6 className="text-sm font-semibold">{product.name}</h6>
+              </div>
+            </div>
+          </Table.Cell>
+          <Table.Cell>
+            <Badge color="info" className="capitalize">
+              {product.category_name || t('table.category.none')}
+            </Badge>
+          </Table.Cell>
+          <Table.Cell>
+            <h5 className="text-base font-bold text-wrap">
+              ${parseFloat(product.price.toString()).toLocaleString()}
+            </h5>
+            <div className="text-xs font-medium text-dark opacity-70 mb-2">
+               {t('table.stock', { count: product.stock })}
+            </div>
+            <div className="me-5">
+              <Progress
+                progress={product.stock > 0 ? 100 : 0}
+                color={product.stock > 10 ? 'success' : product.stock > 0 ? 'warning' : 'red'}
+                size={"sm"}
+              />
+            </div>
+          </Table.Cell>
+          <Table.Cell>
+            <Badge
+              color={product.status === 'ACTIVE' ? 'success' : 'lightsecondary'}
+              className="uppercase"
+            >
+              {product.status || t('table.status.noStatus')}
+            </Badge>
+          </Table.Cell>
+          <Table.Cell>
+            <Dropdown
+              label=""
+              dismissOnClick={true}
+              renderTrigger={() => (
+                <span className="h-9 w-9 flex justify-center items-center rounded-full hover:bg-lightprimary hover:text-primary cursor-pointer">
+                  <HiOutlineDotsVertical size={22} />
+                </span>
+              )}
+            >
+              {tableActionData.map((items: any, index: number) => (
+                <Dropdown.Item 
+                  key={index} 
+                  className="flex gap-3"
+                  onClick={() => {
+                    if (items.listtitle === "Borrar") {
+                      handleDelete(product.id);
+                    } else if (items.listtitle === "Editar") {
+                      handleEdit(product);
+                    } else if (items.listtitle === "Ver Detalle") {
+                      navigate(`/app/products/${product.id}`);
+                    }
+                  }}
+                >
+                  <Icon icon={`${items.icon}`} height={18} />
+                  <span>
+                    {items.listtitle === "Borrar" ? t('table.action.delete')
+                      : items.listtitle === "Editar" ? t('table.action.edit')
+                      : items.listtitle === "Ver Detalle" ? t('table.action.view')
+                      : items.listtitle
+                    }
+                  </span>
+                </Dropdown.Item>
+              ))}
+            </Dropdown>
+          </Table.Cell>
+        </Table.Row>
+      ))
+    )}
+  </Table.Body>
+));
 
 const ProductTable = () => {
   const { t } = useTranslation("productTable");
@@ -104,7 +200,21 @@ const ProductTable = () => {
   useEffect(() => {
     fetchProducts();
     fetchCategories();
+    
+    // Cleanup de URLs de previsualización al desmontar
+    return () => {
+      if (newProduct.preview_url && newProduct.preview_url.startsWith('blob:')) {
+        URL.revokeObjectURL(newProduct.preview_url);
+      }
+    };
   }, []);
+
+  // Cleanup de URL anterior cuando cambia la imagen
+  useEffect(() => {
+    return () => {
+      // Este efecto se ejecuta antes de que preview_url cambie o el componente se desmonte
+    };
+  }, [newProduct.preview_url]);
 
   const handleDelete = async (id: string | number) => {
     if (!window.confirm(t('confirm.delete'))) return;
@@ -177,7 +287,6 @@ const ProductTable = () => {
         price: parseFloat(newProduct.price),
         stock: parseInt(newProduct.stock),
         category: parseInt(newProduct.category),
-        // No forzamos status — el backend lo asigna como PENDING por defecto
       };
 
       if (newProduct.image_file) {
@@ -275,98 +384,16 @@ const ProductTable = () => {
                   <Table.HeadCell>{t('table.head.status')}</Table.HeadCell>
                   <Table.HeadCell></Table.HeadCell>
                 </Table.Head>
-                <Table.Body className="divide-y divide-border dark:divide-darkborder">
-                  {products.length === 0 ? (
-                    <Table.Row>
-                      <Table.Cell colSpan={5} className="text-center py-10 opacity-50">
-                        {t('table.noProducts')}
-                      </Table.Cell>
-                    </Table.Row>
-                  ) : (
-                    products.map((product, index) => (
-                      <Table.Row key={product.id || index}>
-                        <Table.Cell className="whitespace-nowrap ps-6">
-                          <div className="flex gap-3 items-center">
-                            <img
-                              src={product.images?.[0]?.url_image || PLACEHOLDER_IMAGE}
-                              alt="product"
-                              className="h-[60px] w-[60px] rounded-md object-cover shadow-sm bg-gray-50 cursor-zoom-in"
-                              onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
-                              onClick={() => openPreview(product.images?.[0]?.url_image || PLACEHOLDER_IMAGE, product.name)}
-                            />
-                            <div className="truncat line-clamp-2 sm:text-wrap max-w-56">
-                              <h6 className="text-sm font-semibold">{product.name}</h6>
-                            </div>
-                          </div>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Badge color="info" className="capitalize">
-                            {product.category_name || t('table.category.none')}
-                          </Badge>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <h5 className="text-base font-bold text-wrap">
-                            ${parseFloat(product.price.toString()).toLocaleString()}
-                          </h5>
-                          <div className="text-xs font-medium text-dark opacity-70 mb-2">
-                             {t('table.stock', { count: product.stock })}
-                          </div>
-                          <div className="me-5">
-                            <Progress
-                              progress={product.stock > 0 ? 100 : 0}
-                              color={product.stock > 10 ? 'success' : product.stock > 0 ? 'warning' : 'red'}
-                              size={"sm"}
-                            />
-                          </div>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Badge
-                            color={product.status === 'ACTIVE' ? 'success' : 'lightsecondary'}
-                            className="uppercase"
-                          >
-                            {product.status || t('table.status.noStatus')}
-                          </Badge>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Dropdown
-                            label=""
-                            dismissOnClick={true}
-                            renderTrigger={() => (
-                              <span className="h-9 w-9 flex justify-center items-center rounded-full hover:bg-lightprimary hover:text-primary cursor-pointer">
-                                <HiOutlineDotsVertical size={22} />
-                              </span>
-                            )}
-                          >
-                            {tableActionData.map((items, index) => (
-                              <Dropdown.Item 
-                                key={index} 
-                                className="flex gap-3"
-                                onClick={() => {
-                                  if (items.listtitle === "Borrar") {
-                                    handleDelete(product.id);
-                                  } else if (items.listtitle === "Editar") {
-                                    handleEdit(product);
-                                  } else if (items.listtitle === "Ver Detalle") {
-                                    navigate(`/app/products/${product.id}`);
-                                  }
-                                }}
-                              >
-                                <Icon icon={`${items.icon}`} height={18} />
-                                <span>
-                                  {items.listtitle === "Borrar" ? t('table.action.delete')
-                                    : items.listtitle === "Editar" ? t('table.action.edit')
-                                    : items.listtitle === "Ver Detalle" ? t('table.action.view')
-                                    : items.listtitle
-                                  }
-                                </span>
-                              </Dropdown.Item>
-                            ))}
-                          </Dropdown>
-                        </Table.Cell>
-                      </Table.Row>
-                    ))
-                  )}
-                </Table.Body>
+                <MemoizedTableBody 
+                  products={products} 
+                  t={t} 
+                  openPreview={openPreview} 
+                  handleDelete={handleDelete} 
+                  handleEdit={handleEdit} 
+                  navigate={navigate} 
+                  PLACEHOLDER_IMAGE={PLACEHOLDER_IMAGE}
+                  tableActionData={tableActionData}
+                />
               </Table>
             </div>
         </div>
@@ -399,6 +426,10 @@ const ProductTable = () => {
                 onChange={(e) => {
                   if (e.target.files?.[0]) {
                     const file = e.target.files[0];
+                    // Revocar URL anterior si existe para liberar memoria
+                    if (newProduct.preview_url && newProduct.preview_url.startsWith('blob:')) {
+                      URL.revokeObjectURL(newProduct.preview_url);
+                    }
                     setNewProduct({
                       ...newProduct, 
                       image_file: file,
