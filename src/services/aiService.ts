@@ -12,7 +12,7 @@ export async function suggestDescription(
 
 export async function pollTaskStatus(
   taskId: string,
-  maxAttempts = 30,
+  maxAttempts = 60, // 60 intentos * 3s = 180s (3 minutos)
   intervalMs = 3000
 ): Promise<string> {
   let attempts = 0;
@@ -26,14 +26,15 @@ export async function pollTaskStatus(
     }
 
     if (status === 'FAILED') {
-      throw new Error(error || 'Task failed');
+      throw new Error(error || 'La tarea de IA falló en el servidor.');
     }
 
+    // Si sigue en PROCESSING o PENDING, esperamos
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
     attempts++;
   }
 
-  throw new Error('Timeout: La tarea tardó demasiado en completarse');
+  throw new Error('La IA está tomando más tiempo de lo esperado debido a alta demanda. Por favor, intenta de nuevo en unos momentos.');
 }
 
 export async function generateAIDescription(

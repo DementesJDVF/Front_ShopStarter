@@ -62,8 +62,22 @@ const AuthRegister = () => {
             if (!/\S+@\S+\.\S+/.test(formData.email)) { setError(t("errors.emailInvalid")); return false; }
         }
         if (step === 2) {
-            if (formData.password.length < 8) { setError(t("errors.passwordTooShort")); return false; }
-            if (formData.password !== formData.password_confirm) { setError(t("errors.passwordMismatch")); return false; }
+            if (formData.password.length < 8) {
+                setError(t("errors.passwordTooShort"));
+                return false;
+            }
+            if (!/[A-Z]/.test(formData.password)) {
+                setError(t("errors.passwordNoUppercase"));
+                return false;
+            }
+            if (!/[0-9]/.test(formData.password)) {
+                setError(t("errors.passwordNoNumber"));
+                return false;
+            }
+            if (formData.password !== formData.password_confirm) {
+                setError(t("errors.passwordMismatch"));
+                return false;
+            }
         }
         if (step === 3 && formData.role === 'VENDEDOR') {
             if (!formData.birth_date) { setError(t("errors.birthDateRequired")); return false; }
