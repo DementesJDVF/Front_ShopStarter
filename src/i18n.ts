@@ -31,6 +31,11 @@ import TradVendorsEN from 'src/views/vendedor/locales/en.json';
 
 import TradProductTableES from 'src/components/tables/locales/es.json';
 import TradProductTableEN from 'src/components/tables/locales/en.json';
+
+import TradAdminES from 'src/views/admin/locales/es.json'
+import TradAdminEN from 'src/views/admin/locales/en.json'
+
+
 i18n
   .use(initReactI18next)
   .init({
@@ -46,7 +51,8 @@ i18n
         samplePage: TradSamplePageES,
         sidebar: TradSidebarES,
         vendedor: TradVendorsES,
-        productTable: TradProductTableES,  
+        productTable: TradProductTableES,
+        admin: TradAdminES,  
       },
       en: {
         translation: en,
@@ -60,6 +66,7 @@ i18n
         sidebar: TradSidebarEN,
         vendedor: TradVendorsEN,
         productTable: TradProductTableEN,
+        admin: TradAdminEN,
       },
     },
     lng: "es",
