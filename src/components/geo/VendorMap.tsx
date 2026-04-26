@@ -2,17 +2,19 @@ import React, { useEffect, useRef, useState } from 'react';
 import api from '../../utils/axios';
 import { Spinner } from 'flowbite-react';
 
+interface VendorMapProps {
+  isAdmin?: boolean;
+}
+
 /**
- * Componente de Mapa de Vendedores.
- * Utiliza Leaflet (inyectado vía CDN en index.html).
+ * Componente de Mapa de Vendedores con soporte para Vista de Águila (Admin).
  */
-const VendorMap: React.FC = () => {
+const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMap = useRef<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Esperar a que Leaflet esté disponible en el objeto window
     const checkLeaflet = setInterval(() => {
       if ((window as any).L) {
         clearInterval(checkLeaflet);
@@ -32,7 +34,10 @@ const VendorMap: React.FC = () => {
     const L = (window as any).L;
     if (!L || !mapRef.current) return;
 
-    // Inicializar mapa centrado en Popayán, Cauca
+    if (leafletMap.current) {
+        leafletMap.current.remove();
+    }
+
     leafletMap.current = L.map(mapRef.current).setView([2.4419, -76.6062], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -41,42 +46,41 @@ const VendorMap: React.FC = () => {
     }).addTo(leafletMap.current);
 
     try {
-      const response = await api.get('geo/vendors-locations/');
+      const endpoint = isAdmin ? 'geo/locations/all_locations/' : 'geo/vendors-locations/';
+      const response = await api.get(endpoint);
       const locations = response.data;
 
       if (Array.isArray(locations) && locations.length > 0) {
         const markers: any[] = [];
-        
         locations.forEach((loc: any) => {
           if (loc.latitude && loc.longitude) {
             const marker = L.marker([loc.latitude, loc.longitude])
               .addTo(leafletMap.current)
-              .bindPopup(`<b>${loc.description || 'Vendedor'}</b><br>Lat: ${loc.latitude}, Lon: ${loc.longitude}`);
+              .bindPopup(`<b>${loc.description || loc.vendor_name || 'Vendedor'}</b><br>Lat: ${loc.latitude}, Lon: ${loc.longitude}`);
             markers.push(marker);
           }
         });
 
-        // Ajustar vista para ver todos los marcadores si hay alguno
         if (markers.length > 0) {
           const group = L.featureGroup(markers);
           leafletMap.current.fitBounds(group.getBounds().pad(0.1));
         }
       }
     } catch (error) {
-      console.error("Error al cargar ubicaciones de vendedores:", error);
+      console.error("Error al cargar ubicaciones:", error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700">
+    <div className="relative w-full h-full min-h-[500px] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800">
       {loading && (
-        <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white/50 dark:bg-dark/50 backdrop-blur-sm">
-          <Spinner size="lg" />
+        <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white/60 backdrop-blur-sm">
+          <Spinner size="xl" color="info" />
         </div>
       )}
-      <div ref={mapRef} className="w-full h-full" style={{ minHeight: '400px' }} />
+      <div ref={mapRef} className="w-full h-full" style={{ minHeight: '500px' }} />
     </div>
   );
 };
