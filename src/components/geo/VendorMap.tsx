@@ -14,22 +14,6 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
   const leafletMap = useRef<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const checkLeaflet = setInterval(() => {
-      if ((window as any).L) {
-        clearInterval(checkLeaflet);
-        initMap();
-      }
-    }, 100);
-
-    return () => {
-      if (leafletMap.current) {
-        leafletMap.current.remove();
-      }
-      clearInterval(checkLeaflet);
-    };
-  }, []);
-
   const initMap = async () => {
     const L = (window as any).L;
     if (!L || !mapRef.current) return;
@@ -46,11 +30,15 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
     }).addTo(leafletMap.current);
 
     try {
+      setLoading(true);
       const endpoint = isAdmin ? 'geo/locations/all_locations/' : 'geo/vendors-locations/';
       const response = await api.get(endpoint);
-      const locations = response.data;
+      
+      // 🔥 CORRECCIÓN: Manejar tanto arrays como objetos con 'results' (DRF Pagination)
+      const data = response.data.results || response.data;
+      const locations = Array.isArray(data) ? data : [];
 
-      if (Array.isArray(locations) && locations.length > 0) {
+      if (locations.length > 0) {
         const markers: any[] = [];
         locations.forEach((loc: any) => {
           if (loc.latitude && loc.longitude) {
@@ -60,15 +48,15 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
                 popupContent = `
                   <div class="p-2 min-w-[200px] font-sans">
                     <h3 class="font-black text-indigo-900 border-b border-indigo-100 mb-2 uppercase italic text-lg">${loc.user_name || 'VENDEDOR'}</h3>
-                    <p class="text-xs text-gray-500 mb-1"><b>Email:</b> ${loc.user_email}</p>
-                    <p class="text-xs text-gray-500 mb-1"><b>Estado:</b> <span class="px-2 py-0.5 rounded-full ${loc.user_status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${loc.user_status}</span></p>
-                    <p class="text-xs text-gray-400 mt-2"><b>Ubicación:</b> ${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}</p>
+                    <p class="text-xs text-gray-500 mb-1"><b>Email:</b> ${loc.user_email || 'Sin email'}</p>
+                    <p class="text-xs text-gray-500 mb-1"><b>Estado:</b> <span class="px-2 py-0.5 rounded-full ${loc.user_status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${loc.user_status || 'N/A'}</span></p>
+                    <p class="text-xs text-gray-400 mt-2"><b>Ubicación:</b> ${Number(loc.latitude).toFixed(4)}, ${Number(loc.longitude).toFixed(4)}</p>
                     <p class="text-[10px] text-gray-300 mt-1 italic">Moderación ShopStarter</p>
                   </div>
                 `;
             }
 
-            const marker = L.marker([loc.latitude, loc.longitude])
+            const marker = L.marker([Number(loc.latitude), Number(loc.longitude)])
               .addTo(leafletMap.current)
               .bindPopup(popupContent);
             markers.push(marker);
@@ -86,6 +74,23 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const checkLeaflet = setInterval(() => {
+      if ((window as any).L) {
+        clearInterval(checkLeaflet);
+        initMap();
+      }
+    }, 100);
+
+    return () => {
+      if (leafletMap.current) {
+        leafletMap.current.remove();
+        leafletMap.current = null;
+      }
+      clearInterval(checkLeaflet);
+    };
+  }, [isAdmin]); // 🔥 Re-inicializar si cambia el rol
 
   return (
     <div className="relative w-full h-full min-h-[500px] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800">
