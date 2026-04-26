@@ -1,0 +1,47 @@
+{
+  "login": {
+    "title": "Bienvenido de nuevo",
+    "subtitle": "Acceso a ShopStarter",
+    "labelEmail": "Correo Electrónico",
+    "labelPassword": "Contraseña",
+    "forgotPassword": "¿Olvidaste tu clave?",
+    "remember": "Recordar mi sesión en este equipo",
+    "submit": "Iniciar Sesión",
+    "loading": "Entrando...",
+    "noAccount": "¿Eres nuevo aquí?",
+    "createAccount": "Crea tu cuenta de comerciante",
+    "errors": {
+      "emptyFields": "Debes ingresar correo y contraseña.",
+      "invalidCredentials": "Credenciales inválidas. Verifica email y contraseña.",
+      "serverUnavailable": "No se pudo conectar con el servidor. Verifica que el backend esté corriendo.",
+      "unexpected": "Ocurrió un error inesperado."
+    }
+  },
+  "forgotPassword": {
+    "title": "¿Olvidaste tu clave?",
+    "description": "No te preocupes, ingresa tu correo y te enviaremos un enlace para restablecerla.",
+    "labelEmail": "Correo Electrónico",
+    "submit": "Enviar Instrucciones",
+    "loading": "Enviando...",
+    "backToLogin": "← Volver al inicio de sesión",
+    "successTitle": "¡Correo Enviado!",
+    "successDescription": "Hecho. Revisa tu bandeja de entrada (y la carpeta de spam) para seguir las instrucciones de recuperación.",
+    "backButton": "Volver al Login",
+    "toastSuccess": "Enlace de recuperación enviado.",
+    "toastError": "Servicio temporalmente no disponible."
+  },
+  "resetPassword": {
+    "title": "Nueva Contraseña",
+    "description": "Crea una contraseña segura que no hayas usado antes.",
+    "labelPassword": "Nueva Contraseña",
+    "labelConfirm": "Confirmar Contraseña",
+    "submit": "Cambiar Contraseña",
+    "loading": "Restableciendo...",
+    "invalidLinkTitle": "Enlace inválido",
+    "invalidLinkDescription": "Este enlace de recuperación no es válido. Por favor, solicita uno nuevo.",
+    "requestAgain": "Volver a solicitar",
+    "toastSuccess": "Contraseña restablecida con éxito.",
+    "toastErrorFallback": "El enlace ha caducado o es inválido.",
+    "errorMismatch": "Las contraseñas no coinciden."
+  }
+}

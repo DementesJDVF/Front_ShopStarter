@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import api from "../../../utils/axios";
 import CustomTextInput from "../../../components/shared/CustomTextInput";
+import { useTranslation } from "react-i18next";
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();
@@ -12,6 +13,7 @@ const ResetPassword = () => {
     const [loading, setLoading] = useState(false);
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const { t } = useTranslation("login");
 
     const uid = searchParams.get("uid");
     const token = searchParams.get("token");
@@ -20,23 +22,19 @@ const ResetPassword = () => {
         e.preventDefault();
 
         if (password !== confirmPassword) {
-            toast.error("Las contraseñas no coinciden.");
+            toast.error(t("resetPassword.errorMismatch"));
             return;
         }
 
         setLoading(true);
 
         try {
-            await api.post("auth/password-reset-confirm/", {
-                uid,
-                token,
-                password
-            });
-            toast.success("Contraseña restablecida con éxito.");
+            await api.post("auth/password-reset-confirm/", { uid, token, password });
+            toast.success(t("resetPassword.toastSuccess"));
             navigate("/auth/login");
         } catch (err: any) {
             console.error(err);
-            const detail = err.response?.data?.error || err.response?.data?.detail || "El enlace ha caducado o es inválido.";
+            const detail = err.response?.data?.error || err.response?.data?.detail || t("resetPassword.toastErrorFallback");
             toast.error(detail);
         } finally {
             setLoading(false);
@@ -46,9 +44,9 @@ const ResetPassword = () => {
     if (!uid || !token) {
         return (
             <div className="text-center py-20">
-                <h2 className="text-xl font-bold text-red-600">Enlace inválido</h2>
-                <p className="text-gray-500">Este enlace de recuperación no es válido. Por favor, solicita uno nuevo.</p>
-                <Link to="/auth/forgot-password" className="text-primary font-bold mt-4 block">Volver a solicitar</Link>
+                <h2 className="text-xl font-bold text-red-600">{t("resetPassword.invalidLinkTitle")}</h2>
+                <p className="text-gray-500">{t("resetPassword.invalidLinkDescription")}</p>
+                <Link to="/auth/forgot-password" className="text-primary font-bold mt-4 block">{t("resetPassword.requestAgain")}</Link>
             </div>
         );
     }
@@ -61,16 +59,16 @@ const ResetPassword = () => {
                         <Icon icon="solar:lock-password-bold-duotone" height={48} />
                     </div>
                     <h2 className="text-3xl font-black text-indigo-900 tracking-tighter uppercase italic">
-                        Nueva Contraseña
+                        {t("resetPassword.title")}
                     </h2>
                     <p className="text-gray-500 mt-2 font-medium">
-                        Crea una contraseña segura que no hayas usado antes.
+                        {t("resetPassword.description")}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                     <div>
-                        <Label htmlFor="password" value="Nueva Contraseña" className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500 ml-1" />
+                        <Label htmlFor="password" value={t("resetPassword.labelPassword")} className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500 ml-1" />
                         <CustomTextInput
                             id="password"
                             isPassword
@@ -82,7 +80,7 @@ const ResetPassword = () => {
                     </div>
 
                     <div>
-                        <Label htmlFor="confirmPassword" value="Confirmar Contraseña" className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500 ml-1" />
+                        <Label htmlFor="confirmPassword" value={t("resetPassword.labelConfirm")} className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500 ml-1" />
                         <CustomTextInput
                             id="confirmPassword"
                             isPassword
@@ -93,13 +91,13 @@ const ResetPassword = () => {
                         />
                     </div>
 
-                    <Button 
-                        type="submit" 
+                    <Button
+                        type="submit"
                         disabled={loading}
                         className="w-full bg-primary hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-primary/30 py-1 transition-all"
                     >
                         {loading ? <Spinner size="sm" className="mr-2" /> : <Icon icon="solar:check-read-bold" className="mr-2" />}
-                        {loading ? "Restableciendo..." : "Cambiar Contraseña"}
+                        {loading ? t("resetPassword.loading") : t("resetPassword.submit")}
                     </Button>
                 </form>
             </div>

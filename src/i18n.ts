@@ -32,11 +32,18 @@ import TradVendorsEN from 'src/views/vendedor/locales/en.json';
 import TradProductTableES from 'src/components/tables/locales/es.json';
 import TradProductTableEN from 'src/components/tables/locales/en.json';
 
-import TradAdminES from 'src/views/admin/locales/es.json'
-import TradAdminEN from 'src/views/admin/locales/en.json'
+import TradAdminES from 'src/views/admin/locales/es.json';
+import TradAdminEN from 'src/views/admin/locales/en.json';
 
-import TradCategoryListES from 'src/components/categorias/locales/en.json'
-import TradCategoryListEN from 'src/components/categorias/locales/es.json'
+import TradCategoryListES from 'src/components/categorias/locales/es.json';
+import TradCategoryListEN from 'src/components/categorias/locales/en.json';
+
+import TradLoginES from 'src/views/auth/login/locales/es.json';
+import TradLoginEN from 'src/views/auth/login/locales/en.json';
+
+import TradRegisterES from 'src/views/auth/authforms/locales/es.json';
+import TradRegisterEN from 'src/views/auth/authforms/locales/en.json';
+
 
 i18n
   .use(initReactI18next)
@@ -55,7 +62,9 @@ i18n
         vendedor: TradVendorsES,
         productTable: TradProductTableES,
         admin: TradAdminES,  
-        category: TradCategoryListES,
+        categoryList: TradCategoryListES,
+        login: TradLoginES,
+        register: TradRegisterES,
       },
       en: {
         translation: en,
@@ -70,7 +79,9 @@ i18n
         vendedor: TradVendorsEN,
         productTable: TradProductTableEN,
         admin: TradAdminEN,
-        category: TradCategoryListEN,
+        categoryList: TradCategoryListEN,
+        login: TradLoginEN,
+        register: TradRegisterEN,
       },
     },
     lng: "es",

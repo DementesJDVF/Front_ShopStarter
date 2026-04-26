@@ -1,0 +1,47 @@
+{
+  "login": {
+    "title": "Welcome back",
+    "subtitle": "Access to ShopStarter",
+    "labelEmail": "Email Address",
+    "labelPassword": "Password",
+    "forgotPassword": "Forgot your password?",
+    "remember": "Remember my session on this device",
+    "submit": "Sign In",
+    "loading": "Signing in...",
+    "noAccount": "New here?",
+    "createAccount": "Create your merchant account",
+    "errors": {
+      "emptyFields": "You must enter your email and password.",
+      "invalidCredentials": "Invalid credentials. Please check your email and password.",
+      "serverUnavailable": "Could not connect to the server. Please make sure the backend is running.",
+      "unexpected": "An unexpected error occurred."
+    }
+  },
+  "forgotPassword": {
+    "title": "Forgot your password?",
+    "description": "No worries, enter your email and we'll send you a link to reset it.",
+    "labelEmail": "Email Address",
+    "submit": "Send Instructions",
+    "loading": "Sending...",
+    "backToLogin": "← Back to login",
+    "successTitle": "Email Sent!",
+    "successDescription": "Done. Check your inbox (and your spam folder) to follow the recovery instructions.",
+    "backButton": "Back to Login",
+    "toastSuccess": "Recovery link sent.",
+    "toastError": "Service temporarily unavailable."
+  },
+  "resetPassword": {
+    "title": "New Password",
+    "description": "Create a strong password you haven't used before.",
+    "labelPassword": "New Password",
+    "labelConfirm": "Confirm Password",
+    "submit": "Change Password",
+    "loading": "Resetting...",
+    "invalidLinkTitle": "Invalid Link",
+    "invalidLinkDescription": "This recovery link is not valid. Please request a new one.",
+    "requestAgain": "Request again",
+    "toastSuccess": "Password reset successfully.",
+    "toastErrorFallback": "The link has expired or is invalid.",
+    "errorMismatch": "Passwords do not match."
+  }
+}

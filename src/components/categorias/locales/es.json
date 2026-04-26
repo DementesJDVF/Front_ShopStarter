@@ -1,0 +1,34 @@
+{
+  "error": {
+    "load": "Error al cargar las categorías.",
+    "save": "Error al guardar la categoría.",
+    "delete": "Error al eliminar la categoría."
+  },
+  "admin": {
+    "title": "Gestión de Categorías",
+    "addButton": "Agregar Categoría",
+    "table": {
+      "id": "ID",
+      "category": "Categoría",
+      "description": "Descripción",
+      "actions": "Acciones"
+    },
+    "editButton": "Editar",
+    "deleteButton": "Borrar",
+    "confirmDelete": "¿Seguro que deseas eliminar esta categoría?"
+  },
+  "modal": {
+    "titleCreate": "Crear Categoría",
+    "titleEdit": "Actualizar Categoría",
+    "labelName": "Nombre",
+    "placeholderName": "Ej: Tecnología",
+    "labelEmoji": "Selecciona un Emoji",
+    "labelDescription": "Descripción",
+    "saveButton": "Guardar",
+    "cancelButton": "Cancelar"
+  },
+  "public": {
+    "label": "Categoría",
+    "placeholder": "-- Seleccionar Categoría --"
+  }
+}

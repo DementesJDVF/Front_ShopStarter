@@ -1,0 +1,34 @@
+{
+  "error": {
+    "load": "Error loading categories.",
+    "save": "Error saving the category.",
+    "delete": "Error deleting the category."
+  },
+  "admin": {
+    "title": "Category Management",
+    "addButton": "Add Category",
+    "table": {
+      "id": "ID",
+      "category": "Category",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "confirmDelete": "Are you sure you want to delete this category?"
+  },
+  "modal": {
+    "titleCreate": "Create Category",
+    "titleEdit": "Update Category",
+    "labelName": "Name",
+    "placeholderName": "E.g.: Technology",
+    "labelEmoji": "Select an Emoji",
+    "labelDescription": "Description",
+    "saveButton": "Save",
+    "cancelButton": "Cancel"
+  },
+  "public": {
+    "label": "Category",
+    "placeholder": "-- Select Category --"
+  }
+}
