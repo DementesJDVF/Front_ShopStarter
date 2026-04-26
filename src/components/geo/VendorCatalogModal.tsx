@@ -21,12 +21,30 @@ interface Product {
   category_name?: string;
 }
 
+/**
+ * Sanitiza y completa la URL de la imagen.
+ * Si es una ruta relativa, le añade el host del servidor.
+ */
+const getFullImageUrl = (url: string | null): string | null => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  
+  // Obtener la base de la API y limpiar el sufijo /api/
+  const apiUrl = import.meta.env.VITE_API_URL || '';
+  const baseUrl = apiUrl.replace(/\/api\/?$/, '');
+  
+  // Asegurar que no haya doble barra
+  const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+  return `${baseUrl}${cleanUrl}`;
+};
+
 /** Picks the main image URL, falling back to the first approved image. */
 const getProductImage = (images: ProductImage[]): string | null => {
   if (!Array.isArray(images) || (images?.length || 0) === 0) return null;
   const approved = images.filter(img => img.moderation_status !== 'REJECTED' && img.url_image);
   const main = approved.find(img => img.is_main);
-  return (main ?? approved[0])?.url_image ?? null;
+  const rawUrl = (main ?? approved[0])?.url_image ?? null;
+  return getFullImageUrl(rawUrl);
 };
 
 interface VendorCatalogModalProps {
