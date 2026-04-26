@@ -108,7 +108,6 @@ const SidebarContent: MenuItem[] = [
         name: "Usuarios",
         icon: "solar:users-group-two-rounded-outline",
         id: uniqueId(),
-        id: uniqueId(),
         url: "/admin/usuarios",
       },
       {
