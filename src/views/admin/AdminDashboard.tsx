@@ -13,13 +13,13 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import VendorMap from '../../components/geo/VendorMap';
 
-// Componentes Analíticos Premium (Usando rutas relativas)
+// Componentes Analíticos Premium (Usando rutas relativas e imports por defecto)
 import { RevenueForecast } from '../../components/dashboard/RevenueForecast';
-import { TotalIncome } from '../../components/dashboard/TotalIncome';
-import { NewCustomers } from '../../components/dashboard/NewCustomers';
-import { ProductRevenue } from '../../components/dashboard/ProductRevenue';
-import { DailyActivity } from '../../components/dashboard/DailyActivity';
-import { BlogCards } from '../../components/dashboard/BlogCards';
+import TotalIncome from '../../components/dashboard/TotalIncome';
+import NewCustomers from '../../components/dashboard/NewCustomers';
+import ProductRevenue from '../../components/dashboard/ProductRevenue';
+import DailyActivity from '../../components/dashboard/DailyActivity';
+import BlogCards from '../../components/dashboard/BlogCards';
 
 interface User { id: string; email: string; username: string; role: string; status: string; }
 interface Product { id: string; name: string; price: string; status: string; vendor_name?: string; images?: any[]; }
