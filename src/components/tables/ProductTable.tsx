@@ -267,7 +267,15 @@ const ProductTable = () => {
       }
 
       const result = await generateAIDescription(formData);
-      setNewProduct(prev => ({ ...prev, description: result }));
+      
+      // Efecto Typewriter para fluidez máxima
+      let currentText = "";
+      const words = result.split(" ");
+      for (let i = 0; i < words.length; i++) {
+        currentText += words[i] + (i < words.length - 1 ? " " : "");
+        setNewProduct(prev => ({ ...prev, description: currentText }));
+        await new Promise(r => setTimeout(r, 40)); // Pequeña pausa entre palabras
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t('alert.aiError');
       console.error(t('error.ai'), err);
