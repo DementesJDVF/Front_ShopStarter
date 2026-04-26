@@ -118,34 +118,6 @@ const SidebarContent: MenuItem[] = [
       },
     ],
   },
-  {
-    heading: "SISTEMA (UI)",
-    children: [
-      {
-        name: "Typography",
-        icon: "solar:text-circle-outline",
-        id: uniqueId(),
-        url: "/ui/typography",
-      },
-      {
-        name: "Table",
-        icon: "solar:bedside-table-3-linear",
-        id: uniqueId(),
-        url: "/ui/table",
-      },
-      {
-        name: "Form",
-        icon: "solar:password-minimalistic-outline",
-        id: uniqueId(),
-        url: "/ui/form",
-      },
-      {
-        name: "Alert",
-        icon: "solar:airbuds-case-charge-outline",
-        id: uniqueId(),
-        url: "/ui/alert",
-      },
-    ],
   },
 ];
 
