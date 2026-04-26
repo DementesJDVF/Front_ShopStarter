@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
+import { useAuth } from '../../context/AuthContext';
 import { getVendorReviews, submitReview, updateReview, Review } from '../../services/reviewsService';
 import './StarRating.css';
 

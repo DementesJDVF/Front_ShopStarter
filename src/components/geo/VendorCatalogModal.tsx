@@ -3,7 +3,7 @@ import { Modal, Card, Badge, Spinner, Button } from 'flowbite-react';
 import { Icon } from '@iconify/react';
 import api from '../../utils/axios';
 import { useAuth } from '../../context/AuthContext';
-import { getProductImage, getFullImageUrl } from '../../utils/imageHelpers';
+import { optimizeImageUrl } from '../../utils/imageOptimizer';
 import StarRating from '../StarRating/StarRating';
 import toast from 'react-hot-toast';
 
@@ -115,7 +115,7 @@ const VendorCatalogModal: React.FC<VendorCatalogModalProps> = ({ vendorId, isOpe
                 <div className="flex flex-col md:flex-row gap-4 h-full">
                     <div className="w-full md:w-1/3 h-48 md:h-full bg-gray-100 rounded-2xl overflow-hidden relative">
                         <img 
-                          src={getFullImageUrl(getProductImage(product.images))} 
+                          src={optimizeImageUrl(product.images?.[0]?.url_image || '')} 
                           alt={product.name} 
                           className="w-full h-full object-cover" 
                         />
