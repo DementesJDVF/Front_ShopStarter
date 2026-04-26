@@ -54,9 +54,23 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
         const markers: any[] = [];
         locations.forEach((loc: any) => {
           if (loc.latitude && loc.longitude) {
+            let popupContent = `<b>${loc.description || loc.vendor_name || 'Vendedor'}</b>`;
+            
+            if (isAdmin) {
+                popupContent = `
+                  <div class="p-2 min-w-[200px] font-sans">
+                    <h3 class="font-black text-indigo-900 border-b border-indigo-100 mb-2 uppercase italic text-lg">${loc.user_name || 'VENDEDOR'}</h3>
+                    <p class="text-xs text-gray-500 mb-1"><b>Email:</b> ${loc.user_email}</p>
+                    <p class="text-xs text-gray-500 mb-1"><b>Estado:</b> <span class="px-2 py-0.5 rounded-full ${loc.user_status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${loc.user_status}</span></p>
+                    <p class="text-xs text-gray-400 mt-2"><b>Ubicación:</b> ${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}</p>
+                    <p class="text-[10px] text-gray-300 mt-1 italic">Moderación ShopStarter</p>
+                  </div>
+                `;
+            }
+
             const marker = L.marker([loc.latitude, loc.longitude])
               .addTo(leafletMap.current)
-              .bindPopup(`<b>${loc.description || loc.vendor_name || 'Vendedor'}</b><br>Lat: ${loc.latitude}, Lon: ${loc.longitude}`);
+              .bindPopup(popupContent);
             markers.push(marker);
           }
         });
