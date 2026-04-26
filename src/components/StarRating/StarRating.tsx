@@ -72,7 +72,7 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
     try {
       setSubmitting(true);
       setError(null);
-      const newReviewData = await submitReview(vendorId, newRating, newReviewText, token);
+      const newReviewData = await submitReview(vendorId, newRating, newReviewText);
       
       // Actualizar la lista de reseñas
       const data = await getVendorReviews(vendorId);
@@ -109,7 +109,7 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
     try {
       setSubmitting(true);
       setError(null);
-      await updateReview(userReview.id, editRating, editReviewText, token);
+      await updateReview(userReview.id, editRating, editReviewText);
 
       // Recargar reseñas
       const data = await getVendorReviews(vendorId);

@@ -27,8 +27,7 @@ export const getVendorReviews = async (vendorId: string): Promise<ReviewsData> =
 export const submitReview = async (
   vendorId: string,
   rating: number,
-  reviewText?: string,
-  token?: string
+  reviewText?: string
 ): Promise<Review> => {
   try {
     const response = await api.post(
@@ -36,9 +35,6 @@ export const submitReview = async (
       {
         rating,
         review_text: reviewText || '',
-      },
-      {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       }
     );
     return response.data;
@@ -51,8 +47,7 @@ export const submitReview = async (
 export const updateReview = async (
   reviewId: string,
   rating: number,
-  reviewText?: string,
-  token?: string
+  reviewText?: string
 ): Promise<Review> => {
   try {
     const response = await api.patch(
@@ -60,9 +55,6 @@ export const updateReview = async (
       {
         rating,
         review_text: reviewText || '',
-      },
-      {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       }
     );
     return response.data;
