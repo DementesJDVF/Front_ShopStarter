@@ -44,6 +44,17 @@ const AdminDashboard: React.FC = () => {
   const [pendingProducts, setPendingProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Estados para Previsualización de Imagen
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewTitle, setPreviewTitle] = useState('');
+
+  const openPreview = (url: string, title: string) => {
+    setPreviewUrl(url);
+    setPreviewTitle(title);
+    setIsPreviewOpen(true);
+  };
 
   if (!authLoading && (!user || user.role !== 'ADMIN')) {
     return <UnauthorizedScreen code={403} message="Solo Administradores." />;
@@ -201,6 +212,7 @@ const AdminDashboard: React.FC = () => {
             {loading ? <TableSkeleton /> : (
                 <Table hoverable>
                     <Table.Head className="bg-indigo-50">
+                        <Table.HeadCell>Imagen</Table.HeadCell>
                         <Table.HeadCell>Producto</Table.HeadCell>
                         <Table.HeadCell>Vendedor</Table.HeadCell>
                         <Table.HeadCell>Precio</Table.HeadCell>
@@ -210,6 +222,20 @@ const AdminDashboard: React.FC = () => {
                     <Table.Body className="divide-y">
                         {allProducts.filter(p => p.status === 'PENDING' || p.status === 'ACTIVE').map(p => (
                             <Table.Row key={p.id}>
+                                <Table.Cell>
+                                    {p.images && p.images.length > 0 ? (
+                                        <img 
+                                            src={p.images.find(img => img.is_main)?.url_image || p.images[0].url_image} 
+                                            alt={p.name} 
+                                            className="w-12 h-12 object-cover rounded-lg cursor-zoom-in hover:scale-110 transition-transform"
+                                            onClick={() => openPreview(p.images?.find(img => img.is_main)?.url_image || p.images?.[0].url_image, p.name)}
+                                        />
+                                    ) : (
+                                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                            <Icon icon="solar:gallery-bold-duotone" className="text-gray-300" />
+                                        </div>
+                                    )}
+                                </Table.Cell>
                                 <Table.Cell className="font-bold">{p.name}</Table.Cell>
                                 <Table.Cell className="text-xs">{p.vendor_name}</Table.Cell>
                                 <Table.Cell className="font-bold">${Number(p.price).toLocaleString()}</Table.Cell>
@@ -265,6 +291,14 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de Previsualización de Imagen */}
+      <ImagePreviewModal 
+        isOpen={isPreviewOpen} 
+        onClose={() => setIsPreviewOpen(false)} 
+        imageUrl={previewUrl} 
+        title={previewTitle} 
+      />
     </div>
   );
 };
