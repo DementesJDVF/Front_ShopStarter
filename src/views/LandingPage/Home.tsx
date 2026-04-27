@@ -456,7 +456,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 font-sans text-slate-600 selection:bg-indigo-500/30 selection:text-indigo-900 overflow-x-hidden relative">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-200/40 via-white to-purple-200/40 font-sans text-slate-600 selection:bg-indigo-500/30 selection:text-indigo-900 overflow-x-hidden relative">
       <Helmet>
         <title>ShopStarter | Conecta tu Negocio Local con tu Comunidad</title>
         <meta name="description" content="Digitaliza tu tienda de barrio o emprendimiento local. Gestiona pedidos, muestra tu catálogo y conéctate con tus vecinos sin comisiones." />

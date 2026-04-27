@@ -20,7 +20,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
   return (
     <>
       {/* Navbar principal Glassmorphism Premium */}
-      <nav className="fixed w-full z-40 bg-white/60 backdrop-blur-2xl border-b border-white/40 shadow-xl dark:bg-gray-900/60 dark:border-gray-800/50 transition-all duration-500">
+      <nav className="fixed w-full z-40 bg-indigo-50/90 backdrop-blur-2xl border-b border-indigo-100 shadow-xl transition-all duration-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20 md:h-24 px-1 sm:px-4">
 
