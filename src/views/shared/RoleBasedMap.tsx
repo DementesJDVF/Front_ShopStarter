@@ -183,9 +183,19 @@ const RoleBasedMap: React.FC = () => {
                             ${isInactive ? '<span class="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold mb-2 inline-block">OCULTO AL PÚBLICO</span>' : ''}
                             <p class="text-sm text-gray-600 mb-3 line-clamp-2">${loc.description || 'Sin descripción'}</p>
                             ${user?.role === 'ADMIN' ? `<p class="text-[10px] text-red-400">Owner: ${loc.user_email}</p>` : ''}
-                            <button onclick="window.openVendorCatalog('${loc.user}', '${loc.user_name?.replace(/'/g, "\\'") || t('map.vendedor', 'Vendedor')}')" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded-xl text-xs transition-all shadow-md">
-                                VER CATÁLOGO
-                            </button>
+                            
+                            <div class="flex flex-col gap-2">
+                                <button onclick="window.openVendorCatalog('${loc.user}', '${loc.user_name?.replace(/'/g, "\\'") || t('map.vendedor', 'Vendedor')}')" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded-xl text-xs transition-all shadow-md">
+                                    VER CATÁLOGO
+                                </button>
+                                
+                                ${user?.role === 'CLIENTE' ? `
+                                    <button onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${loc.latitude},${loc.longitude}', '_blank')" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2">
+                                        <i class='material-icons' style="font-size: 14px">directions</i>
+                                        CÓMO LLEGAR
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
                     `);
                 markers.push(marker);
