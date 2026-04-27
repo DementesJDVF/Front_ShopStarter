@@ -20,7 +20,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
   return (
     <>
       {/* Navbar principal Glassmorphism Premium */}
-      <nav className="fixed w-full z-40 bg-[#a5a6d1]/90 backdrop-blur-2xl border-b border-indigo-200 shadow-2xl transition-all duration-500">
+      <nav className="fixed w-full z-40 bg-[#a5a6d1]/90 dark:bg-slate-950/90 backdrop-blur-2xl border-b border-indigo-200 dark:border-slate-800 shadow-2xl transition-all duration-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20 md:h-24 px-1 sm:px-4">
 
@@ -57,7 +57,17 @@ const TopBanner: React.FC<NavbarProps> = () => {
 
               {/* Selector de Idioma y Modo Oscuro Desktop */}
               <div className="flex items-center gap-2 pl-4">
-                <DarkThemeToggle className="hover:bg-indigo-50 dark:hover:bg-slate-800 rounded-xl focus:ring-0" />
+                <button
+                  onClick={() => {
+                    document.documentElement.classList.toggle('dark');
+                    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+                  }}
+                  className="p-2.5 rounded-xl hover:bg-white/20 dark:hover:bg-slate-800 text-white transition-all focus:ring-0"
+                  aria-label="Toggle Dark Mode"
+                >
+                  <Icon icon="solar:moon-stars-bold-duotone" className="w-5 h-5 dark:hidden" />
+                  <Icon icon="solar:sun-bold-duotone" className="w-5 h-5 hidden dark:block" />
+                </button>
                 <LenguajeSelector />
               </div>
             </div>
@@ -70,7 +80,16 @@ const TopBanner: React.FC<NavbarProps> = () => {
               >
                 {t('nav.register_mini')}
               </Link>
-              <DarkThemeToggle className="hover:bg-indigo-50 dark:hover:bg-slate-800 rounded-xl focus:ring-0 p-1.5" />
+              <button
+                onClick={() => {
+                  document.documentElement.classList.toggle('dark');
+                  localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+                }}
+                className="p-2 rounded-xl hover:bg-white/20 dark:hover:bg-slate-800 text-white transition-all focus:ring-0"
+              >
+                <Icon icon="solar:moon-stars-bold-duotone" className="w-5 h-5 dark:hidden" />
+                <Icon icon="solar:sun-bold-duotone" className="w-5 h-5 hidden dark:block" />
+              </button>
               <LenguajeSelector />
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
