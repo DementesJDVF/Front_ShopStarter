@@ -69,7 +69,7 @@ const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handle
             <div className="me-5">
               <Progress
                 progress={product.stock > 0 ? 100 : 0}
-                color={product.stock > 10 ? 'success' : product.stock > 0 ? 'warning' : 'red'}
+                color={product.stock >= 5 ? 'success' : product.stock > 0 ? 'warning' : 'red'}
                 size={"sm"}
               />
             </div>
@@ -79,7 +79,7 @@ const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handle
               color={product.status === 'AVAILABLE' ? 'success' : 'lightsecondary'}
               className="uppercase"
             >
-              {product.status || t('table.status.noStatus')}
+              {t('table.status.' + product.status, product.status)}
             </Badge>
           </Table.Cell>
           <Table.Cell>

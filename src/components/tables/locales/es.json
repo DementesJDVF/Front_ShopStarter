@@ -13,7 +13,13 @@
     },
     "stock": "Stock: {{count}} unidades",
     "status": {
-      "noStatus": "SIN ESTADO"
+      "noStatus": "SIN ESTADO",
+      "AVAILABLE": "DISPONIBLE",
+      "PENDING": "PENDIENTE",
+      "RESERVED": "RESERVADO",
+      "SOLD": "VENDIDO",
+      "INACTIVE": "INACTIVO",
+      "REJECTED": "RECHAZADO"
     },
     "action": {
       "view": "Ver Detalle",
