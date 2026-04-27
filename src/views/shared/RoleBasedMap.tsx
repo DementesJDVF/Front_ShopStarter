@@ -15,6 +15,7 @@ const RoleBasedMap: React.FC = () => {
     const leafletMap = useRef<any>(null);
     const routingControl = useRef<any>(null);
     const [loading, setLoading] = useState(true);
+    const [isRoutingActive, setIsRoutingActive] = useState(false);
     const [locations, setLocations] = useState<any[]>([]);
 
     // i18n
@@ -71,6 +72,16 @@ const RoleBasedMap: React.FC = () => {
                 showAlternatives: false,
                 language: 'es'
             }).addTo(leafletMap.current);
+            setIsRoutingActive(true);
+        };
+
+        (window as any).stopRouting = () => {
+            if (routingControl.current && leafletMap.current) {
+                leafletMap.current.removeControl(routingControl.current);
+                routingControl.current = null;
+                setIsRoutingActive(false);
+                toast.success("Navegación finalizada");
+            }
         };
 
         navigator.geolocation.getCurrentPosition((pos) => {
@@ -390,6 +401,21 @@ const RoleBasedMap: React.FC = () => {
                 vendorId={selectedVendor?.id || null}
                 vendorName={selectedVendor?.name}
             />
+
+            {/* Botón flotante para detener navegación */}
+            {isRoutingActive && (
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-[1000] animate-bounce-short">
+                    <Button 
+                        color="failure" 
+                        size="xl" 
+                        onClick={() => { (window as any).stopRouting(); setIsRoutingActive(false); }}
+                        className="rounded-full shadow-2xl font-black flex items-center gap-2 border-4 border-white"
+                    >
+                        <Icon icon="solar:stop-circle-bold-duotone" className="text-2xl mr-2" />
+                        DETENER NAVEGACIÓN
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };

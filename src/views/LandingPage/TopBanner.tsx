@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { Icon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
-import { DarkThemeToggle } from 'flowbite-react';
+import { useThemeMode } from 'flowbite-react';
 import FullLogo from '../../layouts/full/shared/logo/FullLogo';
 import LenguajeSelector from 'src/components/LanguageSelector/LanguageSelector.tsx';
 
@@ -11,6 +11,7 @@ interface NavbarProps {}
 const TopBanner: React.FC<NavbarProps> = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t } = useTranslation("landingPage");
+  const { mode, toggleMode } = useThemeMode();
 
   const navLinks = [
     { name: t('nav.features'), href: '#features' },
@@ -58,15 +59,11 @@ const TopBanner: React.FC<NavbarProps> = () => {
               {/* Selector de Idioma y Modo Oscuro Desktop */}
               <div className="flex items-center gap-2 pl-4">
                 <button
-                  onClick={() => {
-                    document.documentElement.classList.toggle('dark');
-                    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-                  }}
+                  onClick={toggleMode}
                   className="p-2.5 rounded-xl hover:bg-white/20 dark:hover:bg-slate-800 text-white transition-all focus:ring-0"
                   aria-label="Toggle Dark Mode"
                 >
-                  <Icon icon="solar:moon-stars-bold-duotone" className="w-5 h-5 dark:hidden" />
-                  <Icon icon="solar:sun-bold-duotone" className="w-5 h-5 hidden dark:block" />
+                  <Icon icon={mode === 'dark' ? "solar:sun-bold-duotone" : "solar:moon-stars-bold-duotone"} className="w-5 h-5" />
                 </button>
                 <LenguajeSelector />
               </div>
@@ -81,14 +78,10 @@ const TopBanner: React.FC<NavbarProps> = () => {
                 {t('nav.register_mini')}
               </Link>
               <button
-                onClick={() => {
-                  document.documentElement.classList.toggle('dark');
-                  localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-                }}
+                onClick={toggleMode}
                 className="p-2 rounded-xl hover:bg-white/20 dark:hover:bg-slate-800 text-white transition-all focus:ring-0"
               >
-                <Icon icon="solar:moon-stars-bold-duotone" className="w-5 h-5 dark:hidden" />
-                <Icon icon="solar:sun-bold-duotone" className="w-5 h-5 hidden dark:block" />
+                <Icon icon={mode === 'dark' ? "solar:sun-bold-duotone" : "solar:moon-stars-bold-duotone"} className="w-5 h-5" />
               </button>
               <LenguajeSelector />
               <button
