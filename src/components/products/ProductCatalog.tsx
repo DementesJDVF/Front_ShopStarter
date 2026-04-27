@@ -210,7 +210,7 @@ export function ProductCatalog() {
             const rawImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
             const mainImage = getAbsoluteImageUrl(rawImage);
             const isOutOfStock = p.stock <= 0;
-            const isNotAvailable = p.status !== 'AVAILABLE';
+            const isNotAvailable = !p.status || !p.status.toString().toUpperCase().includes('AVAILABLE');
             const canPurchase = !isOutOfStock && !isNotAvailable;
             
             return (

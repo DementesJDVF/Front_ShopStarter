@@ -19,9 +19,10 @@ const Dashboard = () => {
     try {
       setLoadingLocation(true);
       const res = await api.get('geo/locations/');
-      // Buscamos nuestra propia locación (el API suele filtrar por usuario autenticado en el backend)
-      // Si el API devuelve lista, tomamos el primero
-      const loc = Array.isArray(res.data) ? res.data[0] : res.data;
+      const data = res.data.results || res.data;
+      const loc = Array.isArray(data) ? data[0] : data;
+      
+      if (loc) {
         setVendorLocation({
           lat: parseFloat(loc.latitude),
           lng: parseFloat(loc.longitude),

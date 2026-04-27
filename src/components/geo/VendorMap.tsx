@@ -85,6 +85,11 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
                         </div>
                     </div>
 
+                    <button onclick="window.openVendorCatalog('${loc.user}', '${(loc.user_name || 'Vendedor').replace(/'/g, "\\'")}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-xl text-[11px] transition-all shadow-md flex items-center justify-center gap-2 mb-2">
+                        <span>INSPECCIONAR CATÁLOGO</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+
                     <div class="flex items-center justify-between border-t border-gray-100 dark:border-slate-700 pt-2 mt-2">
                         <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${loc.user_status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${loc.user_status}</span>
                         <span class="text-[9px] text-gray-400 italic">ShopStarter Admin</span>

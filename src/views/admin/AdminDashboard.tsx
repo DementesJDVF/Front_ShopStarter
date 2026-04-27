@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, Table, Button, Select, Badge, Spinner } from 'flowbite-react';
 import { HiUserCircle, HiCheck, HiLightningBolt, HiTrash, HiShoppingCart } from 'react-icons/hi';
 import { MdOutlinePendingActions } from 'react-icons/md';
@@ -13,6 +13,7 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import VendorMap from '../../components/geo/VendorMap';
 import { getAbsoluteImageUrl } from '../../utils/urlHelper';
+import VendorCatalogModal from '../../components/geo/VendorCatalogModal';
 
 // Componentes Analíticos Premium (Imports por defecto corregidos)
 import { RevenueForecast } from '../../components/dashboard/RevenueForecast';
@@ -26,6 +27,8 @@ interface User { id: string; email: string; username: string; role: string; stat
 interface Product { id: string; name: string; price: string; status: string; vendor_name?: string; images?: any[]; }
 interface Order { id: string; client_name: string; product_name: string; status: string; total: number; created_at: string; }
 
+interface SelectedVendor { id: string; name: string; }
+
 const TableSkeleton = () => (
     <div className="animate-pulse space-y-4 py-4">
         {[1, 2, 3, 4, 5].map(i => (
@@ -38,6 +41,7 @@ const AdminDashboard: React.FC = () => {
   const { t } = useTranslation('admin');
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [currentView, setCurrentView] = useState(0);
 
   const [users, setUsers] = useState<User[]>([]);
@@ -45,6 +49,10 @@ const AdminDashboard: React.FC = () => {
   const [pendingProducts, setPendingProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Modal de Catálogo (Mapa Eagle View)
+  const [isCatalogModalOpen, setIsCatalogModalOpen] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState<SelectedVendor | null>(null);
 
   if (!authLoading && (!user || user.role !== 'ADMIN')) {
     return <UnauthorizedScreen code={403} message="Solo Administradores." />;
@@ -58,6 +66,14 @@ const AdminDashboard: React.FC = () => {
     else if (location.pathname.includes('mapa')) setCurrentView(5);
     else setCurrentView(0);
   }, [location.pathname]);
+
+  useEffect(() => {
+    (window as any).openVendorCatalog = (vendorId: string, vendorName: string) => {
+        setSelectedVendor({ id: vendorId, name: vendorName });
+        setIsCatalogModalOpen(true);
+    };
+    return () => { delete (window as any).openVendorCatalog; };
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -212,10 +228,10 @@ const AdminDashboard: React.FC = () => {
                         <Table.HeadCell>Vendedor</Table.HeadCell>
                         <Table.HeadCell>Precio</Table.HeadCell>
                         <Table.HeadCell>Estado</Table.HeadCell>
-                        <Table.HeadCell>Moderación</Table.HeadCell>
+                        <Table.HeadCell>Acciones</Table.HeadCell>
                     </Table.Head>
                     <Table.Body className="divide-y">
-                        {allProducts.filter(p => ['PENDING', 'AVAILABLE', 'REJECTED'].includes(p.status)).map(p => (
+                        {allProducts.filter(p => p.status === 'PENDING').map(p => (
                             <Table.Row key={p.id}>
                                 <Table.Cell>
                                     <img src={getProductImage(p.images || [])} alt={p.name} className="w-12 h-12 rounded-xl object-cover shadow-sm border border-gray-100" />
@@ -227,11 +243,12 @@ const AdminDashboard: React.FC = () => {
                                     <Badge color={p.status === 'AVAILABLE' ? 'success' : 'warning'}>{p.status}</Badge>
                                 </Table.Cell>
                                 <Table.Cell className="flex gap-2">
-                                    {p.status === 'PENDING' && (
-                                        <Button color="success" size="xs" onClick={() => handleProductStatus(p.id, 'AVAILABLE')}>
-                                            <HiCheck className="mr-1"/> Aprobar
-                                        </Button>
-                                    )}
+                                    <Button color="success" size="xs" onClick={() => handleProductStatus(p.id, 'AVAILABLE')}>
+                                        <HiCheck className="mr-1"/> Aprobar
+                                    </Button>
+                                    <Button color="info" size="xs" onClick={() => navigate(`/app/products/${p.id}`)}>
+                                        <Icon icon="solar:eye-outline" className="mr-1 h-4 w-4" /> Detalle
+                                    </Button>
                                     <Button color="warning" size="xs" onClick={() => handleDelete('products', p.id)}>
                                         <Icon icon="solar:archive-minimalistic-outline" className="mr-1 h-4 w-4" /> Archivar
                                     </Button>
@@ -281,6 +298,13 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
       </div>
+
+      <VendorCatalogModal
+        isOpen={isCatalogModalOpen}
+        onClose={() => setIsCatalogModalOpen(false)}
+        vendorId={selectedVendor?.id || null}
+        vendorName={selectedVendor?.name}
+      />
     </div>
   );
 };
