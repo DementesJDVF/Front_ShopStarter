@@ -78,10 +78,10 @@ const SloganBlock = () => {
           <Icon icon="solar:heart-bold-duotone" className="text-5xl sm:text-6xl animate-pulse" />
         </div>
         <h2
-          className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-indigo-950 dark:text-white leading-[1.1] tracking-tighter drop-shadow-sm"
+          className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-[1.1] tracking-tighter drop-shadow-sm"
           dangerouslySetInnerHTML={{ __html: t("slogan.main") }}
         />
-        <p className="mt-8 sm:mt-10 text-xl sm:text-2xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto font-bold leading-relaxed">
+        <p className="mt-8 sm:mt-10 text-xl sm:text-2xl text-slate-400 max-w-3xl mx-auto font-bold leading-relaxed">
           {t("slogan.philosophy")}
         </p>
       </div>
@@ -117,13 +117,13 @@ const Testimonials = () => {
       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none animate-blob"></div>
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="text-center mb-16" data-aos="fade-up">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-400 font-black tracking-[0.2em] uppercase text-xs mb-4 block">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 font-black tracking-[0.2em] uppercase text-xs mb-4 block">
             {t("testimonials.section_tag")}
           </span>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-indigo-950 dark:text-white mb-4 tracking-tighter">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 tracking-tighter">
             {t("testimonials.section_title")}
           </h2>
-          <p className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 font-bold">{t("testimonials.section_desc")}</p>
+          <p className="text-lg sm:text-xl text-slate-400 font-bold">{t("testimonials.section_desc")}</p>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
           {reviews.map((rev, i) => (
@@ -160,11 +160,11 @@ const FAQAccordion = () => {
     <section className="py-32 bg-transparent">
       <div className="max-w-3xl mx-auto px-4">
         <div className="text-center mb-16" data-aos="fade-up">
-          <Icon icon="solar:question-circle-bold-duotone" className="text-7xl text-indigo-600 dark:text-indigo-400 mx-auto mb-6 drop-shadow-lg" />
-          <h2 className="text-4xl md:text-5xl font-black text-indigo-950 dark:text-white tracking-tighter">
+          <Icon icon="solar:question-circle-bold-duotone" className="text-7xl text-indigo-400 mx-auto mb-6 drop-shadow-[0_0_15px_rgba(129,140,248,0.3)]" />
+          <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
             {t("faq.title")}
           </h2>
-          <p className="text-sm font-black text-indigo-600/40 uppercase tracking-widest mt-4">{t("faq.tagline")}</p>
+          <p className="text-sm font-black text-indigo-400/40 uppercase tracking-widest mt-4">{t("faq.tagline")}</p>
         </div>
         <div className="space-y-6">
           {faqs.map((faq, i) => (
@@ -226,13 +226,13 @@ const Hero = () => {
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
           <span>{t("hero.status")}</span>
         </div>
-        <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black text-indigo-950 dark:text-white tracking-tighter mb-8 leading-[1.1] drop-shadow-sm">
+        <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black text-white tracking-tighter mb-8 leading-[1.1] drop-shadow-2xl">
           {t("hero.title_1")} <br className="hidden sm:block" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-cyan-400 to-indigo-900 dark:to-indigo-300 pb-2">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-white pb-2">
             {t("hero.title_2")}
           </span>
         </h1>
-        <p className="text-xl sm:text-2xl text-slate-500 dark:text-slate-400 mb-12 max-w-3xl leading-relaxed font-bold">
+        <p className="text-xl sm:text-2xl text-slate-400 mb-12 max-w-3xl leading-relaxed font-bold">
           {t("hero.description")}
         </p>
         <div className="flex flex-col sm:flex-row items-center gap-4 mb-24 w-full justify-center">
@@ -456,7 +456,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-transparent font-sans text-slate-900 selection:bg-indigo-500/30 selection:text-indigo-900 overflow-x-hidden relative">
+    <div className="min-h-screen bg-slate-950 font-sans text-slate-300 selection:bg-indigo-500/30 selection:text-white overflow-x-hidden relative">
       <Helmet>
         <title>ShopStarter | Conecta tu Negocio Local con tu Comunidad</title>
         <meta name="description" content="Digitaliza tu tienda de barrio o emprendimiento local. Gestiona pedidos, muestra tu catálogo y conéctate con tus vecinos sin comisiones." />

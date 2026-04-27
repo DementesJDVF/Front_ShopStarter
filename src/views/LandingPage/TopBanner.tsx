@@ -19,13 +19,13 @@ const TopBanner: React.FC<NavbarProps> = () => {
   return (
     <>
       {/* Navbar principal Glassmorphism Premium */}
-      <nav className="fixed w-full z-40 bg-white/60 backdrop-blur-2xl border-b border-white/40 shadow-xl dark:bg-gray-900/60 dark:border-gray-800/50 transition-all duration-500">
+      <nav className="fixed w-full z-40 bg-slate-950/60 backdrop-blur-2xl border-b border-white/5 transition-all duration-500 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20 md:h-24 px-1 sm:px-4">
 
             {/* 👈 Logo */}
             <div className="flex-shrink-0 flex items-center transform hover:scale-[1.05] transition duration-500 drop-shadow-lg">
-              <FullLogo />
+              <FullLogo variant="light" />
             </div>
 
             {/* 👉 Enlaces Desktop */}
@@ -34,7 +34,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
                 <a
                   key={link.name}
                   href={link.href}
-                  className="relative text-indigo-950 dark:text-white font-black uppercase tracking-widest text-[11px] hover:text-indigo-600 transition-all before:content-[''] before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-0.5 before:bg-indigo-600 hover:before:w-full before:transition-all before:duration-300"
+                  className="relative text-white font-black uppercase tracking-widest text-[11px] hover:text-indigo-400 transition-all before:content-[''] before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-0.5 before:bg-indigo-400 hover:before:w-full before:transition-all before:duration-300"
                 >
                   {link.name}
                 </a>
@@ -42,7 +42,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
 
               <Link
                 to="/auth/login"
-                className="text-indigo-950 dark:text-white font-black uppercase tracking-widest text-[11px] hover:text-indigo-600 transition-all"
+                className="text-white font-black uppercase tracking-widest text-[11px] hover:text-indigo-400 transition-all"
               >
                 {t('nav.login')}
               </Link>
@@ -71,7 +71,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
               <LenguajeSelector />
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2 rounded-xl text-indigo-950 dark:text-white hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors"
+                className="p-2 rounded-xl text-white hover:bg-white/10 transition-colors"
                 aria-label={t('nav.open_menu', 'Abrir menú')}
               >
                 <Icon icon="solar:hamburger-menu-bold-duotone" className="w-7 h-7" />
@@ -89,10 +89,10 @@ const TopBanner: React.FC<NavbarProps> = () => {
             onClick={() => setIsMobileMenuOpen(false)}
           />
 
-          <div className="fixed inset-y-0 right-0 z-50 w-72 bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(10,1,74,0.3)] transform transition-transform duration-500 ease-in-out md:hidden border-l border-white/20 dark:border-slate-800">
+          <div className="fixed inset-y-0 right-0 z-50 w-72 bg-slate-950/95 backdrop-blur-3xl shadow-[0_0_50px_rgba(10,1,74,0.3)] transform transition-transform duration-500 ease-in-out md:hidden border-l border-white/5">
             <div className="p-6 flex items-center justify-between border-b border-indigo-50 dark:border-slate-800">
               <div className="scale-90 origin-left">
-                <FullLogo variant="dark" />
+                <FullLogo variant="light" />
               </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
