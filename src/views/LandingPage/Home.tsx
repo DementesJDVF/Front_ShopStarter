@@ -129,7 +129,7 @@ const Testimonials = () => {
           {reviews.map((rev, i) => (
             <div
               key={i}
-              className="bg-indigo-50/50 dark:bg-slate-800/40 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-xl border border-white/60 dark:border-slate-700/50 hover:shadow-indigo-900/10 hover:-translate-y-2 transition-all duration-500 relative group"
+              className="bg-white/70 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-xl border border-white/80 hover:shadow-indigo-200/50 hover:-translate-y-2 transition-all duration-500 relative group"
             >
               <Icon icon="solar:quote-right-bold" className="absolute top-8 right-8 text-7xl text-indigo-500/5 group-hover:scale-110 transition-transform" />
               <p className="text-indigo-950/80 dark:text-slate-200 text-lg relative z-10 mb-10 font-bold leading-relaxed">"{rev.text}"</p>
@@ -168,7 +168,7 @@ const FAQAccordion = () => {
         </div>
         <div className="space-y-6">
           {faqs.map((faq, i) => (
-            <div key={i} className={`border ${openIdx === i ? 'border-indigo-300 dark:border-indigo-500 bg-indigo-50/80 dark:bg-slate-800/60 shadow-2xl scale-[1.02]' : 'border-white/60 dark:border-slate-700/40 bg-indigo-50/40 dark:bg-slate-800/20'} rounded-[2.5rem] backdrop-blur-xl overflow-hidden transition-all duration-500`}>
+            <div key={i} className={`border ${openIdx === i ? 'border-indigo-300 bg-white/90 shadow-2xl scale-[1.02]' : 'border-white/60 bg-white/40'} rounded-[2.5rem] backdrop-blur-xl overflow-hidden transition-all duration-500`}>
               <button onClick={() => setOpenIdx(openIdx === i ? null : i)} className="w-full px-8 py-8 flex items-center justify-between text-left cursor-pointer hover:bg-white/40 dark:hover:bg-slate-700/40 transition-all">
                 <span className="font-black text-xl text-indigo-950 dark:text-white pr-4 leading-tight tracking-tight">{faq.q}</span>
                 <div className={`w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-indigo-100/50 dark:bg-slate-700/50 text-indigo-600 dark:text-indigo-300 transition-all duration-500 ${openIdx === i ? 'rotate-180 bg-gradient-to-r from-indigo-600 to-indigo-950 text-white shadow-lg' : ''}`}>
@@ -247,8 +247,8 @@ const Hero = () => {
           </Link>
         </div>
 
-        {/* Demo Mockup */}
-        <div className="relative w-full max-w-4xl mx-auto rounded-[2rem] sm:rounded-[2.5rem] p-4 bg-white/40 dark:bg-slate-800/40 backdrop-blur-2xl border border-white/60 dark:border-slate-700/50 shadow-2xl shadow-indigo-900/5 overflow-visible group" data-aos="fade-up" data-aos-delay="200">
+        {/* Demo Mockup - Lavender Glass Style */}
+        <div className="relative w-full max-w-4xl mx-auto rounded-[2.5rem] p-4 bg-white/60 backdrop-blur-2xl border border-white/60 shadow-2xl shadow-indigo-200/50 overflow-visible group" data-aos="fade-up" data-aos-delay="200">
           <div className="w-full h-12 border-b border-slate-200/50 dark:border-slate-700/50 flex items-center px-4 gap-2 mb-4">
             <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-600"></div>
             <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-600"></div>
@@ -335,7 +335,7 @@ const Features = () => {
               key={index}
               data-aos="fade-up"
               data-aos-delay={index * 100}
-              className="group relative bg-white/40 dark:bg-slate-800/40 backdrop-blur-2xl p-10 rounded-[2.5rem] border border-white/50 dark:border-slate-700/50 hover:border-indigo-600/30 shadow-xl hover:shadow-indigo-600/10 transition-all duration-500 transform hover:-translate-y-3 overflow-hidden"
+              className="group relative bg-white/60 backdrop-blur-2xl p-10 rounded-[2.5rem] border border-white/60 hover:border-indigo-300 shadow-xl shadow-indigo-100/50 hover:shadow-indigo-200/50 transition-all duration-500 transform hover:-translate-y-3 overflow-hidden"
             >
               <div className={`absolute top-0 right-0 w-40 h-40 bg-gradient-to-br ${featureColors[index]} rounded-full blur-[100px] opacity-0 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none`}></div>
               <div className={`w-16 h-16 rounded-2xl mb-8 flex items-center justify-center bg-gradient-to-br ${featureColors[index]} shadow-2xl text-white transform group-hover:scale-110 group-hover:rotate-[12deg] transition-all duration-500`}>
@@ -456,7 +456,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-transparent font-sans text-slate-600 selection:bg-indigo-500/30 selection:text-indigo-900 overflow-x-hidden relative">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 font-sans text-slate-600 selection:bg-indigo-500/30 selection:text-indigo-900 overflow-x-hidden relative">
       <Helmet>
         <title>ShopStarter | Conecta tu Negocio Local con tu Comunidad</title>
         <meta name="description" content="Digitaliza tu tienda de barrio o emprendimiento local. Gestiona pedidos, muestra tu catálogo y conéctate con tus vecinos sin comisiones." />
