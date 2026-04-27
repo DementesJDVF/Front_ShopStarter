@@ -114,7 +114,8 @@ export function ProductCatalog() {
       ]);
       let prods = prodRes.data.results || prodRes.data;
       setProducts(prods);
-      setCategories(catRes.data.results || catRes.data);
+      const cats = catRes.data.results || catRes.data;
+      setCategories(cats.filter((v: any, i: number, a: any[]) => a.findIndex((t: any) => t.name === v.name) === i));
     } catch (e: any) {
       setError(e.response?.data?.message || e.message || t("serverError"));
     } finally {

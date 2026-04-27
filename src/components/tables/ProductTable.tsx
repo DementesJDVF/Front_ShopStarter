@@ -20,6 +20,7 @@ interface Product {
   category?: string | number;
   category_name: string;
   images: Array<{ url_image: string; is_main: boolean }>;
+  is_deleted?: boolean;
 }
 
 interface Category {
@@ -191,7 +192,7 @@ const ProductTable = () => {
         cats = data.results;
       }
 
-      setCategories(cats);
+      setCategories(cats.filter((v, i, a) => a.findIndex(t => t.name === v.name) === i));
       if (cats.length === 0) {
         console.warn(t('fetch.noCategories'));
       }
@@ -355,8 +356,8 @@ const ProductTable = () => {
       listtitle: "Editar",
     },
     {
-      icon: "solar:archive-minimalistic-outline",
-      listtitle: "Archivar",
+      icon: "solar:trash-bin-trash-outline",
+      listtitle: "Borrar",
     },
   ];
 

@@ -18,7 +18,8 @@ const ClienteHome = () => {
     const fetchCategories = async () => {
       try {
         const res = await api.get('products/get-categories/');
-        setCategories(res.data.results || res.data);
+        const data = res.data.results || res.data;
+        setCategories(data.filter((v: any, i: number, a: any[]) => a.findIndex(t => t.name === v.name) === i));
       } catch (err) {
         console.error("Error al obtener las categorías", err);
       } finally {

@@ -19,19 +19,23 @@
       "RESERVED": "RESERVADO",
       "SOLD": "VENDIDO",
       "INACTIVE": "INACTIVO",
-      "REJECTED": "RECHAZADO"
+      "REJECTED": "RECHAZADO",
+      "ARCHIVED": "ARCHIVADO"
     },
     "action": {
       "view": "Ver Detalle",
       "edit": "Editar",
-      "delete": "Borrar"
+      "delete": "Borrar",
+      "archive": "Archivar",
+      "restore": "Restaurar"
     }
   },
   "action": {
     "addProduct": "Añadir Producto"
   },
   "confirm": {
-    "delete": "¿Estás seguro de que deseas eliminar este producto?"
+    "delete": "¿Estás seguro de que deseas eliminar este producto?",
+    "restore": "¿Deseas restaurar este producto?"
   },
   "alert": {
     "deleteError": "Hubo un error al eliminar el producto.",

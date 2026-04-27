@@ -249,8 +249,8 @@ const AdminDashboard: React.FC = () => {
                                     <Button color="info" size="xs" onClick={() => navigate(`/app/products/${p.id}`)}>
                                         <Icon icon="solar:eye-outline" className="mr-1 h-4 w-4" /> Detalle
                                     </Button>
-                                    <Button color="warning" size="xs" onClick={() => handleDelete('products', p.id)}>
-                                        <Icon icon="solar:archive-minimalistic-outline" className="mr-1 h-4 w-4" /> Archivar
+                                    <Button color="failure" size="xs" onClick={() => handleProductStatus(p.id, 'REJECTED')}>
+                                        <HiTrash className="mr-1 h-4 w-4" /> {t('products.reject')}
                                     </Button>
                                 </Table.Cell>
                             </Table.Row>
