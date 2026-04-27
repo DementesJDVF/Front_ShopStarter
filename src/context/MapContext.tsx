@@ -55,11 +55,13 @@ export const MapProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         },
         (err) => {
           console.error("Error obteniendo ubicación:", err);
-          toast.error("No se pudo obtener tu ubicación. Verifica los permisos.");
+          let msg = "No se pudo obtener tu ubicación. Verifica los permisos.";
+          if (err.code === err.TIMEOUT) msg = "La geolocalización tardó demasiado. Intenta de nuevo.";
+          toast.error(msg);
           setGettingLocation(false);
           resolve(null);
         },
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     });
   };

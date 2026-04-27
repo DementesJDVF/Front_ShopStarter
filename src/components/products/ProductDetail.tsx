@@ -213,7 +213,7 @@ export default function ProductDetail() {
 
           {/* Botón de Reserva */}
           <div className="mt-4">
-            {product.status.toUpperCase().trim() === 'AVAILABLE' && product.stock > 0 ? (
+            {product.status && product.status.toString().toUpperCase().includes('AVAILABLE') && product.stock > 0 ? (
               <Button 
                 size="xl" 
                 className="w-full font-black text-xl rounded-2xl shadow-lg ring-offset-2 transition-transform active:scale-95"
@@ -224,13 +224,13 @@ export default function ProductDetail() {
                 {reserving ? <Spinner size="sm" className="mr-2" /> : <Icon icon="solar:calendar-mark-bold" className="mr-2 text-2xl" />}
                 RESERVAR AHORA
               </Button>
-            ) : product.status.toUpperCase().trim() === 'SOLD' || product.stock <= 0 ? (
+            ) : (product.status && product.status.toString().toUpperCase().includes('SOLD')) || product.stock <= 0 ? (
               <Button size="xl" color="gray" disabled className="w-full rounded-2xl">
                 AGOTADO
               </Button>
             ) : (
               <Button size="xl" color="gray" disabled className="w-full rounded-2xl">
-                {t("notAvailable")} (Estado: {product.status})
+                {t("notAvailable")} (Estado detectado: {product.status})
               </Button>
             )}
             <p className="text-center text-xs text-gray-400 mt-3 italic">
