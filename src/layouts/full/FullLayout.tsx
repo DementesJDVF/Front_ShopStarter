@@ -77,14 +77,14 @@ const FullLayout: FC = () => {
         </div>
 
         {/* Main Content Column */}
-        <div className="flex flex-col flex-grow min-h-screen relative z-10 bg-transparent dark:bg-darkgray">
+        <div className="flex flex-col flex-grow min-w-0 min-h-screen relative z-10 bg-transparent dark:bg-darkgray">
           {/* Global Header (Actions & Mobile Menu) */}
           <Header /> 
           
           {/* Page Outlet */}
-          <main className="flex-grow p-4 md:p-8 bg-transparent overflow-x-hidden relative">
+          <main className="flex-grow p-4 md:p-6 bg-transparent relative overflow-x-hidden">
             <ScrollToTop>
-              <div className="container-fluid mx-auto max-w-[1600px] animate-fade-in relative z-10">
+              <div className="w-full max-w-[1400px] mx-auto animate-fade-in relative z-10">
                  <Outlet />
               </div>
             </ScrollToTop>

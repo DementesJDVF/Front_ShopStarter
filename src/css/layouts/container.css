@@ -1,8 +1,6 @@
 .page-wrapper {
-    margin-left: 256px;
     transition: .2s ease-in;
-    margin-right: 0px;
-
+    width: 100%;
 }
 
 .simplebar-scrollbar:before {
