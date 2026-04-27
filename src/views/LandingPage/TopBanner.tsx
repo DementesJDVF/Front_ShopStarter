@@ -20,7 +20,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
   return (
     <>
       {/* Navbar principal Glassmorphism Premium */}
-      <nav className="fixed w-full z-40 bg-indigo-50/90 backdrop-blur-2xl border-b border-indigo-100 shadow-xl transition-all duration-500">
+      <nav className="fixed w-full z-40 bg-[#a5a6d1]/90 backdrop-blur-2xl border-b border-indigo-200 shadow-2xl transition-all duration-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20 md:h-24 px-1 sm:px-4">
 
@@ -35,7 +35,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
                 <a
                   key={link.name}
                   href={link.href}
-                  className="relative text-indigo-950 dark:text-white font-black uppercase tracking-widest text-[11px] hover:text-indigo-600 transition-all before:content-[''] before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-0.5 before:bg-indigo-600 hover:before:w-full before:transition-all before:duration-300"
+                  className="relative text-white font-black uppercase tracking-widest text-[11px] hover:text-white/80 transition-all before:content-[''] before:absolute before:-bottom-1 before:left-0 before:w-0 before:h-0.5 before:bg-white hover:before:w-full before:transition-all before:duration-300"
                 >
                   {link.name}
                 </a>
@@ -43,7 +43,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
 
               <Link
                 to="/auth/login"
-                className="text-indigo-950 dark:text-white font-black uppercase tracking-widest text-[11px] hover:text-indigo-600 transition-all"
+                className="text-white font-black uppercase tracking-widest text-[11px] hover:text-white/80 transition-all"
               >
                 {t('nav.login')}
               </Link>
