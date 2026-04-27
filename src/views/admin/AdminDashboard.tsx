@@ -92,7 +92,7 @@ const AdminDashboard: React.FC = () => {
   const handleProductStatus = async (id: string, status: string) => {
     try {
       await api.patch(`products/create/${id}/`, { status });
-      toast.success(`Producto ${status === 'AVAILABLE' ? 'Aprobado' : 'Rechazado'}`);
+      toast.success(`Producto ${status === 'ACTIVE' ? 'Aprobado' : 'Rechazado'}`);
       fetchData();
     } catch (err) { toast.error("Error al actualizar producto"); }
   };
@@ -208,15 +208,15 @@ const AdminDashboard: React.FC = () => {
                         <Table.HeadCell>Moderación</Table.HeadCell>
                     </Table.Head>
                     <Table.Body className="divide-y">
-                        {allProducts.filter(p => p.status === 'PENDING' || p.status === 'AVAILABLE').map(p => (
+                        {allProducts.filter(p => p.status === 'PENDING' || p.status === 'ACTIVE').map(p => (
                             <Table.Row key={p.id}>
                                 <Table.Cell className="font-bold">{p.name}</Table.Cell>
                                 <Table.Cell className="text-xs">{p.vendor_name}</Table.Cell>
                                 <Table.Cell className="font-bold">${Number(p.price).toLocaleString()}</Table.Cell>
-                                <Table.Cell><Badge color={p.status === 'AVAILABLE' ? 'success' : 'warning'}>{p.status}</Badge></Table.Cell>
+                                <Table.Cell><Badge color={p.status === 'ACTIVE' ? 'success' : 'warning'}>{p.status}</Badge></Table.Cell>
                                 <Table.Cell className="flex gap-2">
                                     {p.status === 'PENDING' && (
-                                        <Button color="success" size="xs" onClick={() => handleProductStatus(p.id, 'AVAILABLE')}><HiCheck className="mr-1"/> Aprobar</Button>
+                                        <Button color="success" size="xs" onClick={() => handleProductStatus(p.id, 'ACTIVE')}><HiCheck className="mr-1"/> Aprobar</Button>
                                     )}
                                     <Button color="failure" size="xs" onClick={() => handleDelete('products', p.id)}><HiTrash className="mr-1"/> Eliminar</Button>
                                 </Table.Cell>
