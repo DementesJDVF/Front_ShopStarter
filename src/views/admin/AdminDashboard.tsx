@@ -118,7 +118,7 @@ const AdminDashboard: React.FC = () => {
             <h1 className="text-3xl md:text-5xl font-black text-indigo-900 dark:text-white tracking-tighter uppercase italic">
             ADMIN<span className="text-indigo-500"> DASHBOARD</span>
             </h1>
-            <p className="text-gray-500 font-medium italic">Control Maestro y Moderación</p>
+            <p className="text-gray-600 dark:text-gray-400 font-medium italic">Control Maestro y Moderación</p>
         </div>
         <div className="flex gap-2">
             <Badge color="success" size="lg" className="px-4 py-2 border border-green-200">
@@ -135,19 +135,19 @@ const AdminDashboard: React.FC = () => {
                   <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl">
                     <div className="flex items-center gap-4">
                         <div className="p-4 bg-primary/10 rounded-2xl"><Icon icon="solar:users-group-rounded-bold-duotone" className="text-primary" height="32" /></div>
-                        <div><p className="text-sm font-bold text-gray-400 uppercase">Usuarios</p><h3 className="text-4xl font-black text-gray-900 dark:text-white">{users.length}</h3></div>
+                        <div><p className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">Usuarios</p><h3 className="text-4xl font-black text-gray-900 dark:text-white">{users.length}</h3></div>
                     </div>
                   </Card>
                   <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl">
                     <div className="flex items-center gap-4">
                         <div className="p-4 bg-secondary/10 rounded-2xl"><Icon icon="solar:box-minimalistic-bold-duotone" className="text-secondary" height="32" /></div>
-                        <div><p className="text-sm font-bold text-gray-400 uppercase">Pendientes</p><h3 className="text-4xl font-black text-gray-900 dark:text-white">{pendingProducts.length}</h3></div>
+                        <div><p className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">Pendientes</p><h3 className="text-4xl font-black text-gray-900 dark:text-white">{pendingProducts.length}</h3></div>
                     </div>
                   </Card>
                   <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl border-l-4 border-l-green-500">
                     <div className="flex items-center gap-4">
                         <div className="p-4 bg-green-100 dark:bg-green-900/30 rounded-2xl"><HiShoppingCart className="text-green-600" size={32} /></div>
-                        <div><p className="text-sm font-bold text-gray-400 uppercase">Ventas</p><h3 className="text-4xl font-black text-green-600">{orders.length}</h3></div>
+                        <div><p className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">Ventas</p><h3 className="text-4xl font-black text-green-600">{orders.length}</h3></div>
                     </div>
                   </Card>
               </div>

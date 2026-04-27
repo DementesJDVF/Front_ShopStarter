@@ -38,8 +38,8 @@ const Profile = ({ variant = "dark" }: ProfileProps) => {
               />
             </span>
             <div className="text-left hidden sm:block">
-               <p className={`text-sm font-bold ${isDark ? 'text-dark' : 'text-white'}`}>{user?.username || t('profile.userFallback')}</p>
-               <p className={`text-xs uppercase ${isDark ? 'text-gray-500' : 'text-white/70'}`}>{user?.role}</p>
+               <p className={`text-sm font-bold ${isDark ? 'text-gray-900 dark:text-white' : 'text-white'}`}>{user?.username || t('profile.userFallback')}</p>
+               <p className={`text-xs uppercase font-black ${isDark ? 'text-gray-600 dark:text-gray-300' : 'text-white/90'}`}>{user?.role}</p>
             </div>
           </div>
         )}
@@ -48,25 +48,25 @@ const Profile = ({ variant = "dark" }: ProfileProps) => {
         <Dropdown.Item
           as={Link}
           to="#"
-          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-white hover:bg-primary/20"
+          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-gray-700 dark:text-white hover:bg-primary/10"
         >
-          <Icon icon="solar:user-circle-outline" className="text-white" height={20} />
+          <Icon icon="solar:user-circle-outline" className="text-gray-500 dark:text-gray-400" height={20} />
           {t('profile.myProfile')}
         </Dropdown.Item>
         <Dropdown.Item
           as={Link}
           to="#"
-          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-white hover:bg-primary/20"
+          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-gray-700 dark:text-white hover:bg-primary/10"
         >
-          <Icon icon="solar:letter-linear" className="text-white" height={20} />
+          <Icon icon="solar:letter-linear" className="text-gray-500 dark:text-gray-400" height={20} />
           {t('profile.myAccount')}
         </Dropdown.Item>
         <Dropdown.Item
           as={Link}
           to="/usuario/seguridad"
-          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-white hover:bg-primary/20"
+          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-gray-700 dark:text-white hover:bg-primary/10"
         >
-          <Icon icon="solar:shield-keyhole-linear" className="text-white" height={20} />
+          <Icon icon="solar:shield-keyhole-linear" className="text-gray-500 dark:text-gray-400" height={20} />
           {t('profile.security')}
         </Dropdown.Item>
 
@@ -74,7 +74,7 @@ const Profile = ({ variant = "dark" }: ProfileProps) => {
           <Button 
             onClick={handleLogout}
             size={'sm'} 
-            className="w-full mt-2 border border-white/50 text-white bg-primary/20 hover:bg-primary transition-all duration-300"
+            className="w-full mt-2 border border-primary/20 text-gray-800 dark:text-white bg-primary/10 hover:bg-primary hover:text-white transition-all duration-300 rounded-xl"
           >
             {t('profile.logout')}
           </Button>

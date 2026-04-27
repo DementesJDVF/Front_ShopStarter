@@ -69,7 +69,7 @@ const SidebarLayout: React.FC<SidebarProps> = ({ isHovered }) => {
             {filteredContent?.map((item, index) => (
               <div className="mb-6 pt-2" key={item.heading ?? index}>
                 {!isCollapsed && (
-                  <h5 className="text-white/40 font-black text-[11px] mb-4 uppercase tracking-[0.2em] transition-opacity duration-300 px-2">
+                  <h5 className="text-white/70 font-black text-[11px] mb-4 uppercase tracking-[0.2em] transition-opacity duration-300 px-2">
                     {t(item.heading ?? "")}
                   </h5>
                 )}

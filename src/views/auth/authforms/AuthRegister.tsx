@@ -135,8 +135,8 @@ const AuthRegister = () => {
                 <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6">
                     <Icon icon="solar:check-circle-bold-duotone" className="text-6xl text-green-500" />
                 </div>
-                <h2 className="text-3xl font-black text-slate-900 mb-4">{t("success.title")}</h2>
-                <p className="text-slate-600 mb-8 max-w-sm">{t("success.description")}</p>
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-4">{t("success.title")}</h2>
+                <p className="text-slate-600 dark:text-slate-300 mb-8 max-w-sm">{t("success.description")}</p>
                 <Link to="/auth/login" className="bg-[#3A17E4] text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest hover:shadow-xl transition-all">
                     {t("success.goToLogin")}
                 </Link>
@@ -149,8 +149,8 @@ const AuthRegister = () => {
             <div className="glass-card-premium p-8 sm:p-10 border border-white/50 dark:border-white/10 shadow-2xl">
 
                 <div className="text-center mb-8">
-                    <h2 className="text-2xl font-black text-[#0A014A] tracking-tighter mb-2">{t("form.title")}</h2>
-                    <p className="text-xs font-bold text-slate-500/80 uppercase tracking-[0.2em]">{t("form.subtitle")}</p>
+                    <h2 className="text-2xl font-black text-[#0A014A] dark:text-white tracking-tighter mb-2">{t("form.title")}</h2>
+                    <p className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-[0.2em]">{t("form.subtitle")}</p>
                 </div>
 
                 {/* Barra de Progreso Visual */}
@@ -206,8 +206,8 @@ const AuthRegister = () => {
                                     </p>
                                     <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
                                         formData.password.length === 0 ? 'text-slate-400' :
-                                        formData.password.length < 8 ? 'text-red-500 bg-red-50' :
-                                        formData.password.length < 12 ? 'text-orange-500 bg-orange-50' : 'text-green-500 bg-green-50'
+                                        formData.password.length < 8 ? 'text-red-500 bg-red-50 dark:bg-red-900/20' :
+                                        formData.password.length < 12 ? 'text-orange-500 bg-orange-50 dark:bg-orange-900/20' : 'text-green-500 bg-green-50 dark:bg-green-900/20'
                                     }`}>
                                         {formData.password.length === 0 ? t("form.strengthEmpty") :
                                          formData.password.length < 8 ? t("form.strengthWeak") :
@@ -228,22 +228,22 @@ const AuthRegister = () => {
                         <div className="flex flex-col gap-5 animate-fade-in">
                             <div>
                                 <Label value={t("form.labelFullName")} className="text-[11px] font-extrabold text-[#0A014A] dark:text-slate-300 uppercase tracking-wider ml-1 mb-1.5 block" />
-                                <TextInput id="full_name" required value={formData.full_name} onChange={handleChange} placeholder="ej: Juan Pérez" className="mt-1 form-rounded-xl" />
+                                <TextInput id="full_name" required value={formData.full_name} onChange={handleChange} placeholder="ej: Juan Pérez" className="mt-1 form-rounded-xl dark:!text-white" />
                             </div>
 
                             {formData.role === 'VENDEDOR' && (
                                 <>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <Label value={t("form.labelDocType")} className="text-[11px] font-extrabold text-[#0A014A] uppercase tracking-wider ml-1 mb-1.5 block" />
-                                            <Select id="document_type" value={formData.document_type} onChange={handleChange} className="mt-1 form-rounded-xl rounded-2xl">
+                                            <Label value={t("form.labelDocType")} className="text-[11px] font-extrabold text-[#0A014A] dark:text-slate-300 uppercase tracking-wider ml-1 mb-1.5 block" />
+                                            <Select id="document_type" value={formData.document_type} onChange={handleChange} className="mt-1 form-rounded-xl rounded-2xl dark:bg-slate-800 dark:text-white">
                                                 <option value="CC">{t("form.optionCC")}</option>
                                                 <option value="NIT">{t("form.optionNIT")}</option>
                                             </Select>
                                         </div>
                                         <div>
-                                            <Label value={t("form.labelDocNumber")} className="text-[11px] font-extrabold text-[#0A014A] uppercase tracking-wider ml-1 mb-1.5 block" />
-                                            <TextInput id="document_number" required value={formData.document_number} onChange={handleChange} placeholder="Número" className="mt-1 form-rounded-xl" />
+                                            <Label value={t("form.labelDocNumber")} className="text-[11px] font-extrabold text-[#0A014A] dark:text-slate-300 uppercase tracking-wider ml-1 mb-1.5 block" />
+                                            <TextInput id="document_number" required value={formData.document_number} onChange={handleChange} placeholder="Número" className="mt-1 form-rounded-xl dark:!text-white" />
                                         </div>
                                     </div>
 

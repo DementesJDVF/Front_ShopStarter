@@ -58,7 +58,7 @@ const GreetingClock = ({ user }: { user: any }) => {
 
       {/* Saludo y Fecha */}
       <div className="flex flex-col -mt-0.5 relative z-10">
-        <span className="text-[10px] font-bold text-[#3A17E4]/50 dark:text-white/40 uppercase tracking-[0.2em]">
+        <span className="text-[10px] font-black text-indigo-700 dark:text-white/70 uppercase tracking-[0.2em]">
           {dateString}
         </span>
         <div className="flex items-center gap-2">
@@ -84,7 +84,7 @@ const GreetingClock = ({ user }: { user: any }) => {
           className="text-xl animate-spin-slow"
           style={{ animationDuration: "8s" }}
         />
-        <span className="text-base font-black tracking-tight text-[#0A014A] dark:text-white">
+        <span className="text-base font-black tracking-tight text-indigo-900 dark:text-white">
           {timeString}
         </span>
       </div>

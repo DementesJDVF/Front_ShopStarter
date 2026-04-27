@@ -3,49 +3,50 @@
     --color-secondary: #16CDC7;
     --color-primary-emphasis: #5249fe;
     --color-secondary-emphasis: #1cc3bd;
-    --color-lightprimary: #635BFF40;
-    --color-lightsecondary: #16CDC740;
-    --color-info: #46CAEB;
-    --color-success: #36c96c;
-    --color-warning: #f8c20a;
-    --color-error: #FF6692;
-    --color-lightsuccess: #2EA95C40;
-    --color-lighterror: #FF669260;
-    --color-lightinfo: #46caeb40;
-    --color-lightwarning: #F8C20A40;
+    --color-lightprimary: #635BFF25;
+    --color-lightsecondary: #16CDC725;
+    --color-info: #0EA5E9;
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+    --color-error: #EF4444;
+    --color-lightsuccess: #10B98120;
+    --color-lighterror: #EF444420;
+    --color-lightinfo: #0EA5E920;
+    --color-lightwarning: #F59E0B20;
     --color-white: #fff;
-    --color-dark: #1F2A3D;
-    --color-border: #e0e6eb;
-    --color-bordergray: #f3f3f4;
-    --color-darkborder: #333F55;
-    --color-link: #2a3547;
-    --color-muted: #EFF4FA;
-    --color-darkmuted: #2A3851;
-    --color-darklink: #29343d;
-    --color-lightgray: #F4F7FB;
-    --color-lighthover: #f6f7f9;
-    --color-darkgray: #1A2537;
+    --color-dark: #0F172A;
+    --color-border: #E2E8F0;
+    --color-bordergray: #F1F5F9;
+    --color-darkborder: #334155;
+    --color-link: #475569;
+    --color-muted: #F8FAFC;
+    --color-darkmuted: #1E293B;
+    --color-darklink: #F8FAFC;
+    --color-lightgray: #F1F5F9;
+    --color-lighthover: #F8FAFC;
+    --color-darkgray: #0B1121;
     --color-sky: #0A2540;
-    --color-error-emphasis: #d9577c;
-    --color-warning-emphasis: #d3a509;
-    --color-success-emphasis: #2ea95c;
-    --color-info-emphasis: #3cacc8;
+    --color-error-emphasis: #DC2626;
+    --color-warning-emphasis: #D97706;
+    --color-success-emphasis: #059669;
+    --color-info-emphasis: #0284C7;
     --color-surface-ld: #ffffff;
-    --color-bodytext: #98A4AE;
-    --glow-color: rgba(255, 152, 0, 0.1); /* Warm solar glow */
+    --color-bodytext: #475569; /* Slate 600 - Perfect contrast for body text */
+    --color-heading: #0F172A;  /* Slate 900 - Deep and clear */
+    --glow-color: rgba(255, 152, 0, 0.08);
 }
 
 .dark {
-    /* Premium Deep Slate/Indigo Dark Mode Palette */
-    --color-surface-ld: #0f172a;    /* Deep slate for general surface */
-    --color-darkgray: #0B1121;      /* Very deep backdrop (Main App Bg) */
-    --color-dark: #1e293b;          /* Elevated elements (Cards, Sidebars) */
-    --color-dark-light: #161C2E;    /* Internal card panels */
-    --color-darkmuted: #1e293b;     /* Muted/hover backgrounds */
-    --color-border: #1e293b;        /* Subtle slate borders */
-    --color-darkborder: #2B3856;    /* Enhanced borders for inputs/active elements */
-    --color-bodytext: #94a3b8;      /* Clear readable typography */
-    --color-lighthover: #1e293b;    /* Hover interactions */
-    --color-darklink: #f8fafc;      /* High contrast text */
-    --glow-color: rgba(99, 91, 255, 0.15); /* Soft purple lunar glow */
+    --color-surface-ld: #0f172a;
+    --color-darkgray: #020617;      /* More deep backdrop */
+    --color-dark: #1e293b;
+    --color-dark-light: #161C2E;
+    --color-darkmuted: #1e293b;
+    --color-border: #334155;
+    --color-darkborder: #475569;
+    --color-bodytext: #CBD5E1;     /* Slate 300 - High contrast on dark */
+    --color-heading: #F8FAFC;      /* Slate 50 - Brilliant white-ish */
+    --color-lighthover: #1e293b;
+    --color-darklink: #F8FAFC;
+    --glow-color: rgba(99, 91, 255, 0.12);
 }

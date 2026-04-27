@@ -22,7 +22,7 @@ const NavItems: React.FC<NavItemsProps> = ({ item, isCollapsed = false }) => {
       as={Link}
       className={`transition-all duration-300 w-full block ${item.url == pathname
           ? "text-white bg-white/20 backdrop-blur-md shadow-xl rounded-xl border border-white/20"
-          : "text-white/60 font-bold bg-transparent group/link hover:bg-white/10 hover:text-white"
+          : "text-white/90 font-bold bg-transparent group/link hover:bg-white/10 hover:text-white"
         } ${isCollapsed ? 'px-2' : 'px-4 mb-1'}`}
     >
       <div className={`flex items-center gap-3 w-full transition-all duration-300`}>
