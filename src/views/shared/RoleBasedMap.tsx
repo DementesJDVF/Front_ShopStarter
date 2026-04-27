@@ -195,6 +195,9 @@ const RoleBasedMap: React.FC = () => {
             const markers: any[] = [];
             locations.forEach((loc: any) => {
                 if (!loc?.latitude || !loc?.longitude) return; // saltar entradas incompletas
+                
+                // Si la ubicación está apagada, NO la mostramos en el mapa (limpieza total solicitada)
+                if (loc.is_active === false) return;
 
                 const isInactive = loc.is_active === false;
                 const markerHtml = `
