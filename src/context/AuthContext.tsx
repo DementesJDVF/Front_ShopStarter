@@ -62,21 +62,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // El servidor lo ha guardado en una Cookie HttpOnly de este origen.
   };
 
-  const logout = () => {
-    // 1. Invalidad sesión en el servidor (Eliminar Cookies HttpOnly)
-    api.post('auth/logout/').catch(() => {
-        // Si falla (ej: sin red), intentamos por GET como respaldo
-        api.get('auth/logout/').catch(() => {});
-    });
-
-    // 2. Limpieza de estado local
-    setUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    sessionStorage.clear();
-    
-    // Opcional: Redirigir al login
-    window.location.href = '/auth/login';
+  const logout = async () => {
+    try {
+        // 1. Notificar al backend para invalidar la sesión y borrar Cookies HttpOnly
+        await api.post('auth/logout/');
+    } catch (error) {
+        console.error("Logout falló en servidor, forzando limpieza local:", error);
+    } finally {
+        // 2. LIMPIEZA ABSOLUTA DE ESTADO (Principio Fail-Secure)
+        setUser(null);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token'); // Por si acaso hubiera basura
+        sessionStorage.clear();
+        
+        // 3. REDIRECCIÓN FORZADA
+        // Usamos window.location.href para resetear todo el estado de React y la caché
+        window.location.href = '/';
+    }
   };
 
   return (

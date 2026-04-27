@@ -84,7 +84,7 @@ api.interceptors.response.use(
         // Si el token es basura/inválido, no intentamos refrescar, cerramos sesión de una.
         localStorage.removeItem('user');
         toast.error('Tu sesión es inválida. Inicia sesión de nuevo.');
-        window.location.href = '/auth/login';
+        window.location.href = '/';
         return Promise.reject(error);
       }
 
@@ -114,7 +114,7 @@ api.interceptors.response.use(
           const isPublicPath = window.location.pathname === '/' || window.location.pathname.startsWith('/auth');
           if (!isPublicPath) {
             toast.error('Tu sesión ha finalizado por seguridad. Inicia de nuevo.');
-            window.location.href = '/auth/login';
+            window.location.href = '/';
           }
           return Promise.reject(err);
         } finally {
