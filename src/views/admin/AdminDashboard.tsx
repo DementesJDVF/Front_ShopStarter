@@ -12,6 +12,7 @@ import UnauthorizedScreen from '../../components/shared/UnauthorizedScreen';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import VendorMap from '../../components/geo/VendorMap';
+import { getAbsoluteImageUrl } from '../../utils/urlHelper';
 
 // Componentes Analíticos Premium (Imports por defecto corregidos)
 import { RevenueForecast } from '../../components/dashboard/RevenueForecast';
@@ -108,7 +109,7 @@ const AdminDashboard: React.FC = () => {
   const getProductImage = (images: any[]) => {
       if (!images || images.length === 0) return 'https://via.placeholder.com/150';
       const main = images.find(img => img.is_main) || images[0];
-      return main.url_image || 'https://via.placeholder.com/150';
+      return getAbsoluteImageUrl(main.url_image);
   };
 
   return (
@@ -214,7 +215,7 @@ const AdminDashboard: React.FC = () => {
                         <Table.HeadCell>Moderación</Table.HeadCell>
                     </Table.Head>
                     <Table.Body className="divide-y">
-                        {allProducts.filter(p => p.status === 'PENDING' || p.status === 'AVAILABLE').map(p => (
+                        {allProducts.filter(p => ['PENDING', 'AVAILABLE', 'REJECTED'].includes(p.status)).map(p => (
                             <Table.Row key={p.id}>
                                 <Table.Cell>
                                     <img src={getProductImage(p.images || [])} alt={p.name} className="w-12 h-12 rounded-xl object-cover shadow-sm border border-gray-100" />

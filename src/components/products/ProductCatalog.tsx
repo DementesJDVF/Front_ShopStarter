@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { optimizeImageUrl } from "../../utils/imageOptimizer";
+import { getAbsoluteImageUrl } from "../../utils/urlHelper";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Label, Select, Spinner } from "flowbite-react";
@@ -74,7 +75,8 @@ export function ProductCatalog() {
    * Gestiona la adición de un producto al carrito local.
    */
   const handleAddToCart = (p: ApiProduct) => {
-    const mainImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
+    const rawImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
+    const mainImage = getAbsoluteImageUrl(rawImage);
     addToCart({
       id: p.id.toString(),
       name: p.name,
@@ -205,9 +207,10 @@ export function ProductCatalog() {
           </div>
         ) : (
           filteredProducts.map((p) => {
-            const mainImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
+            const rawImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
+            const mainImage = getAbsoluteImageUrl(rawImage);
             const isOutOfStock = p.stock <= 0;
-            const isNotAvailable = p.status !== 'ACTIVE';
+            const isNotAvailable = p.status !== 'AVAILABLE';
             const canPurchase = !isOutOfStock && !isNotAvailable;
             
             return (
