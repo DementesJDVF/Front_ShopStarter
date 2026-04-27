@@ -42,7 +42,16 @@ const Notification = ({ variant = "dark" }: NotificationProps) => {
             await api.post(`core/notifications/${id}/mark_as_read/`);
         },
         onSuccess: () => {
-            // Invalidar la caché para forzar una recarga de las notificaciones tras el cambio
+            queryClient.invalidateQueries({ queryKey: ["notifications"] });
+        },
+    });
+
+    // Mutación para borrar una notificación
+    const deleteNotification = useMutation({
+        mutationFn: async (id: string) => {
+            await api.delete(`core/notifications/${id}/`);
+        },
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["notifications"] });
         },
     });
@@ -106,7 +115,19 @@ const Notification = ({ variant = "dark" }: NotificationProps) => {
                                     <span className={`text-xs font-bold ${!item.is_read ? 'text-primary' : 'text-gray-700 dark:text-gray-200'}`}>
                                         {item.title}
                                     </span>
-                                    {!item.is_read && <span className="h-1.5 w-1.5 rounded-full bg-primary mt-1"></span>}
+                                    <div className="flex items-center gap-2">
+                                        {!item.is_read && <span className="h-1.5 w-1.5 rounded-full bg-primary"></span>}
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                deleteNotification.mutate(item.id);
+                                            }}
+                                            className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                                            title="Borrar notificación"
+                                        >
+                                            <Icon icon="solar:close-circle-bold" height={16} />
+                                        </button>
+                                    </div>
                                 </div>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
                                     {item.message}
