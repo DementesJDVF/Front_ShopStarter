@@ -13,7 +13,7 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import VendorMap from '../../components/geo/VendorMap';
 
-// Componentes Analíticos Premium
+// Componentes Analíticos Premium (Imports por defecto corregidos)
 import { RevenueForecast } from '../../components/dashboard/RevenueForecast';
 import TotalIncome from '../../components/dashboard/TotalIncome';
 import NewCustomers from '../../components/dashboard/NewCustomers';
@@ -44,23 +44,11 @@ const AdminDashboard: React.FC = () => {
   const [pendingProducts, setPendingProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Estados para Previsualización de Imagen
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [previewTitle, setPreviewTitle] = useState('');
-
-  const openPreview = (url: string, title: string) => {
-    setPreviewUrl(url);
-    setPreviewTitle(title);
-    setIsPreviewOpen(true);
-  };
 
   if (!authLoading && (!user || user.role !== 'ADMIN')) {
     return <UnauthorizedScreen code={403} message="Solo Administradores." />;
   }
 
-  // Sincronización con las rutas del Sidebar
   useEffect(() => {
     if (location.pathname.includes('usuarios')) setCurrentView(2);
     else if (location.pathname.includes('categorias')) setCurrentView(1);
@@ -80,8 +68,8 @@ const AdminDashboard: React.FC = () => {
       ]);
       const pData = pRes.data.results || pRes.data;
       setUsers(uRes.data);
-      setAllProducts(pData);
-      setPendingProducts(pData.filter((p: any) => p.status === 'PENDING'));
+      setAllProducts(Array.isArray(pData) ? pData : []);
+      setPendingProducts(Array.isArray(pData) ? pData.filter((p: any) => p.status === 'PENDING') : []);
       setOrders(oRes.data.results || oRes.data);
     } catch (err) {
       console.error("Error cargando datos", err);
@@ -103,7 +91,7 @@ const AdminDashboard: React.FC = () => {
   const handleProductStatus = async (id: string, status: string) => {
     try {
       await api.patch(`products/create/${id}/`, { status });
-      toast.success(`Producto ${status === 'ACTIVE' ? 'Aprobado' : 'Rechazado'}`);
+      toast.success(`Producto ${status === 'AVAILABLE' ? 'Aprobado' : 'Rechazado'}`);
       fetchData();
     } catch (err) { toast.error("Error al actualizar producto"); }
   };
@@ -115,6 +103,12 @@ const AdminDashboard: React.FC = () => {
       toast.success("Eliminado correctamente.");
       fetchData();
     } catch (err) { toast.error("Error al eliminar."); }
+  };
+
+  const getProductImage = (images: any[]) => {
+      if (!images || images.length === 0) return 'https://via.placeholder.com/150';
+      const main = images.find(img => img.is_main) || images[0];
+      return main.url_image || 'https://via.placeholder.com/150';
   };
 
   return (
@@ -220,31 +214,26 @@ const AdminDashboard: React.FC = () => {
                         <Table.HeadCell>Moderación</Table.HeadCell>
                     </Table.Head>
                     <Table.Body className="divide-y">
-                        {allProducts.filter(p => p.status === 'PENDING' || p.status === 'ACTIVE').map(p => (
+                        {allProducts.filter(p => p.status === 'PENDING' || p.status === 'AVAILABLE').map(p => (
                             <Table.Row key={p.id}>
                                 <Table.Cell>
-                                    {p.images && p.images.length > 0 ? (
-                                        <img 
-                                            src={p.images.find(img => img.is_main)?.url_image || p.images[0].url_image} 
-                                            alt={p.name} 
-                                            className="w-12 h-12 object-cover rounded-lg cursor-zoom-in hover:scale-110 transition-transform"
-                                            onClick={() => openPreview(p.images?.find(img => img.is_main)?.url_image || p.images?.[0].url_image, p.name)}
-                                        />
-                                    ) : (
-                                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                                            <Icon icon="solar:gallery-bold-duotone" className="text-gray-300" />
-                                        </div>
-                                    )}
+                                    <img src={getProductImage(p.images || [])} alt={p.name} className="w-12 h-12 rounded-xl object-cover shadow-sm border border-gray-100" />
                                 </Table.Cell>
                                 <Table.Cell className="font-bold">{p.name}</Table.Cell>
                                 <Table.Cell className="text-xs">{p.vendor_name}</Table.Cell>
-                                <Table.Cell className="font-bold">${Number(p.price).toLocaleString()}</Table.Cell>
-                                <Table.Cell><Badge color={p.status === 'ACTIVE' ? 'success' : 'warning'}>{p.status}</Badge></Table.Cell>
+                                <Table.Cell className="font-bold text-indigo-600">${Number(p.price).toLocaleString()}</Table.Cell>
+                                <Table.Cell>
+                                    <Badge color={p.status === 'AVAILABLE' ? 'success' : 'warning'}>{p.status}</Badge>
+                                </Table.Cell>
                                 <Table.Cell className="flex gap-2">
                                     {p.status === 'PENDING' && (
-                                        <Button color="success" size="xs" onClick={() => handleProductStatus(p.id, 'ACTIVE')}><HiCheck className="mr-1"/> Aprobar</Button>
+                                        <Button color="success" size="xs" onClick={() => handleProductStatus(p.id, 'AVAILABLE')}>
+                                            <HiCheck className="mr-1"/> Aprobar
+                                        </Button>
                                     )}
-                                    <Button color="failure" size="xs" onClick={() => handleDelete('products', p.id)}><HiTrash className="mr-1"/> Eliminar</Button>
+                                    <Button color="failure" size="xs" onClick={() => handleDelete('products', p.id)}>
+                                        <HiTrash className="mr-1"/> Eliminar
+                                    </Button>
                                 </Table.Cell>
                             </Table.Row>
                         ))}
@@ -291,14 +280,6 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Modal de Previsualización de Imagen */}
-      <ImagePreviewModal 
-        isOpen={isPreviewOpen} 
-        onClose={() => setIsPreviewOpen(false)} 
-        imageUrl={previewUrl} 
-        title={previewTitle} 
-      />
     </div>
   );
 };
