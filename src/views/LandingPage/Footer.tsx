@@ -12,13 +12,14 @@ const Icons = {
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-gray-300">
+    <footer className="bg-slate-950 text-slate-400 border-t border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         {/* Parte Superior: Newsletter y Logo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12 pb-12 border-b border-gray-800">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12 pb-12 border-b border-white/5">
           <div>
-            <h3 className="text-2xl font-bold text-white mb-4">shop_starter</h3>
+            <h3 className="text-3xl font-black text-white tracking-tighter italic">SHOP<span className="text-indigo-500">STARTER</span></h3>
+            <p className="text-sm text-slate-500 mt-2 font-bold italic">Impulsando el emprendimiento local.</p>
           </div>
           
           <div className="md:text-right">
@@ -31,59 +32,58 @@ const Footer = () => {
         {/* Parte Media: Enlaces de Navegación */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div>
-            <h5 className="text-white font-bold mb-4">Producto</h5>
-            <ul className="space-y-2">
-              <li><a href="#" className="hover:text-indigo-400 transition">Características</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition">Plantillas</a></li>
+            <h5 className="text-white font-black uppercase tracking-widest text-xs mb-6">Producto</h5>
+            <ul className="space-y-4">
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Características</a></li>
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Plantillas</a></li>
             
-              <li><a href="#" className="hover:text-indigo-400 transition">Changelog</a></li>
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Changelog</a></li>
             </ul>
           </div>
           
           <div>
-            <h5 className="text-white font-bold mb-4">Recursos</h5>
-            <ul className="space-y-2">
-              <li><a href="#" className="hover:text-indigo-400 transition">Documentación</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition">Guías de API</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition">Soporte</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition">Comunidad</a></li>
+            <h5 className="text-white font-black uppercase tracking-widest text-xs mb-6">Recursos</h5>
+            <ul className="space-y-4">
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Documentación</a></li>
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Guías de API</a></li>
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Soporte</a></li>
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Comunidad</a></li>
             </ul>
           </div>
 
           <div>
-            <h5 className="text-white font-bold mb-4">Compañía</h5>
-            <ul className="space-y-2">
-              <li><a href="#" className="hover:text-indigo-400 transition">Sobre Nosotros</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition">Blog</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition">Carreras</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition">Contacto</a></li>
+            <h5 className="text-white font-black uppercase tracking-widest text-xs mb-6">Compañía</h5>
+            <ul className="space-y-4">
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Sobre Nosotros</a></li>
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Blog</a></li>
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Carreras</a></li>
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Contacto</a></li>
             </ul>
           </div>
 
           <div>
-            <h5 className="text-white font-bold mb-4">Legal</h5>
-            <ul className="space-y-2">
-              <li><a href="#" className="hover:text-indigo-400 transition">Privacidad</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition">Términos</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition">Licencia</a></li>
+            <h5 className="text-white font-black uppercase tracking-widest text-xs mb-6">Legal</h5>
+            <ul className="space-y-4">
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Privacidad</a></li>
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Términos</a></li>
+              <li><a href="#" className="hover:text-indigo-400 transition font-bold">Licencia</a></li>
             </ul>
           </div>
         </div>
 
         {/* Parte Inferior: Copyright y Redes */}
-        <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-800">
-          <p className="text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} shop_starter Inc. Todos los derechos reservados.
+        <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/5">
+          <p className="text-sm text-slate-600 font-bold">
+            &copy; {new Date().getFullYear()} ShopStarter Inc. Todos los derechos reservados.
           </p>
           
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-gray-400 hover:text-white transition transform hover:scale-110">
+            <a href="#" className="text-slate-500 hover:text-white transition transform hover:scale-110">
               <Icons.Twitter />
             </a>
-            <a href="#" className="text-gray-400 hover:text-white transition transform hover:scale-110">
+            <a href="#" className="text-slate-500 hover:text-white transition transform hover:scale-110">
               <Icons.GitHub />
             </a>
-            {/* Puedes añadir más iconos aquí */}
           </div>
         </div>
       </div>
