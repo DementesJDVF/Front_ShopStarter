@@ -13,9 +13,11 @@ import { optimizeImageUrl } from "../../utils/imageOptimizer";
 interface Product {
   id: string | number;
   name: string;
+  description?: string;
   price: number;
   status: string;
   stock: number;
+  category?: string | number;
   category_name: string;
   images: Array<{ url_image: string; is_main: boolean }>;
 }
@@ -74,7 +76,7 @@ const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handle
           </Table.Cell>
           <Table.Cell>
             <Badge
-              color={product.status === 'ACTIVE' ? 'success' : 'lightsecondary'}
+              color={product.status === 'AVAILABLE' ? 'success' : 'lightsecondary'}
               className="uppercase"
             >
               {product.status || t('table.status.noStatus')}
