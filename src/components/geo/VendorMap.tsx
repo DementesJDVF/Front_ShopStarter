@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import api from '../../utils/axios';
-import { Spinner } from 'flowbite-react';
+import { Spinner, Button } from 'flowbite-react';
+import { useMap } from '../../context/MapContext';
+import { Icon } from '@iconify/react';
 
 interface VendorMapProps {
   isAdmin?: boolean;
@@ -12,7 +14,9 @@ interface VendorMapProps {
 const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMap = useRef<any>(null);
+  const routingLayer = useRef<any>(null); // 🔥 Para limpiar el camino anterior
   const [loading, setLoading] = useState(true);
+  const { userLocation, requestLocation } = useMap();
 
   const initMap = async () => {
     const L = (window as any).L;
@@ -22,7 +26,8 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
         leafletMap.current.remove();
     }
 
-    leafletMap.current = L.map(mapRef.current).setView([2.4419, -76.6062], 13);
+    leafletMap.current = L.map(mapRef.current, { zoomControl: false }).setView([2.4419, -76.6062], 13);
+    L.control.zoom({ position: 'bottomright' }).addTo(leafletMap.current);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -37,6 +42,19 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
       // 🔥 CORRECCIÓN: Manejar tanto arrays como objetos con 'results' (DRF Pagination)
       const data = response.data.results || response.data;
       const locations = Array.isArray(data) ? data : [];
+
+      // Marcador de usuario (Si existe)
+      if (userLocation) {
+          const userIcon = L.divIcon({
+              className: 'custom-div-icon',
+              html: `<div style="background-color: #3b82f6; width: 15px; height: 15px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>`,
+              iconSize: [15, 15],
+              iconAnchor: [7, 7]
+          });
+          L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
+            .addTo(leafletMap.current)
+            .bindPopup("<b>Tú estás aquí</b>");
+      }
 
       if (locations.length > 0) {
         const markers: any[] = [];
@@ -78,6 +96,29 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
             const marker = L.marker([Number(loc.latitude), Number(loc.longitude)])
               .addTo(leafletMap.current)
               .bindPopup(popupContent);
+
+            // 🔥 CAMINO RÁPIDO (GAME MODE)
+            marker.on('click', () => {
+                if (userLocation && !isAdmin) {
+                    // Limpiar camino anterior
+                    if (routingLayer.current) leafletMap.current.removeLayer(routingLayer.current);
+                    
+                    // Dibujar línea "Neon"
+                    routingLayer.current = L.polyline([
+                        [userLocation.lat, userLocation.lng],
+                        [Number(loc.latitude), Number(loc.longitude)]
+                    ], {
+                        color: '#6366f1',
+                        weight: 5,
+                        opacity: 0.7,
+                        dashArray: '10, 10',
+                        lineCap: 'round'
+                    }).addTo(leafletMap.current);
+                    
+                    leafletMap.current.fitBounds(routingLayer.current.getBounds().pad(0.2));
+                }
+            });
+
             markers.push(marker);
           }
         });
@@ -109,7 +150,15 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
       }
       clearInterval(checkLeaflet);
     };
-  }, [isAdmin]); // 🔥 Re-inicializar si cambia el rol
+  }, [isAdmin, userLocation]); // 🔥 Re-inicializar si cambia el rol o mi ubicación
+
+  useEffect(() => {
+    // 🔥 REAL-TIME MAP: Refrescar locaciones cada 15 segundos
+    const interval = setInterval(() => {
+        initMap();
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [isAdmin, userLocation]);
 
   return (
     <div className="relative w-full h-full min-h-[500px] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800">

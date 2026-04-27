@@ -12,6 +12,7 @@ interface Order {
   status: string;
   total: number;
   created_at: string;
+  payment_notified: boolean;
 }
 
 const VendorOrders: React.FC = () => {
@@ -108,7 +109,14 @@ const VendorOrders: React.FC = () => {
                   <Table.Row key={order.id} className="bg-white hover:bg-indigo-50/30 transition-colors">
                     <Table.Cell className="font-black text-gray-900 py-5">{order.product_name}</Table.Cell>
                     <Table.Cell className="font-medium text-gray-500">{order.client_name}</Table.Cell>
-                    <Table.Cell>{getStatusBadge(order.status)}</Table.Cell>
+                    <Table.Cell>
+                        <div className="flex flex-col gap-1">
+                            {getStatusBadge(order.status)}
+                            {order.status === 'RESERVED' && order.payment_notified && (
+                                <Badge color="info" className="animate-pulse rounded-lg font-black text-[10px]">PAGO REPORTADO</Badge>
+                            )}
+                        </div>
+                    </Table.Cell>
                     <Table.Cell className="font-bold text-indigo-600">${Number(order.total).toLocaleString()}</Table.Cell>
                     <Table.Cell className="flex justify-center gap-2">
                       {order.status === 'RESERVED' && (

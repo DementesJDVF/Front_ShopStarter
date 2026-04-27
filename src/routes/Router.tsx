@@ -24,6 +24,7 @@ const RoleBasedMap = lazy(() => import('../views/shared/RoleBasedMap'));
 // Specific Role Views
 const ClienteHome = lazy(() => import('../views/cliente/Home.tsx'));
 const BrowseProducts = lazy(() => import('../views/cliente/BrowseProducts.tsx'));
+const ClientOrders = lazy(() => import('../views/cliente/ClientOrders.tsx'));
 const VendedorDashboard = lazy(() => import('../views/vendedor/Dashboard.tsx'));
 const ManageProducts = lazy(() => import('../views/vendedor/ManageProducts.tsx'));
 const AdminDashboard = lazy(() => import('../views/admin/AdminDashboard.tsx'));
@@ -71,6 +72,7 @@ const Router = [
         children: [
           { path: 'home', element: <ClienteHome /> },
           { path: 'productos', element: <BrowseProducts /> },
+          { path: 'reservas', element: <ClientOrders /> },
           { path: 'mapa', element: <RoleBasedMap /> },
           { path: 'reseñas', element: <SamplePage /> },
         ]

@@ -12,6 +12,8 @@ const Dashboard = () => {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [savingLocation, setSavingLocation] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(true);
+  const [isLocationActive, setIsLocationActive] = useState(false);
+  const [toggling, setToggling] = useState(false);
 
   const fetchLocation = async () => {
     try {
@@ -20,12 +22,12 @@ const Dashboard = () => {
       // Buscamos nuestra propia locación (el API suele filtrar por usuario autenticado en el backend)
       // Si el API devuelve lista, tomamos el primero
       const loc = Array.isArray(res.data) ? res.data[0] : res.data;
-      if (loc && loc.latitude) {
         setVendorLocation({
           lat: parseFloat(loc.latitude),
           lng: parseFloat(loc.longitude),
           description: loc.description
         });
+        setIsLocationActive(loc.is_active);
       }
     } catch (err) {
       console.error("Error al cargar ubicación:", err);
@@ -61,6 +63,19 @@ const Dashboard = () => {
     }
   };
 
+  const toggleVisibility = async () => {
+      try {
+          setToggling(true);
+          const res = await api.post('geo/locations/toggle_visibility/');
+          setIsLocationActive(res.data.is_active);
+          alert(res.data.message);
+      } catch (err) {
+          console.error(err);
+      } finally {
+          setToggling(false);
+      }
+  };
+
   return (
     <div className="p-6">
       <div className="bg-gradient-to-r from-[#CFFEFF] to-[#BBADFF] dark:bg-none dark:bg-transparent p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -68,9 +83,18 @@ const Dashboard = () => {
           <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{t('dashboard.title')}</h1>
           <p className="text-slate-600 dark:text-gray-400 mt-1 italic font-medium">{t('dashboard.subtitle')}</p>
         </div>
-        <div className="flex gap-2">
-            <Badge color="success" size="lg" className="px-4 py-2">{t('dashboard.statusActive')}</Badge>
-            <Button size="sm" color="light" outline onClick={() => setShowLocationModal(true)}>
+        <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
+            <Button 
+                size="sm" 
+                color={isLocationActive ? "success" : "failure"} 
+                onClick={toggleVisibility}
+                disabled={toggling || !vendorLocation}
+                className="rounded-xl shadow-md"
+            >
+                {toggling ? <Spinner size="sm" /> : <Icon icon={isLocationActive ? "solar:map-point-wave-bold" : "solar:map-point-remove-bold"} className="mr-2" />}
+                {isLocationActive ? "UBICACIÓN ENCENDIDA" : "UBICACIÓN APAGADA"}
+            </Button>
+            <Button size="sm" color="light" outline onClick={() => setShowLocationModal(true)} className="rounded-xl">
               <HiOutlineLocationMarker className="mr-2 h-4 w-4" />
               {vendorLocation ? t('dashboard.updateLocation') : t('dashboard.setLocation')}
             </Button>
