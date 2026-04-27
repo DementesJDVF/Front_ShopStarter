@@ -7,6 +7,7 @@ import { Icon } from "@iconify/react";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
 import { getAbsoluteImageUrl } from "../../utils/urlHelper";
 import toast from 'react-hot-toast';
+import { useAuth } from "../../context/AuthContext";
 
 type ProductImage = {
   id: number;
@@ -21,6 +22,7 @@ type ProductDetailData = {
   price: string;
   stock: number;
   status: string;
+  vendor: string | number;
   vendor_name: string;
   category_name: string;
   is_featured: boolean;
@@ -32,6 +34,7 @@ export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation("product");
+  const { user } = useAuth();
 
   const [product, setProduct] = useState<ProductDetailData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -213,7 +216,13 @@ export default function ProductDetail() {
 
           {/* Botón de Reserva */}
           <div className="mt-4">
-            {product.status && product.status.toString().toUpperCase().includes('AVAILABLE') && product.stock > 0 ? (
+            {/* NO permitir que el vendedor reserve su propio producto */}
+            {user && product.vendor?.toString() === user.id?.toString() ? (
+              <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center gap-3 text-amber-700">
+                <Icon icon="solar:info-circle-bold" height={24} />
+                <p className="text-sm font-bold">Este es tu producto. Puedes gestionarlo desde tu panel de control.</p>
+              </div>
+            ) : product.status && product.status.toString().toUpperCase().includes('AVAILABLE') && product.stock > 0 ? (
               <Button 
                 size="xl" 
                 className="w-full font-black text-xl rounded-2xl shadow-lg ring-offset-2 transition-transform active:scale-95"
