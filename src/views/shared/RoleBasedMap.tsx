@@ -297,7 +297,7 @@ const RoleBasedMap: React.FC = () => {
 
     return (
         <div className="p-6 h-full flex flex-col gap-6">
-            <div className="flex justify-between items-end">
+            <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-black text-gray-800 dark:text-white uppercase tracking-tight">
                         {getMapTitle()}
@@ -308,53 +308,54 @@ const RoleBasedMap: React.FC = () => {
                             : t('desc_otro')}
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
-                    {/* Botón interactivo para solicitar la geolocalización real del dispositivo */}
-                    {user?.role === 'VENDEDOR' ? (
-                        <Button
-                            color={isLocationActive ? "success" : "failure"}
-                            size="sm"
-                            onClick={toggleVisibility}
-                            disabled={toggling}
-                            className="rounded-xl shadow-lg border-2 border-white/50"
-                        >
-                            <div className="flex items-center gap-2">
-                                {toggling ? <Spinner size="sm"/> : <Icon icon={isLocationActive ? "solar:map-point-wave-bold" : "solar:map-point-remove-bold"} height={20}/>}
-                                <span className="font-black italic">
-                                    {isLocationActive ? "UBICACIÓN: ENCENDIDA" : "UBICACIÓN: APAGADA"}
-                                </span>
-                            </div>
-                        </Button>
-                    ) : (
-                        <Button
-                            color={userLocation ? "success" : "primary"}
-                            size="sm"
-                            onClick={requestLocation}
-                            disabled={gettingLocation}
-                            className="rounded-xl shadow-lg"
-                        >
-                            <div className="flex items-center gap-2">
-                                {gettingLocation
-                                    ? <Spinner size="sm"/>
-                                    : <Icon icon="solar:map-point-wave-linear" height={20}/>}
-                                <span>
-                                    {userLocation
-                                        ? t('ubicacion_activa')
-                                        : t('activar_ubicacion')}
-                                </span>
-                            </div>
-                        </Button>
-                    )}
-                    <Badge color="primary" icon={() => <Icon icon="solar:map-point-bold-duotone" className="mr-1" />} className="px-3 py-1">
-                        {t('view', { role: user?.role })}
-                    </Badge>
-                </div>
             </div>
 
             <Card className="flex-1 min-h-[500px] overflow-hidden p-0 relative border-0 shadow-2xl rounded-3xl">
+                {/* Controles flotantes dentro del mapa */}
+                <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2 items-end">
+                    <div className="flex gap-2">
+                        {user?.role === 'VENDEDOR' ? (
+                            <Button
+                                color={isLocationActive ? "success" : "failure"}
+                                size="sm"
+                                onClick={toggleVisibility}
+                                disabled={toggling}
+                                className="rounded-xl shadow-2xl border-2 border-white/80 backdrop-blur-md"
+                            >
+                                <div className="flex items-center gap-2">
+                                    {toggling ? <Spinner size="sm"/> : <Icon icon={isLocationActive ? "solar:map-point-wave-bold" : "solar:map-point-remove-bold"} height={20}/>}
+                                    <span className="font-black italic">
+                                        {isLocationActive ? "UBICACIÓN: ENCENDIDA" : "UBICACIÓN: APAGADA"}
+                                    </span>
+                                </div>
+                            </Button>
+                        ) : (
+                            <Button
+                                color={userLocation ? "success" : "primary"}
+                                size="sm"
+                                onClick={requestLocation}
+                                disabled={gettingLocation}
+                                className="rounded-xl shadow-2xl border-2 border-white/80 backdrop-blur-md"
+                            >
+                                <div className="flex items-center gap-2">
+                                    {gettingLocation
+                                        ? <Spinner size="sm"/>
+                                        : <Icon icon="solar:map-point-wave-linear" height={20}/>}
+                                    <span className="font-bold">
+                                        {userLocation ? "ACTUALIZAR UBICACIÓN" : "MI UBICACIÓN"}
+                                    </span>
+                                </div>
+                            </Button>
+                        )}
+                    </div>
+                    <Badge color="primary" icon={() => <Icon icon="solar:map-point-bold-duotone" className="mr-1" />} className="px-3 py-1 shadow-lg border border-white/20 backdrop-blur-md opacity-90">
+                        {t('view', { role: user?.role })}
+                    </Badge>
+                </div>
+
                 {/* Pantalla de carga superpuesta mientras se obtienen los datos */}
                 {loading && (
-                    <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white/60 backdrop-blur-sm">
+                    <div className="absolute inset-0 z-[1001] flex items-center justify-center bg-white/60 backdrop-blur-sm">
                         <Spinner size="xl" />
                     </div>
                 )}
