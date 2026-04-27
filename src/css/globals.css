@@ -266,4 +266,42 @@
   .text-brand-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-indigo-600 dark:from-white dark:to-purple-400 font-black;
   }
+
+  /* --- LEAFLET CUSTOM MARKERS --- */
+  .custom-div-icon {
+    background: none;
+    border: none;
+  }
+
+  .marker-pin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50% 50% 50% 0;
+    background: #6366f1;
+    position: absolute;
+    transform: rotate(-45deg);
+    left: 50%;
+    top: 50%;
+    margin: -15px 0 0 -15px;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4);
+    border: 2px solid white;
+  }
+
+  .inactive-pin {
+    background: #94a3b8 !important;
+    box-shadow: none !important;
+    opacity: 0.8;
+  }
+
+  .custom-div-icon i {
+    position: absolute;
+    width: 22px;
+    font-size: 18px;
+    left: 0;
+    right: 0;
+    margin: 10px auto;
+    text-align: center;
+    color: white;
+    z-index: 20;
+  }
 }

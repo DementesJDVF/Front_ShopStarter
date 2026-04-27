@@ -64,8 +64,11 @@ const RoleBasedMap: React.FC = () => {
     const fetchActiveStatus = async () => {
         try {
             const res = await api.get('geo/my-locations/');
-            const loc = Array.isArray(res.data) ? res.data[0] : res.data;
-            if (loc) setIsLocationActive(loc.is_active);
+            const data = res.data.results || res.data;
+            const loc = Array.isArray(data) ? data[0] : data;
+            if (loc) {
+                setIsLocationActive(loc.is_active);
+            }
         } catch (err) { console.error(err); }
     };
 
@@ -142,18 +145,29 @@ const RoleBasedMap: React.FC = () => {
             locations.forEach((loc: any) => {
                 if (!loc?.latitude || !loc?.longitude) return; // saltar entradas incompletas
 
-                const marker = L.marker([loc.latitude, loc.longitude])
+                const isInactive = loc.is_active === false;
+                const markerHtml = `
+                    <div class='marker-pin ${isInactive ? 'inactive-pin' : ''}'></div>
+                    <i class='material-icons' style="${isInactive ? 'color: #94a3b8;' : ''}">shop</i>
+                `;
+
+                const vendorIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: markerHtml,
+                    iconSize: [30, 42],
+                    iconAnchor: [15, 42]
+                });
+
+                const marker = L.marker([loc.latitude, loc.longitude], { icon: vendorIcon })
                     .addTo(leafletMap.current)
                     .bindPopup(`
-                        <div class="p-2">
-                            <b class="text-primary">${loc.user_name || t('map.establecimiento', 'Establecimiento')}</b><br/>
-                            <p class="text-xs text-gray-500 mb-2">${loc.description || t('map.sin_descripcion', 'Sin descripción')}</p>
+                        <div class="p-3 min-w-[200px] ${isInactive ? 'opacity-75' : ''}">
+                            <h3 class="font-bold text-lg mb-1">${loc.user_name || 'Vendedor'}</h3>
+                            ${isInactive ? '<span class="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold mb-2 inline-block">OCULTO AL PÚBLICO</span>' : ''}
+                            <p class="text-sm text-gray-600 mb-3 line-clamp-2">${loc.description || 'Sin descripción'}</p>
                             ${user?.role === 'ADMIN' ? `<p class="text-[10px] text-red-400">Owner: ${loc.user_email}</p>` : ''}
-                            <button onclick="window.openVendorCatalog('${loc.user}', '${loc.user_name?.replace(/'/g, "\\'") || t('map.vendedor', 'Vendedor')}')" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-1.5 px-3 rounded text-xs transition-colors shadow-sm">
-                                <span style="display:flex; justify-content:center; align-items:center;">
-                                    ${t('ver_catalogo')}
-                                    <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                                </span>
+                            <button onclick="window.openVendorCatalog('${loc.user}', '${loc.user_name?.replace(/'/g, "\\'") || t('map.vendedor', 'Vendedor')}')" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded-xl text-xs transition-all shadow-md">
+                                VER CATÁLOGO
                             </button>
                         </div>
                     `);
