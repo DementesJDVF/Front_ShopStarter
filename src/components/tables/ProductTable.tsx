@@ -355,8 +355,8 @@ const ProductTable = () => {
       listtitle: "Editar",
     },
     {
-      icon: "solar:trash-bin-minimalistic-outline",
-      listtitle: "Borrar",
+      icon: "solar:archive-minimalistic-outline",
+      listtitle: "Archivar",
     },
   ];
 

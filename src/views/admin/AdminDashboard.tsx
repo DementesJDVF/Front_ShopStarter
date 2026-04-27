@@ -231,8 +231,8 @@ const AdminDashboard: React.FC = () => {
                                             <HiCheck className="mr-1"/> Aprobar
                                         </Button>
                                     )}
-                                    <Button color="failure" size="xs" onClick={() => handleDelete('products', p.id)}>
-                                        <HiTrash className="mr-1"/> Eliminar
+                                    <Button color="warning" size="xs" onClick={() => handleDelete('products', p.id)}>
+                                        <Icon icon="solar:archive-minimalistic-outline" className="mr-1 h-4 w-4" /> Archivar
                                     </Button>
                                 </Table.Cell>
                             </Table.Row>
