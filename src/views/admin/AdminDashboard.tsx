@@ -313,7 +313,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* TABLA + MAPA */}
+        {/* tabla de registrados y el mapa*/}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           <Card className="bg-white/5 border border-white/20">

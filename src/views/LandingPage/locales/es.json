@@ -1,0 +1,140 @@
+{
+  "hero": {
+    "status": "Monitoreo Activo - Cero Comisiones Financieras",
+    "title_1": "Conecta tus pedidos",
+    "title_2": "con tu comunidad",
+    "description": "ShopStarter te da la infraestructura tecnológica para profesionalizar la recepción de pedidos. Visibiliza tu catálogo a los vecinos de forma limpia, organizada y libre.",
+    "register_button": "Empezar Completamente Gratis",
+    "stat_activity": "Actividad Diaria",
+    "stat_orders_today": "{{count}} Pedidos Hoy",
+    "stat_merchants": "Comerciantes Activos"
+  },
+  "marquee": [
+    "🚀 Tienda de Barrio Digital",
+    "📱 Organiza tus Pedidos",
+    "🌍 Visible en el Mapa Local",
+    "🤝 Conecta con tus Vecinos",
+    "🛡️ Gestión Puramente Organizativa",
+    "📦 Control Total de Entregas"
+  ],
+  "slogan": {
+    "main": "Con amor y esfuerzo <br />nos ganaremos el almuerzo.",
+    "philosophy": "Nuestra filosofía es tu crecimiento. Entendemos el sudor de la calle y el sacrificio local. ShopStarter es tu aliado para darle orden y dignidad digital al fruto de tu trabajo."
+  },
+  "testimonials": {
+    "section_tag": "Voz del Pueblo",
+    "section_title": "La comunidad habla",
+    "section_desc": "Hecho por y para los luchadores del día a día.",
+    "reviews": [
+      {
+        "name": "Doña Nubia",
+        "role": "Vendedora de Postres",
+        "text": "Esto es una bendición. Antes anotaba los encargos en un cuaderno viejo. Ahora me llegan directos al celular, organizo mis pudines y el cliente pasa a recoger. Cero enredos."
+      },
+      {
+        "name": "Carlos Vargas",
+        "role": "Repartición de Lácteos",
+        "text": "Al ver mi ubicación en el mapa, los vecinos del barrio se dieron cuenta de mi ruta y me solicitan la leche directamente. ¡Conecto fácil y ellos me pagan a la entrega!"
+      },
+      {
+        "name": "Familia Giraldo",
+        "role": "Artesanías Locales",
+        "text": "Nos sentimos grandes. Tenemos nuestro propio catálogo visual, acordamos la entrega y todo queda registrado clarito para alistar los paquetes a tiempo."
+      }
+    ]
+  },
+  "faq": {
+    "title": "Preguntas Frecuentes",
+    "tagline": "Todo clarito como el agua.",
+    "questions": [
+      {
+        "q": "¿Gestionan ustedes el dinero o cobran comisión?",
+        "a": "¡No! ShopStarter es una plataforma puramente organizativa y logística. No tocamos tu dinero ni cobramos porcentajes por venta. Tus clientes te pagarán directamente por los medios que tú y ellos coordinen (efectivo al entregar, transferencia bancaria, vecindad, etc)."
+      },
+      {
+        "q": "¿Qué ventajas tengo al registrarme?",
+        "a": "Tu negocio aparecerá en nuestro mapa hiperlocal, tendrás un catálogo visual y recibirás una notificación clara cada vez que alguien te haga un pedido. ¡Orden estricto en tu celular en vez de cuadernos caóticos!"
+      },
+      {
+        "q": "¿Es necesario ser una empresa formal o grande?",
+        "a": "Para nada. ShopStarter está diseñado para ayudar a todos: desde vendedores de arepas de la esquina, hasta emprendimientos formales nacientes. Creemos en el trabajo honrado y te damos una vitrina profesional sin exigir papeleo absurdo."
+      },
+      {
+        "q": "¿Mis clientes deben descargar una aplicación compleja?",
+        "a": "No. Tus clientes pueden ver tu tienda desde la web pública usando cualquier navegador de forma rapidísima. Eligen lo que quieren, hacen el encargo, y a ti te notifica."
+      }
+    ]
+  },
+  "features": {
+    "tag": "Herramientas Limpias",
+    "title": "Diseñado para poner <br/> orden y dignidad",
+    "list": [
+      {
+        "title": "Catálogo Visual Puro",
+        "desc": "Despliega tus productos con fotografías brillantes y descripciones sin preocuparte de recargos transaccionales."
+      },
+      {
+        "title": "GPS y Geolocalización",
+        "desc": "Tu tienda local es visible en el mapa. Tus vecinos y transeúntes te encontrarán fácil."
+      },
+      {
+        "title": "Gestión de Encargos",
+        "desc": "Aprueba y monitoriza pedidos en tiempo real. Cero caos en hojas de papel, total organización digital."
+      },
+      {
+        "title": "IA de Visualización",
+        "desc": "Sugerencias apoyadas por Inteligencia Artificial para ayudarte a presentar mejores títulos en tus productos."
+      },
+      {
+        "title": "Directorio Cívico",
+        "desc": "Cuentas seguras para ti y acceso ágil para tus clientes. Mantén a tu clientela informada de tu stock."
+      },
+      {
+        "title": "Libertad de Pago",
+        "desc": "Ponte de acuerdo con tu cliente: si te pagan en efectivo, depósito o en el local. Nosotros solo unimos la necesidad."
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "Digitaliza tus procesos <br/> en Minutos",
+    "desc": "Entendemos que no tienes tiempo para complicarte. Registrar tu negocio toma sólo unos pasos.",
+    "steps": [
+      {
+        "title": "Registro",
+        "desc": "Asegura tu cuenta comunitaria gratuita en pocos clics."
+      },
+      {
+        "title": "Tu Vitrina",
+        "desc": "Sube fotos de tus mejores productos de forma visual."
+      },
+      {
+        "title": "Expansión Local",
+        "desc": "Eres indexado en el mapa barrial y los vecinos sabrán que estás ahí."
+      },
+      {
+        "title": "Control Total",
+        "desc": "Notificaciones directas cada que alguien quiera algo. Aprueba, entrega y mantén tu orden digital."
+      }
+    ],
+    "notify": {
+      "synced": "Sincronizado",
+      "new_order": "NUEVO PEDIDO RECIBIDO"
+    }
+  },
+  "cta": {
+    "title": "Simplifica tu vida.<br/> Organiza tu <span class=\"text-transparent bg-clip-text bg-gradient-to-r from-[#2CD4D9] to-indigo-400\">negocio</span>.",
+    "desc": "No dejes que los encargos se pierdan en hojas sueltas. Únete a la plataforma que dignifica tu esfuerzo.",
+    "button": "Formar Parte"
+  },
+
+  "nav": {
+  "features": "Características",
+  "how_works": "Cómo funciona",
+  "login": "Ingresar",
+  "register": "Empezar Gratis",
+  "register_mini": "Empezar",
+  "mobile_start": "Empezar Ahora",
+  "mobile_login": "Iniciar Sesión",
+  "open_menu": "Abrir menú"
+}
+}
