@@ -6,6 +6,7 @@ import { Button, Spinner } from "flowbite-react";
 import { Icon } from "@iconify/react";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
 import { getAbsoluteImageUrl } from "../../utils/urlHelper";
+import toast from 'react-hot-toast';
 
 type ProductImage = {
   id: number;
@@ -80,8 +81,16 @@ export default function ProductDetail() {
 
     try {
       setReserving(true);
-      await api.post('orders/', { product_id: product.id });
-      alert(t("reserveSuccessDetail"));
+      // Validamos stock localmente antes de intentar
+      if (product.stock <= 0) {
+          toast.error("Lo sentimos, este producto se acaba de agotar.");
+          return;
+      }
+      await api.post('orders/', { 
+          product: product.id,
+          quantity: 1 // Reservar 1 unidad directa
+      });
+      toast.success("¡Reserva exitosa!");
       navigate('/cliente/reservas');
     } catch (e: any) {
       alert(e.response?.data?.error || t("reserveError"));
