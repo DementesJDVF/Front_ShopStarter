@@ -3,6 +3,7 @@ import TopBanner from "./TopBanner";
 import { Link } from "react-router";
 import { Icon } from "@iconify/react";
 import { useEffect, useState } from "react";
+import VisualCatalog from "./VisualCatalog";
 import { Helmet } from "react-helmet-async";
 import api from "../../utils/axios";
 import { useTranslation } from "react-i18next";
@@ -478,6 +479,9 @@ const Home = () => {
           </section>
           <section className="bg-transparent">
             <HowItWorks />
+          </section>
+          <section className="py-24 bg-white/30 dark:bg-slate-900/40 backdrop-blur-sm">
+            <VisualCatalog />
           </section>
           <section className="bg-indigo-950/[0.06] dark:bg-slate-900/60 backdrop-blur-xl py-20 border-b border-white/20">
             <Testimonials />

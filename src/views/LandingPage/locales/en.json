@@ -136,5 +136,14 @@
   "mobile_start": "Start Now",
   "mobile_login": "Login",
   "open_menu": "Open menu"
-}
+  },
+  "visualCatalog": {
+    "tag": "Discovery",
+    "title": "Explore by Category",
+    "explore": "Explore",
+    "viewAll": "View all",
+    "fullCatalog": "Go to Full Catalog",
+    "categoryTitle": "Improve your life here",
+    "loading": "Loading catalog..."
+  }
 }

@@ -136,5 +136,14 @@
   "mobile_start": "Empezar Ahora",
   "mobile_login": "Iniciar Sesión",
   "open_menu": "Abrir menú"
-}
+  },
+  "visualCatalog": {
+    "tag": "Descubrimiento",
+    "title": "Explora por Categoría",
+    "explore": "Explorar",
+    "viewAll": "Ver todo",
+    "fullCatalog": "Ir al Catálogo Completo",
+    "categoryTitle": "Mejora tu vida aquí",
+    "loading": "Cargando catálogo..."
+  }
 }
