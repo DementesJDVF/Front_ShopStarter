@@ -24,9 +24,12 @@ const RoleBasedMap: React.FC = () => {
     const [selectedPosition, setSelectedPosition] = useState<{lat: number, lng: number} | null>(null);
     const [locationDescription, setLocationDescription] = useState('');
 
-    // Estados para el Modal de Catálogo (Cliente)
     const [isCatalogModalOpen, setIsCatalogModalOpen] = useState(false);
     const [selectedVendor, setSelectedVendor] = useState<{id: string, name: string} | null>(null);
+
+    // Visibilidad del vendedor
+    const [isLocationActive, setIsLocationActive] = useState(false);
+    const [toggling, setToggling] = useState(false);
 
     // Efecto para inicializar el mapa cuando la librería Leaflet (L) esté disponible globalmente
     useEffect(() => {
@@ -51,6 +54,36 @@ const RoleBasedMap: React.FC = () => {
             delete (window as any).openVendorCatalog;
         };
     }, [user?.role]);
+
+    useEffect(() => {
+        if (user?.role === 'VENDEDOR') {
+            fetchActiveStatus();
+        }
+    }, [user]);
+
+    const fetchActiveStatus = async () => {
+        try {
+            const res = await api.get('geo/my-locations/');
+            const loc = Array.isArray(res.data) ? res.data[0] : res.data;
+            if (loc) setIsLocationActive(loc.is_active);
+        } catch (err) { console.error(err); }
+    };
+
+    const toggleVisibility = async () => {
+        try {
+            setToggling(true);
+            const res = await api.post('geo/locations/toggle_visibility/');
+            setIsLocationActive(res.data.is_active);
+            toast.success(res.data.message);
+            // Refrescar marcadores
+            const L = (window as any).L;
+            if (L) fetchAndRenderMarkers(L);
+        } catch (err) {
+            toast.error("Error al cambiar visibilidad");
+        } finally {
+            setToggling(false);
+        }
+    };
 
     // Función para configurar e inicializar el mapa de Leaflet
     const initMap = async () => {
@@ -188,23 +221,41 @@ const RoleBasedMap: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3">
                     {/* Botón interactivo para solicitar la geolocalización real del dispositivo */}
-                    <Button
-                        color={userLocation ? "success" : "primary"}
-                        size="sm"
-                        onClick={requestLocation}
-                        disabled={gettingLocation}
-                    >
-                        <div className="flex items-center gap-2">
-                            {gettingLocation
-                                ? <Spinner size="sm"/>
-                                : <Icon icon="solar:map-point-wave-linear" height={20}/>}
-                            <span>
-                                {userLocation
-                                    ? t('ubicacion_activa')
-                                    : t('activar_ubicacion')}
-                            </span>
-                        </div>
-                    </Button>
+                    {user?.role === 'VENDEDOR' ? (
+                        <Button
+                            color={isLocationActive ? "success" : "failure"}
+                            size="sm"
+                            onClick={toggleVisibility}
+                            disabled={toggling}
+                            className="rounded-xl shadow-lg border-2 border-white/50"
+                        >
+                            <div className="flex items-center gap-2">
+                                {toggling ? <Spinner size="sm"/> : <Icon icon={isLocationActive ? "solar:map-point-wave-bold" : "solar:map-point-remove-bold"} height={20}/>}
+                                <span className="font-black italic">
+                                    {isLocationActive ? "UBICACIÓN: ENCENDIDA" : "UBICACIÓN: APAGADA"}
+                                </span>
+                            </div>
+                        </Button>
+                    ) : (
+                        <Button
+                            color={userLocation ? "success" : "primary"}
+                            size="sm"
+                            onClick={requestLocation}
+                            disabled={gettingLocation}
+                            className="rounded-xl shadow-lg"
+                        >
+                            <div className="flex items-center gap-2">
+                                {gettingLocation
+                                    ? <Spinner size="sm"/>
+                                    : <Icon icon="solar:map-point-wave-linear" height={20}/>}
+                                <span>
+                                    {userLocation
+                                        ? t('ubicacion_activa')
+                                        : t('activar_ubicacion')}
+                                </span>
+                            </div>
+                        </Button>
+                    )}
                     <Badge color="primary" icon={() => <Icon icon="solar:map-point-bold-duotone" className="mr-1" />} className="px-3 py-1">
                         {t('view', { role: user?.role })}
                     </Badge>
