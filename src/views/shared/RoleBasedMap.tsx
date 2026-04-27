@@ -13,6 +13,7 @@ const RoleBasedMap: React.FC = () => {
     const { userLocation, requestLocation, gettingLocation } = useMap();
     const mapRef = useRef<HTMLDivElement>(null);
     const leafletMap = useRef<any>(null);
+    const routingControl = useRef<any>(null);
     const [loading, setLoading] = useState(true);
     const [locations, setLocations] = useState<any[]>([]);
 
@@ -37,6 +38,39 @@ const RoleBasedMap: React.FC = () => {
         (window as any).openVendorCatalog = (vendorId: string, vendorName: string) => {
              setSelectedVendor({ id: vendorId, name: vendorName });
              setIsCatalogModalOpen(true);
+        };
+
+        (window as any).tracePath = (destLat: number, destLng: number) => {
+            const L = (window as any).L;
+            if (!L || !leafletMap.current) return;
+
+            // Si no tenemos la ubicación del usuario, intentamos pedirla
+            if (!userLocation) {
+                toast.error("Activa tu ubicación primero usando el botón de arriba.");
+                return;
+            }
+
+            // Limpiar ruta anterior si existe
+            if (routingControl.current) {
+                leafletMap.current.removeControl(routingControl.current);
+            }
+
+            toast.loading("Calculando la mejor ruta...", { duration: 2000 });
+
+            routingControl.current = L.Routing.control({
+                waypoints: [
+                    L.latLng(userLocation.lat, userLocation.lng),
+                    L.latLng(destLat, destLng)
+                ],
+                lineOptions: {
+                    styles: [{ color: '#6366f1', weight: 6, opacity: 0.8 }]
+                },
+                addWaypoints: false,
+                draggableWaypoints: false,
+                fitSelectedRoutes: true,
+                showAlternatives: false,
+                language: 'es'
+            }).addTo(leafletMap.current);
         };
 
         navigator.geolocation.getCurrentPosition((pos) => {
@@ -190,9 +224,9 @@ const RoleBasedMap: React.FC = () => {
                                 </button>
                                 
                                 ${user?.role === 'CLIENTE' ? `
-                                    <button onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${loc.latitude},${loc.longitude}', '_blank')" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2">
-                                        <i class='material-icons' style="font-size: 14px">directions</i>
-                                        CÓMO LLEGAR
+                                    <button onclick="window.tracePath(${loc.latitude}, ${loc.longitude})" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2">
+                                        <i class='material-icons' style="font-size: 14px">route</i>
+                                        TRAZAR CAMINO
                                     </button>
                                 ` : ''}
                             </div>

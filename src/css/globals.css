@@ -304,4 +304,26 @@
     color: white;
     z-index: 20;
   }
+
+  /* --- LEAFLET ROUTING MACHINE PREMIUM --- */
+  .leaflet-routing-container {
+    @apply !bg-white/80 dark:!bg-slate-900/80 !backdrop-blur-md !border-0 !shadow-2xl !rounded-2xl !p-4 !max-h-[300px] !overflow-y-auto !transition-all !duration-500;
+    font-family: 'Manrope', sans-serif !important;
+  }
+
+  .leaflet-routing-alt {
+    @apply !bg-transparent !border-0;
+  }
+
+  .leaflet-routing-alt h2 {
+    @apply !text-primary !text-lg !font-black !mb-2 !uppercase !tracking-tighter;
+  }
+
+  .leaflet-routing-alt h3 {
+    @apply !text-gray-500 !text-xs !font-bold;
+  }
+
+  .leaflet-routing-icon {
+    @apply !bg-primary !rounded-full !filter !brightness-125;
+  }
 }
