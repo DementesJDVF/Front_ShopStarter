@@ -234,10 +234,10 @@ const ProductTable = () => {
     setEditingId(product.id);
     setNewProduct({
       name: product.name,
-      description: '', 
+      description: product.description || '', 
       price: product.price.toString(),
       stock: product.stock.toString(),
-      category: categoryMatch ? categoryMatch.id.toString() : '', 
+      category: categoryMatch ? categoryMatch.id.toString() : (product.category?.toString() || ''), 
       image_file: null,
       preview_url: product.images?.[0]?.url_image || ''
     });
@@ -325,9 +325,18 @@ const ProductTable = () => {
         preview_url: ''
       });
       fetchProducts();
-    } catch (error) {
+    } catch (error: any) {
+      const backendError = error.response?.data;
+      let errorMessage = t('alert.processError');
+
+      if (backendError) {
+        // Si el backend devuelve un objeto de errores, extraemos el primer mensaje legible
+        const firstError: any = Object.values(backendError)[0];
+        errorMessage = Array.isArray(firstError) ? firstError[0] : (typeof firstError === 'string' ? firstError : JSON.stringify(firstError));
+      }
+
       console.error(t('error.processProduct'), error);
-      alert(t('alert.processError'));
+      alert(errorMessage);
     } finally {
       setSubmitting(false);
     }
