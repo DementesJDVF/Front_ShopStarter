@@ -9,7 +9,7 @@
 .catalog__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
+  gap: 20px;
 }
 
 .catalog__status {
@@ -27,6 +27,7 @@
   background: #fff;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .product-card__vendor {

@@ -77,7 +77,7 @@ const FullLayout: FC = () => {
         </div>
 
         {/* Main Content Column */}
-        <div className="flex flex-col flex-grow min-h-screen relative z-10 bg-transparent dark:bg-darkgray">
+        <div className="flex flex-col flex-grow min-w-0 min-h-screen relative z-10 bg-transparent dark:bg-darkgray">
           {/* Global Header (Actions & Mobile Menu) */}
           <Header /> 
           

@@ -63,12 +63,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    // 1. Invalidad sesión en el servidor (Eliminar Cookies HttpOnly)
+    api.post('auth/logout/').catch(() => {
+        // Si falla (ej: sin red), intentamos por GET como respaldo
+        api.get('auth/logout/').catch(() => {});
+    });
+
+    // 2. Limpieza de estado local
     setUser(null);
     localStorage.removeItem('user');
-    localStorage.removeItem('token'); // Limpieza de legados inseguros
-    sessionStorage.removeItem('access_token');
+    localStorage.removeItem('token');
+    sessionStorage.clear();
     
-    // Opcional a futuro: Hacer llamada a api.post('auth/logout/') para eliminar cookie local
+    // Opcional: Redirigir al login
+    window.location.href = '/auth/login';
   };
 
   return (

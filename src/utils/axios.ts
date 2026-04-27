@@ -25,21 +25,11 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Request interceptor para inyectar Token automáticamente
+// Request interceptor: El navegador enviará las cookies HttpOnly automáticamente 
+// gracias a 'withCredentials: true'. Ya no inyectamos el token manualmente para
+// evitar conflictos de sincronización entre localStorage y Cookies.
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    try {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        const userData = JSON.parse(userStr);
-        const token = userData.access || userData.token;
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-      }
-    } catch (e) {
-      console.error("Error al inyectar token:", e);
-    }
     return config;
   },
   (error) => {

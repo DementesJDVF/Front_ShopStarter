@@ -12,7 +12,7 @@
 /* --- CONFIGURACIÓN DE COMPONENTES GLOBALES --- */
 @layer components {
   .container {
-    @apply max-w-[1280px] mx-auto px-4 md:px-8;
+    @apply max-w-[1400px] mx-auto px-4 md:px-6;
   }
 
   .landingpage .container {
@@ -20,11 +20,11 @@
   }
 
   html {
-    @apply overflow-x-auto;
+    @apply overflow-x-hidden;
   }
 
   body {
-    @apply text-sm text-bodytext bg-surface transition-colors duration-300 relative min-h-screen;
+    @apply text-sm text-bodytext bg-surface transition-colors duration-300 relative min-h-screen overflow-x-hidden;
   }
 
   /* --- ADAPTIVE ANIMATIONS & GLOWS --- */
