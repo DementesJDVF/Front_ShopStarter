@@ -12,8 +12,7 @@ const Dashboard = () => {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [savingLocation, setSavingLocation] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(true);
-  const [isLocationActive, setIsLocationActive] = useState(false);
-  const [toggling, setToggling] = useState(false);
+
 
   const fetchLocation = async () => {
     try {
@@ -28,7 +27,7 @@ const Dashboard = () => {
           lng: parseFloat(loc.longitude),
           description: loc.description
         });
-        setIsLocationActive(loc.is_active);
+
       }
     } catch (err) {
       console.error("Error al cargar ubicación:", err);
@@ -64,18 +63,7 @@ const Dashboard = () => {
     }
   };
 
-  const toggleVisibility = async () => {
-      try {
-          setToggling(true);
-          const res = await api.post('geo/locations/toggle_visibility/');
-          setIsLocationActive(res.data.is_active);
-          alert(res.data.message);
-      } catch (err) {
-          console.error(err);
-      } finally {
-          setToggling(false);
-      }
-  };
+
 
   return (
     <div className="p-6">
@@ -85,16 +73,7 @@ const Dashboard = () => {
           <p className="text-slate-600 dark:text-gray-400 mt-1 italic font-medium">{t('dashboard.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
-            <Button 
-                size="sm" 
-                color={isLocationActive ? "success" : "failure"} 
-                onClick={toggleVisibility}
-                disabled={toggling || !vendorLocation}
-                className="rounded-xl shadow-md"
-            >
-                {toggling ? <Spinner size="sm" /> : <Icon icon={isLocationActive ? "solar:map-point-wave-bold" : "solar:map-point-remove-bold"} className="mr-2" />}
-                {isLocationActive ? "UBICACIÓN ENCENDIDA" : "UBICACIÓN APAGADA"}
-            </Button>
+
             <Button size="sm" color="light" outline onClick={() => setShowLocationModal(true)} className="rounded-xl">
               <HiOutlineLocationMarker className="mr-2 h-4 w-4" />
               {vendorLocation ? t('dashboard.updateLocation') : t('dashboard.setLocation')}
