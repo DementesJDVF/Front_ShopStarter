@@ -1,15 +1,19 @@
 .catalog {
   padding: 16px;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .catalog__title {
   margin: 0 0 12px;
 }
 
+/* ✅ 5 columnas fijas, respetan el ancho del contenedor */
 .catalog__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 16px;
+  max-width: 100%;
 }
 
 .catalog__status {
@@ -27,6 +31,7 @@
   background: #fff;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .product-card__vendor {
