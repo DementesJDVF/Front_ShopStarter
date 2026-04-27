@@ -161,8 +161,8 @@ export default function ProductDetail() {
                 <Icon icon="solar:star-bold" className="mr-1" /> {t("featuredProduct")}
               </span>
             )}
-            <span className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider ${product.status === 'AVAILABLE' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
-              {t(`status.${product.status}`, product.status)}
+            <span className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider ${product.status.toUpperCase().trim() === 'AVAILABLE' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+              {t(`status.${product.status.toUpperCase().trim()}`, product.status)}
             </span>
           </div>
 
@@ -204,7 +204,7 @@ export default function ProductDetail() {
 
           {/* Botón de Reserva */}
           <div className="mt-4">
-            {product.status === 'AVAILABLE' && product.stock > 0 ? (
+            {product.status.toUpperCase().trim() === 'AVAILABLE' && product.stock > 0 ? (
               <Button 
                 size="xl" 
                 className="w-full font-black text-xl rounded-2xl shadow-lg ring-offset-2 transition-transform active:scale-95"
@@ -215,13 +215,13 @@ export default function ProductDetail() {
                 {reserving ? <Spinner size="sm" className="mr-2" /> : <Icon icon="solar:calendar-mark-bold" className="mr-2 text-2xl" />}
                 RESERVAR AHORA
               </Button>
-            ) : product.status === 'SOLD' || product.stock <= 0 ? (
+            ) : product.status.toUpperCase().trim() === 'SOLD' || product.stock <= 0 ? (
               <Button size="xl" color="gray" disabled className="w-full rounded-2xl">
                 AGOTADO
               </Button>
             ) : (
               <Button size="xl" color="gray" disabled className="w-full rounded-2xl">
-                {t("notAvailable")}
+                {t("notAvailable")} (Estado: {product.status})
               </Button>
             )}
             <p className="text-center text-xs text-gray-400 mt-3 italic">

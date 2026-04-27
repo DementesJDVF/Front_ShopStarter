@@ -17,8 +17,11 @@ const Cart = () => {
   const handleCheckout = async () => {
       setLoading(true);
       try {
-          // Se envía un POST de reserva por cada item seleccionado
-          const promises = cart.map((item: any) => api.post('orders/', { product_id: item.id }));
+          // Se envía un POST de reserva por cada item seleccionado con su cantidad real
+          const promises = cart.map((item: any) => api.post('orders/', { 
+              product: item.id, // El backend espera 'product' (ID)
+              quantity: item.quantity 
+          }));
           await Promise.all(promises);
           
           clearCart();
