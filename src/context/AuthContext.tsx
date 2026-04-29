@@ -34,37 +34,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const parsedUser = JSON.parse(savedUser);
         setUser(parsedUser);
-        
-        // Validación silenciosa obligatoria de sesión HttpOnly contra el servidor
-        api.get('auth/me/').then(res => {
-            setUser(res.data);
-        }).catch((err) => {
-          if (err.response?.status === 401 || err.response?.status === 403) {
-            logout();
-          }
-        }).finally(() => {
-          setLoading(false);
-        });
-
       } catch (e) {
-        logout();
+        localStorage.removeItem('user');
       }
-    } else {
-        // Evitar llamadas innecesarias (y 401 en consola) para usuarios invitados.
-        // Solo intentamos recuperación silente si existe algún token persistido.
-        if (storedAccessToken) {
-          api.get('auth/me/').then(res => {
-              setUser(res.data);
-              localStorage.setItem('user', JSON.stringify(res.data));
-          }).catch(() => {}).finally(() => {
-            setLoading(false);
-          });
-        } else {
-          setLoading(false);
+    }
+
+    if (storedAccessToken) {
+      // Validación silenciosa de sesión sólo cuando hay credenciales persistidas.
+      api.get('auth/me/').then(res => {
+          setUser(res.data);
+          localStorage.setItem('user', JSON.stringify(res.data));
+      }).catch((err) => {
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          localStorage.removeItem('user');
+          localStorage.removeItem('access_token');
+          sessionStorage.removeItem('access_token');
+          setToken(null);
+          setUser(null);
         }
+      }).finally(() => {
+        setLoading(false);
+      });
+    } else {
+        setLoading(false);
         return;
     }
-    setLoading(false);
   }, []);
 
   const login = (userData: User, accessToken?: string) => {
