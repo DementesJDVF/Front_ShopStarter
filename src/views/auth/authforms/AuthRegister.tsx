@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react';
 import { Link } from 'react-router';
 import api from '../../../utils/axios';
 import CustomTextInput from 'src/components/shared/CustomTextInput';
+import TerminosCheckbox from 'src/components/TerminosCheckbox';
 import FullLogo from 'src/layouts/full/shared/logo/FullLogo';
 import { useTranslation } from 'react-i18next';
 
@@ -13,6 +14,7 @@ const AuthRegister = () => {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [errorTerminos, setErrorTerminos] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [showTerms, setShowTerms] = useState(false);
 
@@ -96,13 +98,18 @@ const AuthRegister = () => {
         e.preventDefault();
         if (step < 3) { nextStep(); return; }
         if (!validateStep()) return;
-        if (!formData.accepted_terms) { setError(t("errors.termsRequired")); return; }
+        
+        if (!formData.accepted_terms) { 
+            setErrorTerminos(true);
+            return; 
+        }
+        setErrorTerminos(false);
 
         setLoading(true);
         setError(null);
 
         try {
-            const dataToSend = { ...formData, is_human: true };
+            const dataToSend = { ...formData, is_human: true, acepto_terminos: true };
             const response = await api.post('users/auth/register/', dataToSend);
             if (response.status === 201) setShowSuccess(true);
         } catch (err: any) {
@@ -262,12 +269,16 @@ const AuthRegister = () => {
                                 </>
                             )}
 
-                            <div className="flex items-start gap-4 p-5 bg-[#3A17E4]/5 rounded-3xl border border-[#3A17E4]/20 mt-2 hover:bg-[#3A17E4]/10 transition-all shadow-sm group">
-                                <Checkbox id="accepted_terms" checked={formData.accepted_terms} onChange={handleChange} required className="text-[#3A17E4] focus:ring-[#3A17E4] h-5 w-5 mt-1 cursor-pointer rounded-lg" />
-                                <div className="text-xs font-bold text-[#0A014A] leading-relaxed">
-                                    {t("form.termsText")} <button type="button" onClick={() => setShowTerms(true)} className="text-[#3A17E4] font-black hover:underline outline-none">{t("form.termsLink")}</button> {t("form.termsText2")}
-                                </div>
-                            </div>
+
+
+                            <TerminosCheckbox
+                                aceptado={formData.accepted_terms}
+                                onChange={(val) => {
+                                    setFormData({ ...formData, accepted_terms: val });
+                                    if (val) setErrorTerminos(false);
+                                }}
+                                error={errorTerminos}
+                            />
                         </div>
                     )}
 
