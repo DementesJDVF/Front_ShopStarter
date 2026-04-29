@@ -1,7 +1,7 @@
 import { Button, Dropdown } from "flowbite-react";
 import { Icon } from "@iconify/react";
 import user1 from "/src/assets/images/profile/user-1.jpg";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { useAuth } from "../../../context/AuthContext";
 import { useTranslation } from 'react-i18next';
 
@@ -12,12 +12,10 @@ interface ProfileProps {
 const Profile = ({ variant = "dark" }: ProfileProps) => {
   const isDark = variant === "dark";
   const { logout, user } = useAuth();
-  const navigate = useNavigate();
   const { t } = useTranslation('header');
 
   const handleLogout = () => {
     logout();
-    navigate("/auth/login");
   };
 
   return (
