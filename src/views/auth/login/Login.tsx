@@ -1,5 +1,4 @@
 import { useState } from "react";
-import api from "src/utils/axios";
 import FullLogo from "src/layouts/full/shared/logo/FullLogo";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "src/context/AuthContext";
@@ -31,15 +30,7 @@ const Login = () => {
     try {
       setLoading(true);
 
-      const response = await api.post("users/auth/login/", {
-        email: cleanEmail,
-        password,
-      });
-
-      const { access, access_token, refresh, user } = response.data;
-      const normalizedAccess = access || access_token;
-      if (!normalizedAccess) throw new Error('Login response without access token');
-      login(user, normalizedAccess, refresh);
+      const user = await login(cleanEmail, password);
 
       if (user.role === 'VENDEDOR') {
           navigate("/vendedor/dashboard");

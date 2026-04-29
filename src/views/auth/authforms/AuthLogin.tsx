@@ -2,7 +2,6 @@ import { Button, Checkbox, Label, TextInput } from "flowbite-react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../../context/AuthContext";
 import { useState } from "react";
-import api from "../../../utils/axios";
 import CustomTextInput from "../../../components/shared/CustomTextInput";
 import { useTranslation } from "react-i18next";
 
@@ -22,11 +21,7 @@ const AuthLogin = () => {
         setError(null);
 
         try {
-            const response = await api.post('users/auth/login/', { email, password });
-            const { access, access_token, refresh, user } = response.data;
-            const normalizedAccess = access || access_token;
-            if (!normalizedAccess) throw new Error('Login response without access token');
-            login(user, normalizedAccess, refresh);
+            const user = await login(email, password);
 
             if (user.role === 'VENDEDOR') {
                 navigate("/vendedor/dashboard");

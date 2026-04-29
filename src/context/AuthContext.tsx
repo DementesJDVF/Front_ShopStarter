@@ -1,101 +1,126 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../utils/axios';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import api, { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, clearAuthStorage } from '../utils/axios';
 
-
-interface User {
+export interface AuthUser {
   id: string;
   email: string;
   username: string;
   role: 'CLIENTE' | 'VENDEDOR' | 'ADMIN';
 }
 
+interface LoginResponse {
+  access?: string;
+  access_token?: string;
+  refresh?: string;
+  user: AuthUser;
+}
+
 interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  login: (userData: User, accessToken: string, refreshToken?: string) => void;
-  logout: () => void;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   loading: boolean;
+  login: (email: string, password: string) => Promise<AuthUser>;
+  logout: () => Promise<void>;
+  loadUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('access'));
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const loadUser = useCallback(async () => {
+    try {
+      const response = await api.get<AuthUser>('api/auth/me/');
+      setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
+    } catch (error) {
+      setUser(null);
+      clearAuthStorage();
+      throw error;
+    }
+  }, []);
+
+  const login = useCallback(async (email: string, password: string): Promise<AuthUser> => {
+    const response = await api.post<LoginResponse>('users/auth/login/', { email, password });
+    const accessToken = response.data.access ?? response.data.access_token;
+
+    if (!accessToken || !response.data.refresh || !response.data.user) {
+      throw new Error('Respuesta de login inválida: faltan tokens o usuario');
+    }
+
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, response.data.refresh);
+    localStorage.setItem('user', JSON.stringify(response.data.user));
+
+    setUser(response.data.user);
+    return response.data.user;
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await api.post('auth/logout/');
+    } catch (_error) {
+      // No bloqueamos el cierre de sesión local por fallo del backend.
+    } finally {
+      clearAuthStorage();
+      setUser(null);
+    }
+  }, []);
+
   useEffect(() => {
-    const bootstrapAuth = async () => {
-      const savedUser = localStorage.getItem('user');
-      const isPublicPath = window.location.pathname === '/' || window.location.pathname.startsWith('/auth');
+    const bootstrapSession = async () => {
+      const hasToken = Boolean(localStorage.getItem(ACCESS_TOKEN_KEY));
+      const cachedUser = localStorage.getItem('user');
 
-      try {
-        if (savedUser) {
-          const parsedUser = JSON.parse(savedUser);
-          setUser(parsedUser);
-
-          // Validación silenciosa de sesión HttpOnly contra el servidor
-          const res = await api.get('auth/me/');
-          setUser(res.data);
-          localStorage.setItem('user', JSON.stringify(res.data));
-          return;
-        }
-
-        // Evitamos 401 innecesario en páginas públicas cuando no hay sesión local
-        if (!isPublicPath) {
-          const res = await api.get('auth/me/');
-          setUser(res.data);
-          localStorage.setItem('user', JSON.stringify(res.data));
-        }
-      } catch (err: any) {
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          setUser(null);
+      if (cachedUser) {
+        try {
+          setUser(JSON.parse(cachedUser));
+        } catch {
           localStorage.removeItem('user');
         }
+      }
+
+      if (!hasToken) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        await loadUser();
+      } catch {
+        // loadUser limpia estado si falla
       } finally {
         setLoading(false);
       }
     };
 
-    bootstrapAuth();
-  }, []);
+    void bootstrapSession();
+  }, [loadUser]);
 
-  const login = (userData: User, accessToken: string, refreshToken?: string) => {
-    setUser(userData);
-    setToken(accessToken);
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('access', accessToken);
-    if (refreshToken) localStorage.setItem('refresh', refreshToken);
-  };
+  useEffect(() => {
+    const handleForcedLogout = async () => {
+      await logout();
+    };
 
-  const logout = async () => {
-    try {
-        // 1. Notificar al backend para invalidar la sesión y borrar Cookies HttpOnly
-        await api.post('auth/logout/');
-    } catch (error) {
-        console.error("Logout falló en servidor, forzando limpieza local:", error);
-    } finally {
-        // 2. LIMPIEZA ABSOLUTA DE ESTADO (Principio Fail-Secure)
-        setUser(null);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token'); // Por si acaso hubiera basura
-        localStorage.removeItem('access');
-        localStorage.removeItem('refresh');
-        setToken(null);
-        sessionStorage.clear();
-        
-        // 3. REDIRECCIÓN FORZADA
-        // Usamos window.location.href para resetear todo el estado de React y la caché
-        window.location.href = '/';
-    }
-  };
+    window.addEventListener('auth:logout', handleForcedLogout);
+    return () => window.removeEventListener('auth:logout', handleForcedLogout);
+  }, [logout]);
 
-  return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user, loading }}>
-      {children}
-    </AuthContext.Provider>
+  const contextValue = useMemo(
+    () => ({
+      user,
+      isAuthenticated: Boolean(user),
+      loading,
+      login,
+      logout,
+      loadUser,
+    }),
+    [user, loading, login, logout, loadUser],
   );
+
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
