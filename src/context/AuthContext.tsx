@@ -26,33 +26,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    
-    if (savedUser) {
-      try {
-        const parsedUser = JSON.parse(savedUser);
-        setUser(parsedUser);
-        
-        // Validación silenciosa obligatoria de sesión HttpOnly contra el servidor
-        api.get('auth/me/').then(res => {
-            setUser(res.data);
-        }).catch((err) => {
-          if (err.response?.status === 401 || err.response?.status === 403) {
-            logout();
-          }
-        });
+    const bootstrapAuth = async () => {
+      const savedUser = localStorage.getItem('user');
+      const isPublicPath = window.location.pathname === '/' || window.location.pathname.startsWith('/auth');
 
-      } catch (e) {
-        logout();
+      try {
+        if (savedUser) {
+          const parsedUser = JSON.parse(savedUser);
+          setUser(parsedUser);
+
+          // Validación silenciosa de sesión HttpOnly contra el servidor
+          const res = await api.get('auth/me/');
+          setUser(res.data);
+          localStorage.setItem('user', JSON.stringify(res.data));
+          return;
+        }
+
+        // Evitamos 401 innecesario en páginas públicas cuando no hay sesión local
+        if (!isPublicPath) {
+          const res = await api.get('auth/me/');
+          setUser(res.data);
+          localStorage.setItem('user', JSON.stringify(res.data));
+        }
+      } catch (err: any) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          setUser(null);
+          localStorage.removeItem('user');
+        }
+      } finally {
+        setLoading(false);
       }
-    } else {
-        // Tratar de recuperar la sesión silente si navegamos y hay una Cookie válida
-        api.get('auth/me/').then(res => {
-            setUser(res.data);
-            localStorage.setItem('user', JSON.stringify(res.data));
-        }).catch(() => {});
-    }
-    setLoading(false);
+    };
+
+    bootstrapAuth();
   }, []);
 
   const login = (userData: User, accessToken: string, refreshToken?: string) => {
