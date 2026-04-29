@@ -1,21 +1,28 @@
-import api from "../utils/axios";
+import api from '../utils/axios';
 
 //  Interfaz para el usuario
 export interface User {
     id: number;
     email: string;
-    username: string; 
-    role: string; 
-    is_active: boolean; 
-    date_joined: string; 
-    last_login: string; 
-    is_staff: boolean; 
-    is_superuser: boolean; 
-    groups: any []; 
-    user_permissions: any[]; 
+    username: string;
+    role: string;
+    is_active: boolean;
+    date_joined: string;
+    last_login: string;
+    is_staff: boolean;
+    is_superuser: boolean;
+    groups: any [];
+    user_permissions: any[];
 }
-// Servicio para obtener los usuarios 
-export const getUsers = async (): Promise<User[]> =>{
-    const response = await api.get("users/list/"); 
-    return response.data; 
+
+// Servicio para obtener los usuarios
+export const getUsers = async (): Promise<User[]> => {
+    const response = await api.get('users/list/');
+    return response.data;
+};
+
+// Ejemplo solicitado: actualizar estado de usuario usando JWT automático
+export const updateUserStatus = async (userId: number | string, status: string) => {
+    const response = await api.patch(`users/${userId}/status/`, { status });
+    return response.data;
 };

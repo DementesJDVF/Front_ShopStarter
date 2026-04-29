@@ -36,8 +36,10 @@ const Login = () => {
         password,
       });
 
-      const { access_token, user } = response.data;
-      login(user, access_token);
+      const { access, access_token, refresh, user } = response.data;
+      const normalizedAccess = access || access_token;
+      if (!normalizedAccess) throw new Error('Login response without access token');
+      login(user, normalizedAccess, refresh);
 
       if (user.role === 'VENDEDOR') {
           navigate("/vendedor/dashboard");

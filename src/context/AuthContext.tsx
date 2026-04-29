@@ -12,7 +12,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (userData: User, token: string) => void;
+  login: (userData: User, accessToken: string, refreshToken?: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
@@ -22,7 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('access'));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,11 +55,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  const login = (userData: User, dummyToken?: string) => {
+  const login = (userData: User, accessToken: string, refreshToken?: string) => {
     setUser(userData);
+    setToken(accessToken);
     localStorage.setItem('user', JSON.stringify(userData));
-    // NUNCA guardamos el Token en LocalStorage para evitar XSS.
-    // El servidor lo ha guardado en una Cookie HttpOnly de este origen.
+    localStorage.setItem('access', accessToken);
+    if (refreshToken) localStorage.setItem('refresh', refreshToken);
   };
 
   const logout = async () => {
@@ -73,6 +74,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         localStorage.removeItem('user');
         localStorage.removeItem('token'); // Por si acaso hubiera basura
+        localStorage.removeItem('access');
+        localStorage.removeItem('refresh');
+        setToken(null);
         sessionStorage.clear();
         
         // 3. REDIRECCIÓN FORZADA
@@ -82,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, token: "secure_httponly_token", login, logout, isAuthenticated: !!user, loading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user, loading }}>
       {children}
     </AuthContext.Provider>
   );

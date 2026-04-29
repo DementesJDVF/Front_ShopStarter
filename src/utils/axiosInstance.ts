@@ -31,9 +31,13 @@ api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getStoredToken(ACCESS_TOKEN_KEY);
 
+    if (!token && config.url && !config.url.includes('users/auth/login/')) {
+      return Promise.reject(new Error('No access token available'));
+    }
+
     if (token) {
       config.headers = config.headers ?? {};
-      config.headers.Authorization = `Bearer ${token.trim()}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
@@ -74,7 +78,7 @@ api.interceptors.response.use(
 
     try {
       const refreshResponse = await axios.post(`${api.defaults.baseURL}token/refresh/`, { refresh });
-      const newAccess = refreshResponse.data?.access || refreshResponse.data?.access_token;
+      const newAccess = refreshResponse.data?.access;
 
       if (!newAccess) {
         throw new Error('Refresh succeeded without new access token');
