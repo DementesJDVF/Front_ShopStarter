@@ -99,7 +99,7 @@ const AdminDashboard: React.FC = () => {
 
   const handleUserStatus = async (id: string, status: string) => {
     try {
-        await api.patch(`users/${id}/status/`, { status });
+        await api.put(`users/${id}/status/`, { status });
         toast.success("Estado de usuario actualizado");
         fetchData();
     } catch (err) { toast.error("Error al actualizar usuario"); }
@@ -196,9 +196,9 @@ const AdminDashboard: React.FC = () => {
                             <Table.Row key={u.id}>
                                 <Table.Cell className="font-bold">{u.username}<br/><span className="text-xs font-normal text-gray-400">{u.email}</span></Table.Cell>
                                 <Table.Cell><Badge color={u.role === 'ADMIN' ? 'purple' : 'info'}>{u.role}</Badge></Table.Cell>
-                                <Table.Cell><Badge color={u.status === 'ACTIVE' ? 'success' : u.status === 'PENDING' ? 'warning' : 'gray'}>{u.status}</Badge></Table.Cell>
+                                <Table.Cell><Badge color={u.status === 'ACTIVE' ? 'success' : (u.status === 'PENDING' || u.status === 'PENDING_APPROVAL') ? 'warning' : 'gray'}>{u.status}</Badge></Table.Cell>
                                 <Table.Cell className="flex gap-2">
-                                    {u.status === 'PENDING' && (
+                                    {(u.status === 'PENDING' || u.status === 'PENDING_APPROVAL') && (
                                         <Button color="success" size="xs" onClick={() => handleUserStatus(u.id, 'ACTIVE')}><HiCheck className="mr-1"/> Aprobar</Button>
                                     )}
                                     <Select value={u.status} onChange={(e) => handleUserStatus(u.id, e.target.value)}>

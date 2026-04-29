@@ -30,6 +30,10 @@ const processQueue = (error: any, token: string | null = null) => {
 // evitar conflictos de sincronización entre localStorage y Cookies.
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    const accessToken = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
     return config;
   },
   (error) => {

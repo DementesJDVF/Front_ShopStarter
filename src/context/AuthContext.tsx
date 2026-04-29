@@ -26,6 +26,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const storedAccessToken = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    if (storedAccessToken) setToken(storedAccessToken);
     const savedUser = localStorage.getItem('user');
     
     if (savedUser) {
@@ -55,9 +57,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  const login = (userData: User, dummyToken?: string) => {
+  const login = (userData: User, accessToken?: string) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
+    if (accessToken) {
+      setToken(accessToken);
+      sessionStorage.setItem('access_token', accessToken);
+    }
     // NUNCA guardamos el Token en LocalStorage para evitar XSS.
     // El servidor lo ha guardado en una Cookie HttpOnly de este origen.
   };
@@ -73,6 +79,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         localStorage.removeItem('user');
         localStorage.removeItem('token'); // Por si acaso hubiera basura
+        localStorage.removeItem('access_token');
+        sessionStorage.removeItem('access_token');
         sessionStorage.clear();
         
         // 3. REDIRECCIÓN FORZADA
@@ -82,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, token: "secure_httponly_token", login, logout, isAuthenticated: !!user, loading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user, loading }}>
       {children}
     </AuthContext.Provider>
   );
