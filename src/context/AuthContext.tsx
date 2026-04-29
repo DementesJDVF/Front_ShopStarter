@@ -42,17 +42,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (err.response?.status === 401 || err.response?.status === 403) {
             logout();
           }
+        }).finally(() => {
+          setLoading(false);
         });
 
       } catch (e) {
         logout();
       }
     } else {
-        // Tratar de recuperar la sesión silente si navegamos y hay una Cookie válida
-        api.get('auth/me/').then(res => {
-            setUser(res.data);
-            localStorage.setItem('user', JSON.stringify(res.data));
-        }).catch(() => {});
+        // Evitar llamadas innecesarias (y 401 en consola) para usuarios invitados.
+        // Solo intentamos recuperación silente si existe algún token persistido.
+        if (storedAccessToken) {
+          api.get('auth/me/').then(res => {
+              setUser(res.data);
+              localStorage.setItem('user', JSON.stringify(res.data));
+          }).catch(() => {}).finally(() => {
+            setLoading(false);
+          });
+        } else {
+          setLoading(false);
+        }
+        return;
     }
     setLoading(false);
   }, []);
