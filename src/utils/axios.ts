@@ -87,6 +87,8 @@ api.interceptors.response.use(
       if (isInvalidToken) {
         // Si el token es basura/inválido, no intentamos refrescar, cerramos sesión de una.
         localStorage.removeItem('user');
+        localStorage.removeItem('access_token');
+        sessionStorage.removeItem('access_token');
         toast.error('Tu sesión es inválida. Inicia sesión de nuevo.');
         window.location.href = '/';
         return Promise.reject(error);
@@ -109,11 +111,16 @@ api.interceptors.response.use(
         try {
           // Solicitar rotación silenciosa al Backend
           await axios.post(`${api.defaults.baseURL}token/refresh/`, {}, { withCredentials: true, xsrfCookieName: 'csrftoken', xsrfHeaderName: 'X-CSRFToken' });
+          // Evita reintentar con un Bearer expirado cuando el backend ya autenticó por Cookie HttpOnly.
+          localStorage.removeItem('access_token');
+          sessionStorage.removeItem('access_token');
           processQueue(null, 'refreshed');
           return api(originalRequest); 
         } catch (err) {
           processQueue(err, null);
           localStorage.removeItem('user');
+          localStorage.removeItem('access_token');
+          sessionStorage.removeItem('access_token');
           
           const isPublicPath = window.location.pathname === '/' || window.location.pathname.startsWith('/auth');
           if (!isPublicPath) {
