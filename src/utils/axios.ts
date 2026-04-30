@@ -25,11 +25,34 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
+// Variable en memoria para persistir el token CSRF obtenido vía JSON
+let memoizedCsrfToken: string | null = null;
+
 // Request interceptor: El navegador enviará las cookies HttpOnly automáticamente 
-// gracias a 'withCredentials: true'. Ya no inyectamos el token manualmente para
-// evitar conflictos de sincronización entre localStorage y Cookies.
+// gracias a 'withCredentials: true'. Pero para CSRF, debemos inyectar el header manualmente
+// si estamos en un entorno Cross-Origin (Vercel -> Railway) donde JS no puede leer cookies.
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  async (config: InternalAxiosRequestConfig) => {
+    const isMutation = ['post', 'put', 'patch', 'delete'].includes(config.method || '');
+    
+    if (isMutation) {
+        // 1. Intentar obtener de la memoria
+        if (memoizedCsrfToken) {
+            config.headers['X-CSRFToken'] = memoizedCsrfToken;
+        } else {
+            try {
+                // 2. Si no hay token memorizado, pedirlo al endpoint dedicado
+                // Usamos axios base para evitar recursión infinita
+                const response = await axios.get(`${api.defaults.baseURL}auth/csrf/`, { withCredentials: true });
+                memoizedCsrfToken = response.data.csrfToken;
+                if (memoizedCsrfToken) {
+                    config.headers['X-CSRFToken'] = memoizedCsrfToken;
+                }
+            } catch (error) {
+                console.error("Error al obtener token CSRF:", error);
+            }
+        }
+    }
     return config;
   },
   (error) => {
@@ -80,6 +103,7 @@ api.interceptors.response.use(
                           (error.response?.data?.detail && error.response.data.detail.includes('token not valid'));
 
     if (error.response?.status === 401 || isInvalidToken) {
+      memoizedCsrfToken = null; // Limpiar token CSRF memorizado
       if (isInvalidToken) {
         // Si el token es basura/inválido, no intentamos refrescar, cerramos sesión de una.
         localStorage.removeItem('user');
