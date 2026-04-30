@@ -80,7 +80,9 @@ const AdminDashboard: React.FC = () => {
       setLoading(true);
       const [uRes, pRes, oRes] = await Promise.all([
         api.get('users/list/'),
-        api.get('products/create/'),
+        api.post('products/create/', {
+          status: 'PENDING'
+        }),
         api.get('orders/')
       ]);
       const pData = pRes.data.results || pRes.data;
