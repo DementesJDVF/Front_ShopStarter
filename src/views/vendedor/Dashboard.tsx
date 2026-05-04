@@ -145,19 +145,24 @@ useEffect(() => {
     <div className="scale-80 origin-top">
 
       {/* HEADER */}
-     <Card className="!bg-gray-100 dark:!bg-gray-300 p-9 shadow-md rounded-xl">
-        <Card className="!bg-gray-600 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
+      <Card className="! bg-gray-100 dark:!bg-gray-900 p-9 shadow-md rounded-xl">
+      <h1 className="mt-4 font-black text-3xl tracking-tight text-blue-400 flex items-center gap-3">
+        <Icon icon="solar:chart-square-bold-duotone" width="32" className="!bg-gray-100 dark:!bg-gray-900" />
+        Panel de Gestión - vendedor
+         <Button className=" ml-[700px] bg-green-400 hover:bg-green-600 text-white" onClick={() => setShowLocationModal(true)}>
+          <HiOutlineLocationMarker className="mr-3" />
+          Mi ubicación
+        </Button>
+        </h1>
+      </Card>
+
+     <Card className="mt-6 !bg-gray-100 dark:!bg-gray-900 p-9 shadow-md rounded-xl">
+        <Card className="!bg-gray-600 dark:!bg-gray-800 p-9 shadow-md rounded-xl">
       <div className="flex justify-between mb-8">
-    
         <h1 className="mt-4 font-black text-3xl tracking-tight text-blue-400 flex items-center gap-3">
           <Icon icon="solar:chart-square-bold-duotone" width="32" className="text-blue-100" />
           ULTIMOS REGISTROS
         </h1>
-
-        <Button className="bg-green-400 hover:bg-green-600 text-white" onClick={() => setShowLocationModal(true)}>
-          <HiOutlineLocationMarker className="mr-2" />
-          Ubicación
-        </Button>
       </div>
 
       {/* METRICS */}
@@ -170,8 +175,8 @@ useEffect(() => {
              <Icon icon="solar:box-bold" width="30" color="#7963b0" />
             </Card>
             <div>
-              <p className="font-black text-black text-2xl ">Ventas</p>
-              <p className="font-black text-2xl tracking-tight">{data[data.length - 1].ventas}
+              <p className="font-black text-black text-2xl max-w-xl ">Ventas</p>
+              <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].ventas}
               </p>
             </div>
           </div>
@@ -184,8 +189,8 @@ useEffect(() => {
             <Icon icon="solar:cart-bold" width="30" color="#da701f" />
              </Card>
              <div>
-              <p className="font-black text-black  text-2xl ">Pedidos</p>
-              <p className="font-black text-2xl tracking-tight">{data[data.length - 1].pedidos}</p>
+              <p className="font-black text-black text-2xl ">Pedidos</p>
+              <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].pedidos}</p>
             </div>
           </div>
         </Card>
@@ -197,8 +202,8 @@ useEffect(() => {
             <Icon icon="solar:users-group-rounded-bold" width="30" color="#b3177f" />
             </Card>
              <div>
-              <p className="font-black text-black  text-2xl ">Usuarios</p>
-              <p className="font-black text-2xl tracking-tight">{data[data.length - 1].usuarios}</p>
+              <p className="font-black text-black text-2xl ">Usuarios</p>
+              <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].usuarios}</p>
             </div>
           </div>
         </Card>
@@ -206,11 +211,11 @@ useEffect(() => {
        { /* estados de pedidos */}
        <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
           <div className="flex gap-3 items-center">
-             <Card className="w-[40px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
+             <Card className="w-[50px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
             <Icon icon="solar:chart-bold" width="30" color="#ce1a1a"/> </Card>
              <div>
-              <p className="font-black text-black  text-2xl ">Estados cancelados</p>
-              <p className="font-black text-2xl tracking-tight">{data[data.length - 1].ingresos}</p>
+              <p className="font-black text-black text-2xl ">Estados cancelados</p>
+              <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].ingresos}</p>
             </div>
           </div>
         </Card>
@@ -218,12 +223,10 @@ useEffect(() => {
     </Card>
   </Card>
 
-   <div className="p-6 border-b"></div>
 
       {/* 🔥 4 GRÁFICAS */}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+      
+      <div className="mt-[40px] grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* VENTAS */}
         <Card>
             
@@ -308,7 +311,7 @@ useEffect(() => {
 
         {/* USUARIOS */}
         <Card>
-          <h2 className="mb-2 font-black text-black text-2xl ">Usuarios</h2>
+          <h2 className="mb-3 dark-white text-black text-2xl ">Usuarios</h2>
 
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={dataUsuarios}>
@@ -388,7 +391,8 @@ useEffect(() => {
       </ResponsiveContainer>
       </Card>
     </Card>
-    </div>
+  </div>
+
 
       {/* MODAL UBICACIÓN */}
       <Modal
