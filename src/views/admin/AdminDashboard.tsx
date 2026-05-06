@@ -1,312 +1,229 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Card, Table, Button, Select, Badge, Spinner } from 'flowbite-react';
-import { HiUserCircle, HiCheck, HiLightningBolt, HiTrash, HiShoppingCart } from 'react-icons/hi';
-import { MdOutlinePendingActions } from 'react-icons/md';
-import { Icon } from '@iconify/react';
-import { useTranslation } from 'react-i18next';
-import api from '../../utils/axios';
-import CategoryComponent from '../../components/categorias/category';
-import ImagePreviewModal from '../../components/shared/ImagePreviewModal';
-import UnauthorizedScreen from '../../components/shared/UnauthorizedScreen';
-import { useAuth } from '../../context/AuthContext';
-import toast from 'react-hot-toast';
-import VendorMap from '../../components/geo/VendorMap';
-import { getAbsoluteImageUrl } from '../../utils/urlHelper';
-import VendorCatalogModal from '../../components/geo/VendorCatalogModal';
+import React, { useEffect, useMemo, useState } from "react";
+import { Card, Table, Badge } from "flowbite-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from "recharts";
+import api from "../../utils/axios";
 
-// Componentes Analíticos Premium (Imports por defecto corregidos)
-import { RevenueForecast } from '../../components/dashboard/RevenueForecast';
-import TotalIncome from '../../components/dashboard/TotalIncome';
-import NewCustomers from '../../components/dashboard/NewCustomers';
-import ProductRevenue from '../../components/dashboard/ProductRevenue';
-import DailyActivity from '../../components/dashboard/DailyActivity';
-import BlogCards from '../../components/dashboard/BlogCards';
+interface User {
+  id: string;
+  username: string;
+  role?: string;
+  status?: string;
+  created_at?: string;
+}
 
-interface User { id: string; email: string; username: string; role: string; status: string; }
-interface Product { id: string; name: string; price: string; status: string; vendor_name?: string; images?: any[]; }
-interface Order { id: string; client_name: string; product_name: string; status: string; total: number; created_at: string; }
+const COLORS = ["#6366F1", "#22C55E", "#F59E0B", "#EF4444"];
 
-interface SelectedVendor { id: string; name: string; }
-
-const TableSkeleton = () => (
-    <div className="animate-pulse space-y-4 py-4">
-        {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="h-12 bg-gray-200/50 dark:bg-slate-800/50 rounded-xl"></div>
-        ))}
-    </div>
-);
-
-const AdminDashboard: React.FC = () => {
-  const { t } = useTranslation('admin');
-  const { user, loading: authLoading } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [currentView, setCurrentView] = useState(0);
-
+export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [pendingProducts, setPendingProducts] = useState<Product[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [openCard, setOpenCard] = useState<string | null>(null);
 
-  // Modal de Catálogo (Mapa Eagle View)
-  const [isCatalogModalOpen, setIsCatalogModalOpen] = useState(false);
-  const [selectedVendor, setSelectedVendor] = useState<SelectedVendor | null>(null);
-
-  if (!authLoading && (!user || user.role !== 'ADMIN')) {
-    return <UnauthorizedScreen code={403} message="Solo Administradores." />;
-  }
+  const toggle = (card: string) => {
+    setOpenCard(prev => (prev === card ? null : card));
+  };
 
   useEffect(() => {
-    if (location.pathname.includes('usuarios')) setCurrentView(2);
-    else if (location.pathname.includes('categorias')) setCurrentView(1);
-    else if (location.pathname.includes('productos')) setCurrentView(3);
-    else if (location.pathname.includes('ventas')) setCurrentView(4);
-    else if (location.pathname.includes('mapa')) setCurrentView(5);
-    else setCurrentView(0);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    (window as any).openVendorCatalog = (vendorId: string, vendorName: string) => {
-        setSelectedVendor({ id: vendorId, name: vendorName });
-        setIsCatalogModalOpen(true);
+    const fetchUsers = async () => {
+      try {
+        const res = await api.get("users/list/");
+        setUsers(res.data || []);
+      } catch (err) {
+        console.error(err);
+        setUsers([]);
+      }
     };
-    return () => { delete (window as any).openVendorCatalog; };
+
+    fetchUsers();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [uRes, pRes, oRes] = await Promise.all([
-        api.get('users/list/'),
-        api.get('products/create/'),
-        api.get('orders/')
-      ]);
-      const pData = pRes.data.results || pRes.data;
-      setUsers(uRes.data);
-      setAllProducts(Array.isArray(pData) ? pData : []);
-      setPendingProducts(Array.isArray(pData) ? pData.filter((p: any) => p.status === 'PENDING') : []);
-      setOrders(oRes.data.results || oRes.data);
-    } catch (err) {
-      console.error("Error cargando datos", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const normalize = (val?: string) => val?.toLowerCase();
 
-  useEffect(() => { fetchData(); }, []);
+  const vendors = useMemo(
+  () =>
+    users.filter(u => {
+      const role = (u.role || "").toLowerCase();
+      return role.includes("vendor") || role.includes("vendedor");
+    }),
+  [users]
+);
 
-  const handleUserStatus = async (id: string, status: string) => {
-    try {
-        await api.patch(`users/${id}/status/`, { status });
-        toast.success("Estado de usuario actualizado");
-        fetchData();
-    } catch (err) { toast.error("Error al actualizar usuario"); }
-  };
+const clients = useMemo(
+  () =>
+    users.filter(u => {
+      const role = (u.role || "").toLowerCase();
+      return role.includes("client") || role.includes("cliente");
+    }),
+  [users]
+);
 
-  const handleProductStatus = async (id: string, status: string) => {
-    try {
-      await api.patch(`products/create/${id}/`, { status });
-      toast.success(`Producto ${status === 'AVAILABLE' ? 'Aprobado' : 'Rechazado'}`);
-      fetchData();
-    } catch (err) { toast.error("Error al actualizar producto"); }
-  };
+const active = useMemo(
+  () =>
+    users.filter(u => {
+      const status = (u.status || "").toLowerCase();
+      return status.includes("active") || status.includes("activo");
+    }),
+  [users]
+);
 
-  const handleDelete = async (type: 'users' | 'products', id: string) => {
-    if (!window.confirm("¿Eliminar permanentemente? Esta acción afectará la base de datos real.")) return;
-    try {
-      await api.delete(`${type}/${type === 'users' ? id : 'create/' + id}/`);
-      toast.success("Eliminado correctamente.");
-      fetchData();
-    } catch (err) { toast.error("Error al eliminar."); }
-  };
+const inactive = useMemo(
+  () =>
+    users.filter(u => {
+      const status = (u.status || "").toLowerCase();
+      return status.includes("inactive") || status.includes("inactivo");
+    }),
+  [users]
+);
+  // ⚠️ ASEGURAR QUE SIEMPRE HAYA VALORES (evita gráficas vacías)
+  const roleData = [
+    { name: "Vendedores", value: vendors.length || 0 },
+    { name: "Clientes", value: clients.length || 0 }
+  ];
 
-  const getProductImage = (images: any[]) => {
-      if (!images || images.length === 0) return 'https://via.placeholder.com/150';
-      const main = images.find(img => img.is_main) || images[0];
-      return getAbsoluteImageUrl(main.url_image);
-  };
+  const statusData = [
+    { name: "Activos", value: active.length || 0 },
+    { name: "Inactivos", value: inactive.length || 0 }
+  ];
 
-  return (
-    <div className="w-full font-[var(--main-font)]">
-      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-            <h1 className="text-3xl md:text-5xl font-black text-indigo-900 dark:text-white tracking-tighter uppercase italic">
-            ADMIN<span className="text-indigo-500"> DASHBOARD</span>
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 font-medium italic">Control Maestro y Moderación</p>
-        </div>
-        <div className="flex gap-2">
-            <Badge color="success" size="lg" className="px-4 py-2 border border-green-200">
-                <HiLightningBolt className="mr-1 inline" /> SISTEMA ONLINE
-            </Badge>
-        </div>
-      </div>
-      
-      <div className="bg-white/40 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2.5rem] border border-gray-100 dark:border-slate-800 p-2 md:p-6 shadow-2xl min-h-[600px]">
-        
-        {currentView === 0 && (
-          <div className="animate-fade-in space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl">
-                    <div className="flex items-center gap-4">
-                        <div className="p-4 bg-primary/10 rounded-2xl"><Icon icon="solar:users-group-rounded-bold-duotone" className="text-primary" height="32" /></div>
-                        <div><p className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">Usuarios</p><h3 className="text-4xl font-black text-gray-900 dark:text-white">{users.length}</h3></div>
-                    </div>
-                  </Card>
-                  <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl">
-                    <div className="flex items-center gap-4">
-                        <div className="p-4 bg-secondary/10 rounded-2xl"><Icon icon="solar:box-minimalistic-bold-duotone" className="text-secondary" height="32" /></div>
-                        <div><p className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">Pendientes</p><h3 className="text-4xl font-black text-gray-900 dark:text-white">{pendingProducts.length}</h3></div>
-                    </div>
-                  </Card>
-                  <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl border-l-4 border-l-green-500">
-                    <div className="flex items-center gap-4">
-                        <div className="p-4 bg-green-100 dark:bg-green-900/30 rounded-2xl"><HiShoppingCart className="text-green-600" size={32} /></div>
-                        <div><p className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">Ventas</p><h3 className="text-4xl font-black text-green-600">{orders.length}</h3></div>
-                    </div>
-                  </Card>
-              </div>
-              <div className="grid grid-cols-12 gap-6">
-                <div className="lg:col-span-8 col-span-12"><RevenueForecast/></div>
-                <div className="lg:col-span-4 col-span-12 space-y-6"><NewCustomers /><TotalIncome /></div>
-                <div className="lg:col-span-8 col-span-12"><ProductRevenue /></div>
-                <div className="lg:col-span-4 col-span-12"><DailyActivity /></div>
-                <div className="col-span-12"><BlogCards /></div>
-              </div>
+  const renderDetails = (data: User[]) => (
+    <div className="mt-4 max-h-60 overflow-auto">
+      {data.length === 0 ? (
+        <p className="text-gray-400">Sin datos</p>
+      ) : (
+        data.map(u => (
+          <div key={u.id} className="flex justify-between border-b py-2">
+            <span>{u.username}</span>
+            <span className="text-xs text-gray-400">{u.role}</span>
           </div>
-        )}
-
-        {currentView === 1 && (<div className="animate-fade-in"><CategoryComponent showAdminManagement={true} /></div>)}
-
-        {currentView === 2 && (
-          <div className="animate-fade-in space-y-6">
-            <h2 className="text-3xl font-black text-indigo-900 uppercase italic flex items-center gap-3"><HiUserCircle className="text-primary text-4xl" /> Gestión de Usuarios</h2>
-            {loading ? <TableSkeleton /> : (
-                <Table hoverable>
-                    <Table.Head className="bg-indigo-50">
-                        <Table.HeadCell>Usuario</Table.HeadCell>
-                        <Table.HeadCell>Rol</Table.HeadCell>
-                        <Table.HeadCell>Estado</Table.HeadCell>
-                        <Table.HeadCell>Acciones</Table.HeadCell>
-                    </Table.Head>
-                    <Table.Body className="divide-y">
-                        {users.map(u => (
-                            <Table.Row key={u.id}>
-                                <Table.Cell className="font-bold">{u.username}<br/><span className="text-xs font-normal text-gray-400">{u.email}</span></Table.Cell>
-                                <Table.Cell><Badge color={u.role === 'ADMIN' ? 'purple' : 'info'}>{u.role}</Badge></Table.Cell>
-                                <Table.Cell><Badge color={u.status === 'ACTIVE' ? 'success' : u.status === 'PENDING' ? 'warning' : 'gray'}>{u.status}</Badge></Table.Cell>
-                                <Table.Cell className="flex gap-2">
-                                    {u.status === 'PENDING' && (
-                                        <Button color="success" size="xs" onClick={() => handleUserStatus(u.id, 'ACTIVE')}><HiCheck className="mr-1"/> Aprobar</Button>
-                                    )}
-                                    <Select value={u.status} onChange={(e) => handleUserStatus(u.id, e.target.value)}>
-                                        <option value="ACTIVE">Activo</option>
-                                        <option value="INACTIVE">Inactivo</option>
-                                        <option value="BLOCKED">Bloqueado</option>
-                                    </Select>
-                                    <Button color="failure" size="xs" onClick={() => handleDelete('users', u.id)}><HiTrash/></Button>
-                                </Table.Cell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
-            )}
-          </div>
-        )}
-
-        {currentView === 3 && (
-          <div className="animate-fade-in space-y-6">
-            <h2 className="text-3xl font-black text-indigo-900 uppercase italic flex items-center gap-3"><MdOutlinePendingActions className="text-secondary text-4xl" /> Aprobación de Productos</h2>
-            <p className="text-gray-500 font-medium">Revisa y aprueba los productos enviados por los vendedores antes de que salgan al catálogo público.</p>
-            {loading ? <TableSkeleton /> : (
-                <Table hoverable>
-                    <Table.Head className="bg-indigo-50">
-                        <Table.HeadCell>Imagen</Table.HeadCell>
-                        <Table.HeadCell>Producto</Table.HeadCell>
-                        <Table.HeadCell>Vendedor</Table.HeadCell>
-                        <Table.HeadCell>Precio</Table.HeadCell>
-                        <Table.HeadCell>Estado</Table.HeadCell>
-                        <Table.HeadCell>Acciones</Table.HeadCell>
-                    </Table.Head>
-                    <Table.Body className="divide-y">
-                        {allProducts.filter(p => p.status === 'PENDING').map(p => (
-                            <Table.Row key={p.id}>
-                                <Table.Cell>
-                                    <img src={getProductImage(p.images || [])} alt={p.name} className="w-12 h-12 rounded-xl object-cover shadow-sm border border-gray-100" />
-                                </Table.Cell>
-                                <Table.Cell className="font-bold">{p.name}</Table.Cell>
-                                <Table.Cell className="text-xs">{p.vendor_name}</Table.Cell>
-                                <Table.Cell className="font-bold text-indigo-600">${Number(p.price).toLocaleString()}</Table.Cell>
-                                <Table.Cell>
-                                    <Badge color={p.status === 'AVAILABLE' ? 'success' : 'warning'}>{p.status}</Badge>
-                                </Table.Cell>
-                                <Table.Cell className="flex gap-2">
-                                    <Button color="success" size="xs" onClick={() => handleProductStatus(p.id, 'AVAILABLE')}>
-                                        <HiCheck className="mr-1"/> Aprobar
-                                    </Button>
-                                    <Button color="info" size="xs" onClick={() => navigate(`/app/products/${p.id}`)}>
-                                        <Icon icon="solar:eye-outline" className="mr-1 h-4 w-4" /> Detalle
-                                    </Button>
-                                    <Button color="failure" size="xs" onClick={() => handleProductStatus(p.id, 'REJECTED')}>
-                                        <HiTrash className="mr-1 h-4 w-4" /> {t('products.reject')}
-                                    </Button>
-                                </Table.Cell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
-            )}
-          </div>
-        )}
-
-        {currentView === 4 && (
-          <div className="animate-fade-in space-y-6">
-            <h2 className="text-3xl font-black text-green-700 uppercase italic flex items-center gap-3"><HiShoppingCart className="text-green-500 text-4xl" /> Auditoría de Ventas</h2>
-            {loading ? <TableSkeleton /> : (
-                <Table hoverable>
-                    <Table.Head className="bg-green-50">
-                        <Table.HeadCell>ID</Table.HeadCell>
-                        <Table.HeadCell>Cliente</Table.HeadCell>
-                        <Table.HeadCell>Producto</Table.HeadCell>
-                        <Table.HeadCell>Estado</Table.HeadCell>
-                        <Table.HeadCell>Total</Table.HeadCell>
-                    </Table.Head>
-                    <Table.Body className="divide-y">
-                        {orders.map(o => (
-                            <Table.Row key={o.id}>
-                                <Table.Cell className="text-xs font-mono">{o.id.slice(0,8)}</Table.Cell>
-                                <Table.Cell>{o.client_name}</Table.Cell>
-                                <Table.Cell className="font-bold">{o.product_name}</Table.Cell>
-                                <Table.Cell><Badge color={o.status === 'PAID' ? 'success' : 'warning'}>{o.status}</Badge></Table.Cell>
-                                <Table.Cell className="font-black text-indigo-600">${Number(o.total).toLocaleString()}</Table.Cell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
-            )}
-          </div>
-        )}
-
-        {currentView === 5 && (
-          <div className="animate-fade-in space-y-6 h-full">
-            <h2 className="text-3xl font-black text-blue-700 uppercase italic flex items-center gap-3"><Icon icon="solar:map-point-wave-bold-duotone" className="text-blue-500 text-4xl" /> Vista de Águila (Mapa Global)</h2>
-            <div className="h-[500px] w-full">
-                <VendorMap isAdmin={true} />
-            </div>
-          </div>
-        )}
-      </div>
-
-      <VendorCatalogModal
-        isOpen={isCatalogModalOpen}
-        onClose={() => setIsCatalogModalOpen(false)}
-        vendorId={selectedVendor?.id || null}
-        vendorName={selectedVendor?.name}
-      />
+        ))
+      )}
     </div>
   );
-};
 
-export default AdminDashboard;
+  return (
+    <div className="p-6 space-y-8 bg-gray-50 dark:bg-slate-900 min-h-screen">
+
+      {/* CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {[
+          { key: "users", label: "Usuarios", data: users },
+          { key: "vendors", label: "Vendedores", data: vendors },
+          { key: "clients", label: "Clientes", data: clients },
+          { key: "active", label: "Activos", data: active }
+        ].map(card => (
+          <Card
+            key={card.key}
+            onClick={() => toggle(card.key)}
+            className="cursor-pointer shadow-xl rounded-2xl hover:scale-105 transition"
+          >
+            <h5 className="text-gray-500">{card.label}</h5>
+            <h2 className="text-4xl font-bold">{card.data.length}</h2>
+          </Card>
+        ))}
+      </div>
+
+      {/* MODAL CENTRADO */}
+      {openCard && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl w-[90%] md:w-[500px]">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">Detalle</h3>
+              <button
+                onClick={() => setOpenCard(null)}
+                className="text-red-500"
+              >
+                X
+              </button>
+            </div>
+
+            {openCard === "users" && renderDetails(users)}
+            {openCard === "vendors" && renderDetails(vendors)}
+            {openCard === "clients" && renderDetails(clients)}
+            {openCard === "active" && renderDetails(active)}
+          </div>
+        </div>
+      )}
+
+      {/* GRAFICAS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <Card className="shadow-xl rounded-2xl">
+          <h5 className="mb-4">Usuarios por Rol (%)</h5>
+          <div className="h-64">
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie data={roleData} dataKey="value" nameKey="name" outerRadius={80} label>
+                  {roleData.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card className="shadow-xl rounded-2xl">
+          <h5 className="mb-4">Estados (%)</h5>
+          <div className="h-64">
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie data={statusData} dataKey="value" nameKey="name" outerRadius={80} label>
+                  {statusData.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i + 2]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+      </div>
+
+      
+      <div className="max-h-60 overflow-y-auto">
+        <Card className="p-2 shadow-lg rounded-lg">
+          <h5 className="mb-4">Usuarios Registrados</h5>
+
+          <Table>
+            <Table.Head>
+              <Table.HeadCell>ID</Table.HeadCell>
+              <Table.HeadCell>Usuario</Table.HeadCell>
+              <Table.HeadCell>Rol</Table.HeadCell>
+              <Table.HeadCell>Estado</Table.HeadCell>
+            </Table.Head>
+
+            <Table.Body>
+              {users.map(u => (
+                <Table.Row key={u.id}>
+                  <Table.Cell>{u.id}</Table.Cell>
+                  <Table.Cell>{u.username}</Table.Cell>
+
+                  <Table.Cell>
+                    <Badge color={normalize(u.role) === "vendor" ? "info" : "purple"}>
+                      {u.role || "N/A"}
+                    </Badge>
+                  </Table.Cell>
+
+                  <Table.Cell>
+                    <Badge color={normalize(u.status) === "active" ? "success" : "gray"}>
+                      {u.status || "N/A"}
+                    </Badge>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        </Card>
+      </div>
+    </div>
+  );
+}
