@@ -221,6 +221,20 @@ const AuthRegister = () => {
                                     {formData.password.length < 8 ? t("form.strengthHintWeak") : t("form.strengthHintStrong")}
                                 </p>
                             </div>
+
+                            <ul className="mt-3 space-y-1">
+                              {[
+                                { label: 'Mínimo 8 caracteres', valid: formData.password.length >= 8 },
+                                { label: 'Al menos una mayúscula', valid: /[A-Z]/.test(formData.password) },
+                                { label: 'Al menos un número', valid: /[0-9]/.test(formData.password) },
+                                { label: 'Al menos un carácter especial (@, $, !, %, *, #, ?, &)', valid: /[@#$%^&+=!¡¿?*]/.test(formData.password) },
+                              ].map((req) => (
+                                <li key={req.label} className={`flex items-center gap-2 text-[10px] font-bold transition-colors ${req.valid ? 'text-green-600' : 'text-slate-400'}`}>
+                                  <Icon icon={req.valid ? 'solar:check-circle-bold' : 'solar:close-circle-bold'} className={req.valid ? 'text-green-500' : 'text-slate-300'} />
+                                  {req.label}
+                                </li>
+                              ))}
+                            </ul>
                         </div>
                     )}
 
@@ -260,6 +274,20 @@ const AuthRegister = () => {
                                         </div>
                                     </div>
                                 </>
+                            )}
+
+                            {formData.role === 'CLIENTE' && (
+                              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-2xl flex items-start gap-3">
+                                <Icon icon="solar:user-circle-bold-duotone" className="text-blue-500 mt-0.5 flex-shrink-0" height={20} />
+                                <div>
+                                  <p className="text-[11px] font-black text-blue-800 dark:text-blue-200 uppercase tracking-tight mb-1">
+                                    ¿Por qué no te pedimos más datos?
+                                  </p>
+                                  <p className="text-[11px] text-blue-700 dark:text-blue-300 font-medium leading-relaxed">
+                                    Como cliente solo necesitas nombre y correo para empezar a comprar. Los datos adicionales (documento, teléfono, fecha de nacimiento) solo se solicitan a vendedores porque deben pasar por un proceso de verificación de identidad antes de publicar productos en la plataforma. Así protegemos a todos los usuarios.
+                                  </p>
+                                </div>
+                              </div>
                             )}
 
                             <div className="flex items-start gap-4 p-5 bg-[#3A17E4]/5 rounded-3xl border border-[#3A17E4]/20 mt-2 hover:bg-[#3A17E4]/10 transition-all shadow-sm group">
@@ -314,19 +342,32 @@ const AuthRegister = () => {
                     <span className="font-black text-xl text-[#0A014A] dark:text-white uppercase tracking-tighter">{t("terms.title")}</span>
                 </Modal.Header>
                 <Modal.Body className="p-8 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl">
-                    <div className="space-y-6 text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-                        <div className="p-5 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-600 rounded-2xl">
-                            <p className="font-black text-red-600 dark:text-red-400 uppercase tracking-tight italic flex items-center gap-2 mb-2">
-                                <Icon icon="solar:danger-bold" /> {t("terms.warningTitle")}
-                            </p>
-                            <p className="text-xs font-bold leading-tight">{t("terms.warningText")}</p>
-                        </div>
-                        <div className="space-y-4">
-                            <p className="flex gap-3"><span className="font-black text-[#3A17E4]">1.</span> <span><strong>{t("terms.item1Label")}</strong> {t("terms.item1Text")}</span></p>
-                            <p className="flex gap-3"><span className="font-black text-[#3A17E4]">2.</span> <span><strong>{t("terms.item2Label")}</strong> {t("terms.item2Text")}</span></p>
-                            <p className="flex gap-3"><span className="font-black text-[#3A17E4]">3.</span> <span><strong>{t("terms.item3Label")}</strong> {t("terms.item3Text")}</span></p>
-                        </div>
+                  <div className="space-y-6 text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+
+                    <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-500 rounded-2xl">
+                      <p className="text-xs font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-tight mb-1 flex items-center gap-2">
+                        <Icon icon="solar:shield-user-bold-duotone" />
+                        ¿Por qué pedimos tu aceptación?
+                      </p>
+                      <p className="text-xs text-indigo-800 dark:text-indigo-200 font-medium leading-relaxed">
+                        Aceptar los Términos y Condiciones es un requisito legal que nos permite informarte sobre cómo usamos tu información, qué derechos tienes como usuario y cuáles son las reglas de uso de la plataforma. Sin esta aceptación no podemos crear tu cuenta, ya que la ley colombiana (Ley 1581 de 2012 — Habeas Data) exige tu consentimiento explícito antes de procesar cualquier dato personal.
+                      </p>
                     </div>
+
+                    <div className="p-5 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-600 rounded-2xl">
+                      <p className="font-black text-red-600 dark:text-red-400 uppercase tracking-tight italic flex items-center gap-2 mb-2">
+                        <Icon icon="solar:danger-bold" /> {t("terms.warningTitle")}
+                      </p>
+                      <p className="text-xs font-bold leading-tight">{t("terms.warningText")}</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <p className="flex gap-3"><span className="font-black text-[#3A17E4]">1.</span> <span><strong>{t("terms.item1Label")}</strong> {t("terms.item1Text")}</span></p>
+                      <p className="flex gap-3"><span className="font-black text-[#3A17E4]">2.</span> <span><strong>{t("terms.item2Label")}</strong> {t("terms.item2Text")}</span></p>
+                      <p className="flex gap-3"><span className="font-black text-[#3A17E4]">3.</span> <span><strong>{t("terms.item3Label")}</strong> {t("terms.item3Text")}</span></p>
+                    </div>
+
+                  </div>
                 </Modal.Body>
                 <Modal.Footer className="bg-gray-50/50 dark:bg-slate-900/80 justify-end p-6 backdrop-blur-md rounded-b-[2.5rem]">
                     <button onClick={() => setShowTerms(false)} className="glass-button !bg-primary !text-white !px-10">
