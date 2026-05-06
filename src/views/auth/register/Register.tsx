@@ -1,7 +1,5 @@
 import FullLogo from "src/layouts/full/shared/logo/FullLogo";
 import AuthRegister from "../authforms/AuthRegister";
-import { Link } from "react-router";
-import { Icon } from "@iconify/react";
 
 const Register = () => {
   return (

@@ -21,34 +21,51 @@ const VendorOrders: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get('orders/');
-      const data = res.data.results ? res.data.results : res.data;
-      setOrders(data);
-    } catch (err) {
-      console.error("Error cargando pedidos:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchOrders();
+    let mounted = true;
+    const loadOrders = async () => {
+      try {
+        const res = await api.get('orders/');
+        const data = res.data.results ? res.data.results : res.data;
+        if (mounted) setOrders(data);
+      } catch (err) {
+        console.error('Error cargando pedidos:', err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    loadOrders();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleAction = async (orderId: string, actionUrl: 'mark-as-paid' | 'cancel') => {
     try {
       setActionLoading(orderId);
       await api.post(`orders/${orderId}/${actionUrl}/`);
-      toast.success(actionUrl === 'mark-as-paid' ? "¡Venta completada con éxito!" : "Reserva cancelada");
-      await fetchOrders();
-    } catch (err) {
-      console.error(`Error al ejecutar ${actionUrl}`, err);
-      toast.error("No se pudo completar la acción. Intenta de nuevo.");
+      toast.success(actionUrl === 'mark-as-paid' ? '¡Venta completada con éxito!' : 'Reserva cancelada');
+      const res = await api.get('orders/');
+      const data = res.data.results ? res.data.results : res.data;
+      setOrders(data);
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.response?.data?.detail || 'No se pudo completar la acción. Intenta de nuevo.';
+      toast.error(msg);
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('orders/');
+      const data = res.data.results ? res.data.results : res.data;
+      setOrders(data);
+    } catch (err) {
+      console.error('Error cargando pedidos:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,7 +93,7 @@ const VendorOrders: React.FC = () => {
           </h1>
           <p className="text-gray-500 font-medium">{t('orders.subtitle')}</p>
         </div>
-        <Button color="light" onClick={fetchOrders} disabled={loading} className="rounded-xl shadow-sm">
+        <Button color="light" onClick={handleRefresh} disabled={loading} className="rounded-xl shadow-sm">
           <Iconify icon="solar:refresh-circle-bold-duotone" className="mr-2" height={20} /> {t('orders.refresh')}
         </Button>
       </div>
@@ -110,29 +127,29 @@ const VendorOrders: React.FC = () => {
                     <Table.Cell className="font-black text-gray-900 py-5">{order.product_name}</Table.Cell>
                     <Table.Cell className="font-medium text-gray-500">{order.client_name}</Table.Cell>
                     <Table.Cell>
-                        <div className="flex flex-col gap-1">
-                            {getStatusBadge(order.status)}
-                            {order.status === 'RESERVED' && order.payment_notified && (
-                                <Badge color="info" className="animate-pulse rounded-lg font-black text-[10px]">PAGO REPORTADO</Badge>
-                            )}
-                        </div>
+                      <div className="flex flex-col gap-1">
+                        {getStatusBadge(order.status)}
+                        {order.status === 'RESERVED' && order.payment_notified && (
+                          <Badge color="info" className="animate-pulse rounded-lg font-black text-[10px]">PAGO REPORTADO</Badge>
+                        )}
+                      </div>
                     </Table.Cell>
                     <Table.Cell className="font-bold text-indigo-600">${Number(order.total).toLocaleString()}</Table.Cell>
                     <Table.Cell className="flex justify-center gap-2">
                       {order.status === 'RESERVED' && (
                         <>
-                          <Button 
-                            size="xs" 
-                            color="success" 
+                          <Button
+                            size="xs"
+                            color="success"
                             className="rounded-lg shadow-sm font-bold"
                             onClick={() => handleAction(order.id, 'mark-as-paid')}
                             disabled={actionLoading === order.id}
                           >
                             {actionLoading === order.id ? <Spinner size="xs" /> : "Marcar PAGADO"}
                           </Button>
-                          <Button 
-                            size="xs" 
-                            color="failure" 
+                          <Button
+                            size="xs"
+                            color="failure"
                             className="rounded-lg shadow-sm font-bold"
                             onClick={() => handleAction(order.id, 'cancel')}
                             disabled={actionLoading === order.id}

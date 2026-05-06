@@ -78,16 +78,26 @@ const AdminDashboard: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [uRes, pRes, oRes] = await Promise.all([
+      const results = await Promise.allSettled([
         api.get('users/list/'),
         api.get('products/create/'),
         api.get('orders/')
       ]);
-      const pData = pRes.data.results || pRes.data;
-      setUsers(uRes.data);
+      
+      const users = results[0].status === 'fulfilled' 
+        ? results[0].value.data 
+        : [];
+      const pData = results[1].status === 'fulfilled'
+        ? results[1].value.data.results || results[1].value.data
+        : [];
+      const orders = results[2].status === 'fulfilled'
+        ? results[2].value.data.results || results[2].value.data
+        : [];
+      
+      setUsers(users);
       setAllProducts(Array.isArray(pData) ? pData : []);
       setPendingProducts(Array.isArray(pData) ? pData.filter((p: any) => p.status === 'PENDING') : []);
-      setOrders(oRes.data.results || oRes.data);
+      setOrders(orders);
     } catch (err) {
       console.error("Error cargando datos", err);
     } finally {

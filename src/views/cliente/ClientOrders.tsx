@@ -15,7 +15,7 @@ interface Order {
 }
 
 const ClientOrders: React.FC = () => {
-  const { t } = useTranslation('client');
+  const t = useTranslation('client').t;
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -27,41 +27,58 @@ const ClientOrders: React.FC = () => {
       const data = res.data.results ? res.data.results : res.data;
       setOrders(data);
     } catch (err) {
-      console.error("Error cargando mis reservas:", err);
+      console.error('Error cargando mis reservas:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchOrders();
-    // Refresco automático para ver si el vendedor aceptó el pago
-    const interval = setInterval(fetchOrders, 15000);
-    return () => clearInterval(interval);
+    let mounted = true;
+    const loadOrders = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('orders/');
+        const data = res.data.results ? res.data.results : res.data;
+        if (mounted) setOrders(data);
+      } catch (err) {
+        console.error('Error cargando mis reservas:', err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    loadOrders();
+    const interval = setInterval(loadOrders, 15000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const handleNotifyPayment = async (orderId: string) => {
     try {
       setActionLoading(orderId);
       await api.post(`orders/${orderId}/notify-payment/`);
-      toast.success("Notificación de pago enviada al vendedor");
+      toast.success('Notificación de pago enviada al vendedor');
       await fetchOrders();
-    } catch (err) {
-      toast.error("Error al notificar pago");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.response?.data?.detail || 'Error al notificar pago';
+      toast.error(msg);
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleCancel = async (orderId: string) => {
-    if (!window.confirm("¿Seguro que quieres cancelar esta reserva? El producto volverá al catálogo.")) return;
+    if (!window.confirm('¿Seguro que quieres cancelar esta reserva? El producto volverá al catálogo.')) return;
     try {
       setActionLoading(orderId);
       await api.post(`orders/${orderId}/cancel/`);
-      toast.success("Reserva liberada");
+      toast.success('Reserva liberada');
       await fetchOrders();
-    } catch (err) {
-      toast.error("Error al cancelar");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || 'Error al cancelar';
+      toast.error(msg);
     } finally {
       setActionLoading(null);
     }
@@ -95,8 +112,8 @@ const ClientOrders: React.FC = () => {
             </div>
           ) : orders.length === 0 ? (
             <div className="text-center py-20">
-               <Iconify icon="solar:cart-large-minimalistic-linear" height={80} className="mx-auto text-gray-200 mb-4" />
-               <h3 className="text-xl font-bold text-gray-400 uppercase">No tienes reservas activas</h3>
+              <Iconify icon="solar:cart-large-minimalistic-linear" height={80} className="mx-auto text-gray-200 mb-4" />
+              <h3 className="text-xl font-bold text-gray-400 uppercase">No tienes reservas activas</h3>
             </div>
           ) : (
             <Table hoverable>
@@ -117,9 +134,9 @@ const ClientOrders: React.FC = () => {
                     <Table.Cell className="flex justify-center gap-2">
                       {order.status === 'RESERVED' && (
                         <>
-                          <Button 
-                            size="sm" 
-                            color="success" 
+                          <Button
+                            size="sm"
+                            color="success"
                             className="rounded-xl shadow-lg font-black italic tracking-tighter"
                             onClick={() => handleNotifyPayment(order.id)}
                             disabled={actionLoading === order.id}
@@ -127,9 +144,9 @@ const ClientOrders: React.FC = () => {
                             {actionLoading === order.id ? <Spinner size="xs" /> : <Iconify icon="solar:dollar-minimalistic-bold" className="mr-1" />}
                             YA PAGUÉ
                           </Button>
-                          <Button 
-                            size="sm" 
-                            color="gray" 
+                          <Button
+                            size="sm"
+                            color="gray"
                             outline
                             className="rounded-xl"
                             onClick={() => handleCancel(order.id)}
@@ -140,7 +157,7 @@ const ClientOrders: React.FC = () => {
                         </>
                       )}
                       {order.status === 'PAID' && (
-                         <Badge color="success" className="px-4 py-2 rounded-full font-black">ENTREGA PENDIENTE</Badge>
+                        <Badge color="success" className="px-4 py-2 rounded-full font-black">ENTREGA PENDIENTE</Badge>
                       )}
                     </Table.Cell>
                   </Table.Row>
@@ -151,10 +168,10 @@ const ClientOrders: React.FC = () => {
         </div>
       </Card>
       <div className="mt-6 p-4 bg-yellow-50 rounded-2xl border border-yellow-100 flex gap-4 items-center">
-         <Iconify icon="solar:info-circle-bold" className="text-yellow-500" height={32} />
-         <p className="text-sm text-yellow-800 font-medium">
-           <b>Importante:</b> Al presionar "YA PAGUÉ", el vendedor recibirá una alerta inmediata para validar tu pago y entregarte el producto.
-         </p>
+        <Iconify icon="solar:info-circle-bold" className="text-yellow-500" height={32} />
+        <p className="text-sm text-yellow-800 font-medium">
+          <b>Importante:</b> Al presionar "YA PAGUÉ", el vendedor recibirá una alerta inmediata para validar tu pago y entregarte el producto.
+        </p>
       </div>
     </div>
   );

@@ -21,6 +21,9 @@ const ProductDetail = lazy(() => import('../components/products/ProductDetail'))
 const Dashboard = lazy(() => import('../views/dashboards/Dashboard'));
 const RoleBasedMap = lazy(() => import('../views/shared/RoleBasedMap'));
 
+// Vendedor Forms
+const AddProduct = lazy(() => import('../components/products/AddProduct.tsx'));
+
 // Specific Role Views
 const ClienteHome = lazy(() => import('../views/cliente/Home.tsx'));
 const BrowseProducts = lazy(() => import('../views/cliente/BrowseProducts.tsx'));
@@ -42,7 +45,7 @@ const Solar = lazy(() => import("../views/icons/Solar"));
 const SamplePage = lazy(() => import('../views/sample-page/SamplePage'));
 
 const Router = [
-  // 1. PUBLIC ROUTES (Landing & Auth)
+  // 1. PUBLIC ROUTES
   {
     path: '/',
     element: <BlankLayout />,
@@ -61,7 +64,7 @@ const Router = [
     ],
   },
 
-  // 2. CLIENT PROTECTED ROUTES
+  // 2. CLIENTE PROTECTED
   {
     path: '/cliente',
     element: <ProtectedRoute allowedRoles={['CLIENTE']} />,
@@ -73,14 +76,14 @@ const Router = [
           { path: 'home', element: <ClienteHome /> },
           { path: 'productos', element: <BrowseProducts /> },
           { path: 'reservas', element: <ClientOrders /> },
-          { path: 'mapa', element: <RoleBasedMap /> },
+          { path: 'mapa', element: <RoleBasedMap /> },  // <-- Aquí va el mapa con vendorId
           { path: 'reseñas', element: <SamplePage /> },
         ]
       }
     ]
   },
 
-  // 3. VENDOR PROTECTED ROUTES
+  // 3. VENDEDOR PROTECTED
   {
     path: '/vendedor',
     element: <ProtectedRoute allowedRoles={['VENDEDOR']} />,
@@ -91,6 +94,7 @@ const Router = [
         children: [
           { path: 'dashboard', element: <VendedorDashboard /> },
           { path: 'productos', element: <ManageProducts /> },
+          { path: 'productos/crear', element: <AddProduct /> },
           { path: 'mapa', element: <RoleBasedMap /> },
           { path: 'pedidos', element: <VendorOrders /> },
           { path: 'auditoria-ia', element: <AIRecommendationsHistory /> },
@@ -100,7 +104,7 @@ const Router = [
     ]
   },
 
-  // 4. ADMIN PROTECTED ROUTES
+  // 4. ADMIN PROTECTED
   {
     path: '/admin',
     element: <ProtectedRoute allowedRoles={['ADMIN']} />,
@@ -119,37 +123,28 @@ const Router = [
       }
     ]
   },
-  
-  // 5. COMMON PROTECTED ROUTES (For all logged in users)
+
+  // 5. COMMON PROTECTED (all logged in)
   {
-    path: '/usuario',
-    element: <ProtectedRoute />, // authenticated only
+    path: '/app',
+    element: <ProtectedRoute />,
     children: [
       {
         path: '',
         element: <FullLayout />,
         children: [
-          { path: 'seguridad', element: <Security /> },
-        ]
-      }
-    ]
-  },
-  
-  // 6. COMMON / UI ROUTES
-  {
-    path: '/app',
-    element: <FullLayout />,
-    children: [
-      { path: 'dashboard', element: <Dashboard /> },
-      { path: 'products', element: <ProductCatalog /> },
-      { path: 'products/:id', element: <ProductDetail /> },
-      { path: 'ui/typography', element: <Typography /> },
-      { path: 'ui/table', element: <Table /> },
-      { path: 'ui/form', element: <Form /> },
-      { path: 'ui/alert', element: <Alert /> },
-      { path: 'ui/shadow', element: <Shadow /> },
-      { path: 'icons/solar', element: <Solar /> },
-      { path: 'sample-page', element: <SamplePage /> },
+          { path: 'dashboard', element: <Dashboard /> },
+          { path: 'products', element: <ProductCatalog /> },
+          { path: 'products/:id', element: <ProductDetail /> },
+          { path: 'ui/typography', element: <Typography /> },
+          { path: 'ui/table', element: <Table /> },
+          { path: 'ui/form', element: <Form /> },
+          { path: 'ui/alert', element: <Alert /> },
+          { path: 'ui/shadow', element: <Shadow /> },
+          { path: 'icons/solar', element: <Solar /> },
+          { path: 'sample-page', element: <SamplePage /> },
+        ],
+      },
     ],
   },
 
@@ -161,5 +156,4 @@ const Router = [
 ];
 
 const router = createBrowserRouter(Router);
-
 export default router;

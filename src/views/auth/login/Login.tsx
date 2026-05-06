@@ -1,9 +1,8 @@
 import { useState } from "react";
 import api from "src/utils/axios";
 import FullLogo from "src/layouts/full/shared/logo/FullLogo";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useAuth } from "src/context/AuthContext";
-import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 
 const Login = () => {
@@ -39,24 +38,23 @@ const Login = () => {
       const { access_token, user } = response.data;
       login(user, access_token);
 
-      if (user.role === 'VENDEDOR') {
-          navigate("/vendedor/dashboard");
-      } else if (user.role === 'CLIENTE') {
-          navigate("/cliente/home");
+      if (user.role === "VENDEDOR") {
+        navigate("/vendedor/dashboard");
+      } else if (user.role === "CLIENTE") {
+        navigate("/cliente/home");
       } else {
-          navigate("/");
+        navigate("/");
       }
-
-    } catch (error: any) {
-      if (error.response) {
-        const data = error.response.data;
+    } catch (err: any) {
+      if (err.response) {
+        const data = err.response.data;
         const msg =
           data?.message ||
           data?.detail ||
-          (typeof data === 'string' ? data : null) ||
+          (typeof data === "string" ? data : null) ||
           t("login.errors.invalidCredentials");
         setErrorMsg(msg);
-      } else if (error.request) {
+      } else if (err.request) {
         setErrorMsg(t("login.errors.serverUnavailable"));
       } else {
         setErrorMsg(t("login.errors.unexpected"));
@@ -68,7 +66,6 @@ const Login = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 flex items-center justify-center font-sans tracking-tight">
-      
       {/* ✨ EFECTO DE FONDO: SEDA GALÁCTICA (SOLO MODO CLARO) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-gradient-to-br from-[#E0E7FF] via-[#F1F5FF] to-[#E0F2FE] dark:hidden">
         <div className="absolute top-[-25%] left-[-25%] w-[130vw] h-[130vw] bg-indigo-500/30 rounded-full blur-[220px] animate-blob transition-all duration-700"></div>
@@ -89,7 +86,6 @@ const Login = () => {
       </div>
 
       <div className="relative z-10 w-full max-w-[440px] px-6 py-12 animate-fade-in">
-        
         {/* LOGO SUPERIOR */}
         <div className="flex justify-center mb-10 transform hover:scale-105 transition-transform duration-500 drop-shadow-2xl">
           <FullLogo />
@@ -97,7 +93,6 @@ const Login = () => {
 
         {/* CARD DE LOGIN: GLASSMORPHISM */}
         <div className="glass-card-premium p-10 border border-white/50 dark:border-white/10">
-          
           <div className="text-center mb-8">
             <h2 className="text-2xl font-black text-[#0A014A] dark:text-white tracking-tighter mb-2">{t("login.title")}</h2>
             <p className="text-sm font-bold text-slate-500/80 dark:text-slate-400 uppercase tracking-widest">{t("login.subtitle")}</p>
@@ -120,7 +115,7 @@ const Login = () => {
             <div>
               <div className="flex justify-between items-center mb-2 px-1">
                 <label className="text-[11px] font-extrabold text-[#0A014A] dark:text-slate-300 uppercase tracking-widest">{t("login.labelPassword")}</label>
-                <Link to="/auth/forgot-password" className="text-[#3A17E4] dark:text-[#2CD4D9] text-[11px] font-black hover:underline uppercase tracking-widest">{t("login.forgotPassword")}</Link>
+                <a href="/auth/forgot-password" className="text-[#3A17E4] dark:text-[#2CD4D9] text-[11px] font-black hover:underline uppercase tracking-widest">{t("login.forgotPassword")}</a>
               </div>
               <input
                 type="password"
@@ -151,7 +146,13 @@ const Login = () => {
                   : "bg-red-50 border-red-100 text-red-600 shadow-lg shadow-red-200/20"
               }`}>
                 <div className="flex items-center gap-3">
-                  <Icon icon={errorMsg.includes("REVISADA") ? "solar:clock-circle-bold-duotone" : "solar:danger-square-bold-duotone"} className="text-xl flex-shrink-0" />
+                  <div className={`w-5 h-5 ${errorMsg.includes("REVISADA") ? "text-amber-500" : "text-red-500"}`}>
+                    {errorMsg.includes("REVISADA") ? (
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    ) : (
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    )}
+                  </div>
                   <span className="leading-relaxed">{errorMsg}</span>
                 </div>
               </div>
@@ -173,10 +174,12 @@ const Login = () => {
 
           <div className="flex flex-col gap-1 text-center mt-10">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t("login.noAccount")}</p>
-            <Link to="/auth/register" className="text-[#3A17E4] font-black hover:underline text-sm tracking-tight flex items-center justify-center gap-2 group">
+            <a href="/auth/register" className="text-[#3A17E4] font-black hover:underline text-sm tracking-tight flex items-center justify-center gap-2 group">
               {t("login.createAccount")}
-              <Icon icon="solar:arrow-right-up-bold-duotone" className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-            </Link>
+              <div className="w-4 h-4 text-[#3A17E4] group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              </div>
+            </a>
           </div>
         </div>
       </div>

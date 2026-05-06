@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, Spinner } from 'flowbite-react';
 import { Icon } from '@iconify/react';
+import { toast } from 'react-hot-toast';
 
 interface LocationPickerProps {
   initialLat?: number;
@@ -18,20 +19,32 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   const markerRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentPos, setCurrentPos] = useState({ lat: initialLat, lng: initialLng });
+  const [leafletError, setLeafletError] = useState(false);
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
     const checkLeaflet = setInterval(() => {
       if ((window as any).L) {
         clearInterval(checkLeaflet);
+        clearTimeout(timeoutId);
+        setLeafletError(false);
         initMap();
       }
     }, 100);
 
+    // Timeout máximo de 10 segundos para cargar Leaflet
+    timeoutId = setTimeout(() => {
+      clearInterval(checkLeaflet);
+      setLeafletError(true);
+      setLoading(false);
+    }, 10000);
+
     return () => {
+      clearInterval(checkLeaflet);
+      clearTimeout(timeoutId);
       if (leafletMap.current) {
         leafletMap.current.remove();
       }
-      clearInterval(checkLeaflet);
     };
   }, []);
 
@@ -78,11 +91,26 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
   const handleUseCurrentLocation = () => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        const { latitude, longitude } = pos.coords;
-        leafletMap.current.setView([latitude, longitude], 15);
-        updatePosition(latitude, longitude);
-      });
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          leafletMap.current.setView([latitude, longitude], 15);
+          updatePosition(latitude, longitude);
+        },
+        (err) => {
+          let errorMessage = 'No se pudo obtener tu ubicación';
+          if (err.code === err.PERMISSION_DENIED) {
+            errorMessage = 'Permiso de ubicación denegado. Por favor, habilítalo en tu navegador.';
+          } else if (err.code === err.POSITION_UNAVAILABLE) {
+            errorMessage = 'Información de ubicación no disponible.';
+          } else if (err.code === err.TIMEOUT) {
+            errorMessage = 'La solicitud de ubicación expiró.';
+          }
+          toast.error(errorMessage);
+        }
+      );
+    } else {
+      toast.error('Tu navegador no soporta geolocalización.');
     }
   };
 
@@ -102,6 +130,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
         {loading && (
           <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white/50 backdrop-blur-sm">
             <Spinner size="lg" />
+          </div>
+        )}
+        {leafletError && (
+          <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white/80">
+            <p className="text-red-500 text-center">
+              Error al cargar el mapa. Por favor, recarga la página.
+            </p>
           </div>
         )}
         <div ref={mapRef} className="w-full h-full" />

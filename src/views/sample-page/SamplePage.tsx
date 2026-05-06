@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import CardBox from '../../components/shared/CardBox';
 import { Table, Badge, Button, Spinner } from "flowbite-react";
 import api from "../../utils/axios";
-import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 
 interface OrderItem {
@@ -35,13 +34,21 @@ const SamplePage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [ordersRes, userRes] = await Promise.all([
+      const results = await Promise.allSettled([
         api.get('orders/'),
         api.get('users/auth/me/')
       ]);
-      setOrders(ordersRes.data.results || ordersRes.data);
-      setUserProfile(userRes.data);
-    } catch (error) {
+      
+      const orders = results[0].status === 'fulfilled' 
+        ? results[0].value.data.results || results[0].value.data
+        : [];
+      const user = results[1].status === 'fulfilled' 
+        ? results[1].value.data
+        : null;
+        
+      setOrders(orders);
+      setUserProfile(user);
+    } catch (err) {
       // error handled in UI
     } finally {
       setLoading(false);
@@ -49,7 +56,34 @@ const SamplePage = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    let mounted = true;
+    const loadData = async () => {
+      try {
+        const results = await Promise.allSettled([
+          api.get('orders/'),
+          api.get('users/auth/me/')
+        ]);
+        
+        const orders = results[0].status === 'fulfilled' 
+          ? results[0].value.data.results || results[0].value.data
+          : [];
+        const user = results[1].status === 'fulfilled' 
+          ? results[1].value.data
+          : null;
+          
+        if (mounted) {
+          setOrders(orders);
+          setUserProfile(user);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (mounted) setLoading(false);
+      }
+    };
+    loadData();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleCancel = async (id: string) => {
@@ -92,14 +126,19 @@ const SamplePage = () => {
             <div className="flex items-center gap-2 mt-1">
               <span className="text-gray-500 text-sm">{t("yourReputation")}</span>
               <div className="flex items-center text-yellow-500 font-bold">
-                <Icon icon="solar:star-bold" className="mr-1" />
+                <div className="w-4 h-4 mr-1">
+                  <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                </div>
                 {parseFloat(userProfile.reputation_score).toFixed(1)}
               </div>
             </div>
           )}
         </div>
         <Button color="light" onClick={fetchData}>
-          <Icon icon="solar:refresh-linear" className="mr-2" /> {t("update")}
+          <div className="w-4 h-4 mr-2">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+          </div>
+          {t("update")}
         </Button>
       </div>
 

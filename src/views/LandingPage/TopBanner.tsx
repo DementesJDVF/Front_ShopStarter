@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Icon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,17 @@ const TopBanner: React.FC<NavbarProps> = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t } = useTranslation("landingPage");
   const { mode, toggleMode } = useThemeMode();
+
+  // Cerrar menú móvil automáticamente al cambiar a vista desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) { // breakpoint md
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const navLinks = [
     { name: t('nav.features'), href: '#features' },

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CardBox from '../../components/shared/CardBox';
 import { Table as FlowTable, Badge, Button, Spinner } from "flowbite-react";
 import api from "../../utils/axios";
-import { Icon } from "@iconify/react";
+import { useTranslation } from "react-i18next";
 
 interface OrderItem {
   id: string;
@@ -28,25 +28,38 @@ const TableView = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [ordersRes, userRes] = await Promise.all([
-        api.get('orders/'),
-        api.get('users/auth/me/')
-      ]);
-      setOrders(ordersRes.data.results || ordersRes.data);
-      setUserProfile(userRes.data);
-    } catch (error) {
-       console.error("Error al cargar datos del vendedor:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { t } = useTranslation();
 
   useEffect(() => {
-    fetchData();
+    let mounted = true;
+    const loadData = async () => {
+      try {
+        const results = await Promise.allSettled([
+          api.get('orders/'),
+          api.get('users/auth/me/')
+        ]);
+        
+        const orders = results[0].status === 'fulfilled' 
+          ? results[0].value.data.results || results[0].value.data
+          : [];
+        const user = results[1].status === 'fulfilled' 
+          ? results[1].value.data
+          : null;
+          
+        if (mounted) {
+          setOrders(orders);
+          setUserProfile(user);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error al cargar datos del vendedor:", error);
+        if (mounted) setLoading(false);
+      }
+    };
+    loadData();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleAction = async (id: string, action: 'complete' | 'cancel') => {
@@ -60,9 +73,22 @@ const TableView = () => {
         await api.post(`orders/${id}/cancel/`);
       }
       alert("Operación realizada con éxito. Tu reputación ha sido actualizada.");
-      fetchData();
+      const results = await Promise.allSettled([
+        api.get('orders/'),
+        api.get('users/auth/me/')
+      ]);
+      
+      const orders = results[0].status === 'fulfilled' 
+        ? results[0].value.data.results || results[0].value.data
+        : [];
+      const user = results[1].status === 'fulfilled' 
+        ? results[1].value.data
+        : null;
+        
+      setOrders(orders);
+      setUserProfile(user);
     } catch (error) {
-       alert("Error al procesar la solicitud.");
+      alert("Error al procesar la solicitud.");
     }
   };
 
@@ -79,19 +105,39 @@ const TableView = () => {
     <CardBox>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 font-[var(--main-font)] gap-4">
         <div>
-           <h5 className="card-title text-2xl font-bold text-primary">Gestión de Reservas (Vendedor)</h5>
-           {userProfile && (
+          <h5 className="card-title text-2xl font-bold text-primary">Gestión de Reservas (Vendedor)</h5>
+          {userProfile && (
             <div className="flex items-center gap-2 mt-1">
               <span className="text-gray-500 text-sm">Tu nivel de confianza como vendedor:</span>
               <div className="flex items-center text-yellow-500 font-bold bg-yellow-50 px-2 py-0.5 rounded-full">
-                <Icon icon="solar:star-bold" className="mr-1" />
+                <div className="w-4 h-4 mr-1">
+                  <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                </div>
                 {parseFloat(userProfile.reputation_score).toFixed(1)}
               </div>
             </div>
           )}
         </div>
-        <Button color="light" onClick={fetchData}>
-           <Icon icon="solar:refresh-bold-duotone" className="mr-2" /> Actualizar Panel
+        <Button color="light" onClick={() => {
+          setLoading(true);
+          Promise.allSettled([api.get('orders/'), api.get('users/auth/me/')])
+            .then(([ordersRes, userRes]) => {
+              const orders = ordersRes.status === 'fulfilled' 
+                ? ordersRes.value.data.results || ordersRes.value.data
+                : [];
+              const user = userRes.status === 'fulfilled' 
+                ? userRes.value.data
+                : null;
+              setOrders(orders);
+              setUserProfile(user);
+            })
+            .catch(() => {})
+            .finally(() => setLoading(false));
+        }}>
+          <div className="w-4 h-4 mr-2">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+          </div>
+          Actualizar Panel
         </Button>
       </div>
 
@@ -99,7 +145,7 @@ const TableView = () => {
         <div className="flex justify-center p-10"><Spinner size="xl" /></div>
       ) : orders.length === 0 ? (
         <div className="text-center p-12 text-gray-500 italic bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-           No tienes pedidos pendientes por entregar en este momento.
+          No tienes pedidos pendientes por entregar en este momento.
         </div>
       ) : (
         <div className="overflow-x-auto font-[var(--main-font)] shadow-sm rounded-xl">

@@ -9,6 +9,7 @@ const api = axios.create({
   withCredentials: true, // Crucial para enviar y recibir Cookies seguras HttpOnly
   xsrfCookieName: 'csrftoken', // Sincronización Django CSRF
   xsrfHeaderName: 'X-CSRFToken',
+  timeout: 30000, // 30 seconds timeout
 });
 
 let isRefreshing = false;
@@ -99,40 +100,28 @@ api.interceptors.response.use(
     const serverMessage = getFriendlyMessage(error.response?.data);
 
     // Manejo Automático de Rotación de Tokens (401 Expirado o Token Inválido)
-    const isInvalidToken = error.response?.data?.code === 'token_not_valid' || 
-                          (error.response?.data?.detail && error.response.data.detail.includes('token not valid'));
-
-    if (error.response?.status === 401 || isInvalidToken) {
+    if (error.response?.status === 401) {
       memoizedCsrfToken = null; // Limpiar token CSRF memorizado
-      if (isInvalidToken) {
-        // Si el token es basura/inválido, no intentamos refrescar, cerramos sesión de una.
-        localStorage.removeItem('user');
-        toast.error('Tu sesión es inválida. Inicia sesión de nuevo.');
-        window.location.href = '/';
-        return Promise.reject(error);
-      }
-
+      
       if (!originalRequest._retry && !originalRequest.url?.includes('auth/') && !originalRequest.url?.includes('token/refresh/')) {
-        if (isRefreshing) {
-          return new Promise(function(resolve, reject) {
-            failedQueue.push({resolve, reject})
-          }).then(() => {
-            return api(originalRequest);
-          }).catch(err => {
-            return Promise.reject(err);
-          });
-        }
-
         originalRequest._retry = true;
         isRefreshing = true;
 
         try {
           // Solicitar rotación silenciosa al Backend
-          await axios.post(`${api.defaults.baseURL}token/refresh/`, {}, { withCredentials: true, xsrfCookieName: 'csrftoken', xsrfHeaderName: 'X-CSRFToken' });
-          processQueue(null, 'refreshed');
-          return api(originalRequest); 
+          // El refresh token se envía automáticamente via cookie (withCredentials: true)
+          // No se envía en el cuerpo para evitar exposición en logs/cliente
+          await axios.post(`${api.defaults.baseURL}token/refresh/`, {}, { 
+            withCredentials: true, 
+            xsrfCookieName: 'csrftoken', 
+            xsrfHeaderName: 'X-CSRFToken'
+          });
+          // Recargar datos del usuario después de renovar token
+          memoizedCsrfToken = null;
+          // If refresh succeeds, retry the original request
+          return api(originalRequest);
         } catch (err) {
-          processQueue(err, null);
+          // If refresh fails, log out the user
           localStorage.removeItem('user');
           
           const isPublicPath = window.location.pathname === '/' || window.location.pathname.startsWith('/auth');
@@ -144,6 +133,12 @@ api.interceptors.response.use(
         } finally {
           isRefreshing = false;
         }
+      } else {
+        // If we are retrying or it's an auth/refresh request, we log out
+        localStorage.removeItem('user');
+        toast.error('Tu sesión es inválida. Inicia sesión de nuevo.');
+        window.location.href = '/';
+        return Promise.reject(error);
       }
     }
     

@@ -27,14 +27,14 @@ export default function AddProduct() {
     const [loadingCats, setLoadingCats] = useState(true);
     const [loadingVendors, setLoadingVendors] = useState(false);
 
-    const [form, setForm] = useState({
+const [form, setForm] = useState({
         vendor: user?.id || "",
         category: "",
         name: "",
         description: "",
         price: "",
-        stock: "",
-        status: "PENDING", // Los productos nuevos nacen pendientes de aprobación
+        stock: "0",
+        status: "PENDING",
         is_featured: false,
         image1_url: "",
         image1_main: true,
@@ -42,52 +42,53 @@ export default function AddProduct() {
         image2_main: false,
     });
 
+    const [imageErrors, setImageErrors] = useState({ image1: "", image2: "" });
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-
-    useEffect(() => {
-        api.get("/products/get-categories/")
-            .then((res) => {
-                const data = res.data;
-                setCategories(Array.isArray(data) ? data : data.results ?? []);
-            })
-            .catch(() => setCategories([]))
-            .finally(() => setLoadingCats(false));
-    }, []);
-
-    useEffect(() => {
-        if (isAdmin) {
-            setLoadingVendors(true);
-            api.get("/users/list/")
-                .then((res) => {
-                    const data = res.data;
-                    const all: Vendor[] = Array.isArray(data) ? data : data.results ?? [];
-                    setVendors(all.filter((u) => u.role === "VENDEDOR"));
-                })
-                .catch(() => setVendors([]))
-                .finally(() => setLoadingVendors(false));
-        }
-    }, [isAdmin]);
 
     function handleChange(
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
     ) {
         const { name, value, type } = e.target;
-        setForm((prev) => ({
-            ...prev,
-            [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
-        }));
+        if (name === "stock" && type === "checkbox") {
+            setForm((prev) => ({
+                ...prev,
+                [name]: (e.target as HTMLInputElement).checked ? "1" : "0",
+            }));
+        } else {
+            setForm((prev) => ({
+                ...prev,
+                [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+            }));
+        }
     }
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setLoading(true);
         setError(null);
+        setImageErrors({ image1: "", image2: "" });
 
         // Validación básica
         if (!form.category) { setError("Debes seleccionar una categoría."); setLoading(false); return; }
         if (isAdmin && !form.vendor) { setError("Debes seleccionar un vendedor."); setLoading(false); return; }
+
+        // Validación de URLs de imagen
+        let hasImageError = false;
+        if (form.image1_url && !form.image1_url.match(/^https?:\/\/.+/)) {
+          setImageErrors(prev => ({ ...prev, image1: t("error.imageInvalid") }));
+          hasImageError = true;
+        }
+        if (form.image2_url && !form.image2_url.match(/^https?:\/\/.+/)) {
+          setImageErrors(prev => ({ ...prev, image2: t("error.imageInvalid") }));
+          hasImageError = true;
+        }
+        if (hasImageError) {
+          setLoading(false);
+          return;
+        }
 
         const images: { url_image: string; is_main: boolean }[] = [];
         if (form.image1_url.trim())
@@ -107,17 +108,20 @@ export default function AddProduct() {
         };
         if (images.length) body.images = images;
 
-        try {
+      try {
             await api.post("/products/create/", body);
 
             setSuccess(true);
-            setTimeout(() => navigate("/vendedor/manage-products"), 1500);
-        } catch (err: any) {
+            setTimeout(() => {
+              setSuccess(false);
+              navigate("/vendedor/manage-products");
+            }, 1500);
+          } catch (err: any) {
             const errorMsg = err.response?.data?.message || err.message || t("error");
             setError(errorMsg);
-        } finally {
+          } finally {
             setLoading(false);
-        }
+          }
     }
 
     return (

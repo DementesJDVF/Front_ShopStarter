@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
 
 interface Location {
   lat: number;
@@ -28,7 +28,7 @@ export const MapProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Cargar ubicación guardada si existe (opcional, para persistencia entre refrescos)
   useEffect(() => {
-    const saved = localStorage.getItem('user_geo_location');
+    const saved = localStorage.getItem("user_geo_location");
     if (saved) {
       setUserLocation(JSON.parse(saved));
     }
@@ -48,7 +48,7 @@ export const MapProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         (pos) => {
           const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           setUserLocation(loc);
-          localStorage.setItem('user_geo_location', JSON.stringify(loc));
+          localStorage.setItem("user_geo_location", JSON.stringify(loc));
           setGettingLocation(false);
           toast.success("Ubicación activada correctamente.");
           resolve(loc);
@@ -61,20 +61,22 @@ export const MapProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setGettingLocation(false);
           resolve(null);
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
       );
     });
   };
 
   return (
-    <MapContext.Provider value={{
-      userLocation,
-      radius,
-      setRadius,
-      isLocationActive: !!userLocation,
-      gettingLocation,
-      requestLocation
-    }}>
+    <MapContext.Provider
+      value={{
+        userLocation,
+        radius,
+        setRadius,
+        isLocationActive: !!userLocation,
+        gettingLocation,
+        requestLocation,
+      }}
+    >
       {children}
     </MapContext.Provider>
   );
@@ -83,7 +85,7 @@ export const MapProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 export const useMap = () => {
   const context = useContext(MapContext);
   if (!context) {
-    throw new Error('useMap debe usarse dentro de un MapProvider');
+    throw new Error("useMap debe usarse dentro de un MapProvider");
   }
   return context;
 };

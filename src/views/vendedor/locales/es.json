@@ -82,5 +82,34 @@
     "alert": {
       "problems": "⚠️ Problemas al intentar {{action}} el pedido."
     }
+  },
+  "product": {
+    "addTitle": "Añadir Nuevo Producto",
+    "name": "Nombre del Producto",
+    "namePlaceholder": "ej. Pizza Margherita",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Describe tu producto...",
+    "price": "Precio",
+    "stock": "Disponibilidad",
+    "stockAvailable": "DISPONIBLE",
+    "stockUnavailable": "AGOTADO",
+    "category": "Categoría",
+    "selectCategory": "Seleccionar categoría",
+    "image1": "Imagen Principal",
+    "image1Placeholder": "https://ejemplo.com/imagen.jpg",
+    "image2": "Imagen Secundaria (opcional)",
+    "image2Placeholder": "https://ejemplo.com/imagen2.jpg",
+    "mainImage": "Imagen principal",
+    "featuredProduct": "Producto Destacado",
+    "saving": "Guardando...",
+    "create": "Crear Producto",
+    "back": "Volver",
+    "error": "Error al crear el producto",
+    "success": "¡Producto creado con éxito!",
+    "loadingCategories": "Cargando categorías...",
+    "loadingVendors": "Cargando vendedores...",
+    "selectVendor": "Seleccionar vendedor",
+    "vendor": "Vendedor",
+    "stockHint": "El estado disponible/agotado controla la visibilidad en el catálogo público."
   }
 }

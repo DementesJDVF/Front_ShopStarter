@@ -120,12 +120,12 @@ const Security = () => {
             </div>
           </div>
 
-          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-start gap-3">
-            <Icon icon="solar:info-circle-bold-duotone" className="text-amber-500 mt-0.5" height={20} />
-            <p className="text-[11px] text-amber-800 font-medium leading-relaxed">
-              La nueva contraseña debe tener al menos 8 caracteres, incluir una mayúscula, un número y un símbolo especial para mayor seguridad.
-            </p>
-          </div>
+           <div className="p-4 bg-amber-50 dark:bg-amber-900/30 rounded-2xl border border-amber-100 dark:border-amber-700/50 flex items-start gap-3">
+             <Icon icon="solar:info-circle-bold-duotone" className="text-amber-500 dark:text-amber-400 mt-0.5" height={20} />
+             <p className="text-[11px] text-amber-800 dark:text-amber-200/80 font-medium leading-relaxed">
+               La nueva contraseña debe tener al menos 8 caracteres, incluir una mayúscula, un número y un símbolo especial para mayor seguridad.
+             </p>
+           </div>
 
           <Button 
             type="submit" 

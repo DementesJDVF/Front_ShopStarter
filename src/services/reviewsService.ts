@@ -14,6 +14,12 @@ export interface ReviewsData {
   reviews: Review[];
 }
 
+const validateRating = (rating: number): void => {
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    throw new Error('El rating debe ser un entero entre 1 y 5');
+  }
+};
+
 export const getVendorReviews = async (vendorId: string): Promise<ReviewsData> => {
   try {
     const response = await api.get(`vendors/${vendorId}/reviews/`);
@@ -29,6 +35,8 @@ export const submitReview = async (
   rating: number,
   reviewText?: string
 ): Promise<Review> => {
+  validateRating(rating);
+  
   try {
     const response = await api.post(
       `vendors/${vendorId}/reviews/`,
@@ -49,6 +57,8 @@ export const updateReview = async (
   rating: number,
   reviewText?: string
 ): Promise<Review> => {
+  validateRating(rating);
+  
   try {
     const response = await api.patch(
       `reviews/edit/${reviewId}/`,
@@ -60,6 +70,15 @@ export const updateReview = async (
     return response.data;
   } catch (error: any) {
     const message = error.response?.data?.message || 'Error al actualizar la reseña';
+    throw new Error(message);
+  }
+};
+
+export const deleteReview = async (reviewId: string): Promise<void> => {
+  try {
+    await api.delete(`reviews/edit/${reviewId}/`);
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Error al eliminar la reseña';
     throw new Error(message);
   }
 };

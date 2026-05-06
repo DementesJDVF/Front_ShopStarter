@@ -14,6 +14,20 @@ export interface CartItem {
 }
 
 /**
+ * Valida que un item del carrito tenga la estructura correcta.
+ */
+const isValidCartItem = (item: any): item is CartItem => {
+  return (
+    typeof item.id === 'string' &&
+    typeof item.name === 'string' &&
+    typeof item.price === 'number' && item.price > 0 &&
+    typeof item.quantity === 'number' && item.quantity > 0 &&
+    typeof item.vendorId === 'string' &&
+    typeof item.vendorName === 'string'
+  );
+};
+
+/**
  * Definición de las funciones y datos accesibles a través del contexto del carrito.
  */
 interface CartContextType {
@@ -36,7 +50,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const savedCart = localStorage.getItem('shop_cart');
     if (savedCart) {
       try {
-        setCart(JSON.parse(savedCart));
+        const parsed = JSON.parse(savedCart);
+        // Validar y filtrar items válidos
+        if (Array.isArray(parsed)) {
+          const validItems = parsed.filter(isValidCartItem);
+          setCart(validItems);
+        }
       } catch (e) {
         console.error("Error al cargar el carrito desde localStorage", e);
       }
@@ -95,7 +114,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Cálculos automáticos derivados del estado del carrito
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalPrice = Math.round(cart.reduce((sum, item) => sum + item.price * item.quantity, 0) * 100) / 100;
 
   return (
     <CartContext.Provider value={{ 

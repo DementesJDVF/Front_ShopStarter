@@ -21,16 +21,26 @@ const ProtectedRoute = ({ allowedRoles }: Props) => {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && user) {
-    const userRole = user.role.toUpperCase();
-    const isAllowed = allowedRoles.some(role => role.toUpperCase() === userRole);
-    
-    if (!isAllowed) {
-      // Redirección si se intenta acceder a un rol no permitido
-      const redirectPath = userRole === 'VENDEDOR' ? '/vendedor/dashboard' : '/cliente/home';
-      return <Navigate to={redirectPath} replace />;
-    }
-  }
+   if (allowedRoles && user) {
+     const userRole = user.role.toUpperCase();
+     const isAllowed = allowedRoles.some(role => role.toUpperCase() === userRole);
+     
+if (!isAllowed) {
+        // Redirección si se intenta acceder a un rol no permitido
+        let redirectPath = '/';
+        if (userRole === 'VENDEDOR') {
+          redirectPath = '/vendedor/dashboard';
+        } else if (userRole === 'ADMIN') {
+          redirectPath = '/admin';
+        } else if (userRole === 'CLIENTE') {
+          redirectPath = '/cliente/home';
+        } else {
+          // Fallback para roles desconocidos
+          redirectPath = '/';
+        }
+        return <Navigate to={redirectPath} replace />;
+      }
+   }
 
   return <Outlet />;
 };

@@ -64,16 +64,17 @@ const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handle
             <h5 className="text-base font-bold text-wrap">
               ${parseFloat(product.price.toString()).toLocaleString()}
             </h5>
-            <div className="text-xs font-medium text-dark opacity-70 mb-2">
-               {t('table.stock', { count: product.stock })}
-            </div>
-            <div className="me-5">
-              <Progress
-                progress={product.stock > 0 ? 100 : 0}
-                color={product.stock >= 5 ? 'success' : product.stock > 0 ? 'warning' : 'red'}
-                size={"sm"}
-              />
-            </div>
+<div className="text-xs font-medium text-dark opacity-70 mb-2">
+   {t('product.stock_count', { count: product.stock })} 
+   ({product.stock > 0 ? t('product.available') : t('product.out_of_stock')})
+</div>
+<div className="me-5">
+   <Progress
+     progress={product.stock > 0 ? 100 : 0}
+     color={product.stock >= 5 ? 'success' : product.stock > 0 ? 'warning' : 'red'}
+     size={"sm"}
+   />
+</div>
           </Table.Cell>
           <Table.Cell>
             <Badge
@@ -192,7 +193,7 @@ const ProductTable = () => {
         cats = data.results;
       }
 
-      setCategories(cats.filter((v, i, a) => a.findIndex(t => t.name === v.name) === i));
+      setCategories(Array.from(new Map(cats.map((c) => [c.name, c])).values()));
       if (cats.length === 0) {
         console.warn(t('fetch.noCategories'));
       }
@@ -201,26 +202,19 @@ const ProductTable = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-    
-    // Cleanup de URLs de previsualización al desmontar
-    return () => {
-      if (newProduct.preview_url && newProduct.preview_url.startsWith('blob:')) {
-        URL.revokeObjectURL(newProduct.preview_url);
-      }
-    };
-  }, []);
+useEffect(() => {
+     fetchProducts();
+     fetchCategories();
+     
+     // Cleanup de URLs de previsualización al desmontar
+     return () => {
+       if (newProduct.preview_url && newProduct.preview_url.startsWith('blob:')) {
+         URL.revokeObjectURL(newProduct.preview_url);
+       }
+     };
+   }, []);
 
-  // Cleanup de URL anterior cuando cambia la imagen
-  useEffect(() => {
-    return () => {
-      // Este efecto se ejecuta antes de que preview_url cambie o el componente se desmonte
-    };
-  }, [newProduct.preview_url]);
-
-  const handleDelete = async (id: string | number) => {
+   const handleDelete = async (id: string | number) => {
     if (!window.confirm(t('confirm.delete'))) return;
     try {
       await api.delete(`products/create/${id}/`);

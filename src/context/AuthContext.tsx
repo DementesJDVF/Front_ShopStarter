@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../utils/axios';
+import toast from 'react-hot-toast';
 
 
 interface User {
@@ -11,8 +12,8 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
-  login: (userData: User, token: string) => void;
+  hasToken: boolean;
+  login: (userData: User, dummyToken?: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
@@ -22,7 +23,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,7 +42,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 logout();
             }
         }).catch((err) => {
-          if (err.response?.status === 401 || err.response?.status === 403) {
+          const status = err.response?.status;
+          // 401/403 son errores esperados, cualquier otro (como 500) también limpiamos sesión
+          if (status === 401 || status === 403 || status === 500 || status === 502) {
             logout();
           }
         }).finally(() => {
@@ -60,7 +62,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setUser(res.data);
                 localStorage.setItem('user', JSON.stringify(res.data));
             }
-        }).catch(() => {})
+        }).catch((err) => {
+          const status = err.response?.status;
+          // Ignoramos errores de autenticación pero no crasheamos la app
+          if (status !== 401 && status !== 403 && status !== 500) {
+            console.warn('Auth check failed:', err.message);
+          }
+        })
         .finally(() => {
           setLoading(false);
         });
@@ -76,16 +84,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     // 1. LIMPIEZA LOCAL INMEDIATA (Principio de Optimismo/Seguridad)
-    // Esto evita que la UI permita acciones mientras se procesa el logout en red
     setUser(null);
     localStorage.removeItem('user');
-    localStorage.removeItem('token');
     sessionStorage.clear();
 
     try {
         // 2. Notificar al backend de forma secundaria
-        // Usamos axios directo si queremos evitar interceptores, o api sabiendo que puede fallar
-        await api.post('auth/logout/').catch(() => {}); 
+        await api.post('auth/logout/').catch((err) => {
+          // Mostrar toast de advertencia si el logout backend falla
+          console.warn('Logout backend warning:', err);
+          toast.error('No se pudo cerrar sesión en el servidor. Por favor, inténtalo de nuevo.');
+        }); 
     } catch (error) {
         // Ignoramos errores de red en logout, la prioridad es la limpieza local
     } finally {
@@ -94,11 +103,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  return (
-    <AuthContext.Provider value={{ user, token: "secure_httponly_token", login, logout, isAuthenticated: !!user, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+   return (
+      <AuthContext.Provider value={{ user, hasToken: !!user, login, logout, isAuthenticated: !!user, loading }}>
+        {children}
+      </AuthContext.Provider>
+    );
 };
 
 export const useAuth = () => {
