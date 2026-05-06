@@ -48,12 +48,12 @@ export function ProductCatalog() {
   const { addToCart } = useCart();
   const { userLocation, radius, setRadius } = useMap();
 
-  // Estados Visor
+ 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
   const [previewTitle, setPreviewTitle] = useState('');
 
-  // Función para abrir la previsualización de una imagen en grande
+  
   const openPreview = (url: string, title: string) => {
     setPreviewUrl(url);
     setPreviewTitle(title);
@@ -96,10 +96,7 @@ export function ProductCatalog() {
     });
   };
 
-  /**
-   * Carga los datos de productos y categorías desde la API.
-   * Si se proporcionan coordenadas, prioriza la búsqueda por cercanía geográfica.
-   */
+
   async function loadData(lat?: number, lng?: number, currentRadius?: number) {
     try {
       setLoading(true);
