@@ -85,7 +85,7 @@ i18n
       },
     },
     lng: "es",
-    fallbackLng: "en",
+    fallbackLng: "en", 
     interpolation: { escapeValue: false },
   });
 
