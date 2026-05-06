@@ -8,6 +8,10 @@ import api from "../../utils/axios";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
 import { useTranslation } from "react-i18next";
 import { generateAIDescription } from "../../services/aiService";
+// ===== NUEVO: Sprint IA y Funcionalidad =====
+import IAErrorAlert from "../ia/IAErrorAlert";
+import IACriticalBadge from "../ia/IACriticalBadge";
+// ===== FIN NUEVO =====
 import { optimizeImageUrl } from "../../utils/imageOptimizer";
 
 interface Product {
@@ -483,6 +487,10 @@ const ProductTable = () => {
                 </div>
               )}
             </div>
+            {/* ===== NUEVO: Sprint IA y Funcionalidad ===== */}
+            <IAErrorAlert visible={!!aiError} mensaje={aiError || "Error en el servicio de IA"} />
+            <div className="flex justify-center mt-1"><IACriticalBadge label="Descripcion IA" severity="alta" /></div>
+            {/* ===== FIN NUEVO ===== */}
 
             {/* 3. Botón IA */}
             <div className="flex justify-center">

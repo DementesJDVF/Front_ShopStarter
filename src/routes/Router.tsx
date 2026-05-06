@@ -48,6 +48,7 @@ const Router = [
     element: <BlankLayout />,
     children: [
       { index: true, element: <HomeRedirect /> },
+      { path: 'catalog', element: <BrowseProducts /> },
       {
         path: 'auth',
         children: [
