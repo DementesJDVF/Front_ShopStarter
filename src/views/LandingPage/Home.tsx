@@ -246,6 +246,15 @@ const Hero = () => {
               <Icon icon="solar:arrow-right-up-bold-duotone" className="text-2xl group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
             </span>
           </Link>
+          <Link
+            to="/catalog"
+            className="group relative inline-flex items-center justify-center px-12 py-5 font-black text-indigo-950 dark:text-white transition-all duration-300 bg-white/80 dark:bg-slate-800/80 border-2 border-indigo-200 dark:border-slate-700 rounded-2xl hover:shadow-[0_20px_40px_rgba(79,70,229,0.2)] hover:scale-[1.05] hover:bg-white dark:hover:bg-slate-700 overflow-hidden w-full sm:w-auto shadow-lg backdrop-blur-sm"
+          >
+            <span className="relative flex items-center gap-3 text-lg uppercase tracking-widest">
+              {t("hero.browse_catalog", { defaultValue: "Explorar Catálogo" })}
+              <Icon icon="solar:shop-2-bold-duotone" className="text-2xl group-hover:scale-110 transition-transform" />
+            </span>
+          </Link>
         </div>
 
         {/* Demo Mockup - Lavender Glass Style */}
