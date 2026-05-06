@@ -145,24 +145,25 @@ useEffect(() => {
     <div className="scale-80 origin-top">
 
       {/* HEADER */}
-      <Card className="! bg-gray-100 dark:!bg-gray-900 p-9 shadow-md rounded-xl">
-      <h1 className="mt-4 font-black text-3xl tracking-tight text-blue-400 flex items-center gap-3">
-        <Icon icon="solar:chart-square-bold-duotone" width="32" className="!bg-gray-100 dark:!bg-gray-900" />
-        Panel de Gestión - vendedor
-         <Button className=" ml-[700px] bg-green-400 hover:bg-green-600 text-white" onClick={() => setShowLocationModal(true)}>
-          <HiOutlineLocationMarker className="mr-3" />
-          Mi ubicación
+      <Card  className=" mt-[10px] !bg-gray-100 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
+         <h1 className="font-black text-3xl tracking-tight text-blue-400 dark:text-blue-400 flex items-center gap-3">
+          Panel de Gestión - Vendedor
+          <Button className="ml-[770px] bg-green-400 hover:bg-green-600 text-white" onClick={() => setShowLocationModal(true)}>
+          <HiOutlineLocationMarker className="mr-4" />
+          Mi Ubicación
         </Button>
         </h1>
       </Card>
 
-     <Card className="mt-6 !bg-gray-100 dark:!bg-gray-900 p-9 shadow-md rounded-xl">
-        <Card className="!bg-gray-600 dark:!bg-gray-800 p-9 shadow-md rounded-xl">
+     <Card className=" mt-[25px] !bg-gray-100 dark:!bg-gray-400 p-9 shadow-md rounded-xl">
+        <Card className="!bg-gray-700 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
       <div className="flex justify-between mb-8">
+    
         <h1 className="mt-4 font-black text-3xl tracking-tight text-blue-400 flex items-center gap-3">
-          <Icon icon="solar:chart-square-bold-duotone" width="32" className="text-blue-100" />
+          <Icon icon="solar:chart-square-bold-duotone" width="32" className="text-blue-300" />
           ULTIMOS REGISTROS
         </h1>
+
       </div>
 
       {/* METRICS */}
@@ -175,7 +176,7 @@ useEffect(() => {
              <Icon icon="solar:box-bold" width="30" color="#7963b0" />
             </Card>
             <div>
-              <p className="font-black text-black text-2xl max-w-xl ">Ventas</p>
+              <p className="font-black text-black text-2xl ">Ventas</p>
               <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].ventas}
               </p>
             </div>
@@ -223,12 +224,12 @@ useEffect(() => {
     </Card>
   </Card>
 
-
       {/* 🔥 4 GRÁFICAS */}
-      
-      <div className="mt-[40px] grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div className=" mt-[20px] grid grid-cols-1 md:grid-cols-2 gap-6">
+
         {/* VENTAS */}
-        <Card>
+        <Card className="!bg-gray-100 dark:!bg-gray-400 p-9 shadow-md rounded-xl">
             
          <Card className="!bg-gray-700 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
           <h1 className="mb-2 font-black text-white text-2xl">Ventas</h1>
@@ -260,12 +261,12 @@ useEffect(() => {
         </Card>
 
         {/* PEDIDOS */}
-        <Card >
-          <h2 className="mb-2 font-black text-black text-2xl">
+        <Card className="!bg-gray-100 dark:!bg-gray-800 p-9 shadow-md rounded-xl">
+         <h2 className="mb-2 font-black dark:text-white text-black text-2xl">
             Pedidos
           </h2>
 
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer className="mt-[15px]" width="100%" height={250}>
             <BarChart data={dataPedidos}>
 
               {/*  GRADIENTE */}
@@ -310,10 +311,10 @@ useEffect(() => {
         </Card>
 
         {/* USUARIOS */}
-        <Card>
-          <h2 className="mb-3 dark-white text-black text-2xl ">Usuarios</h2>
+        <Card className="!bg-gray-100 dark:!bg-gray-800 p-9 shadow-md rounded-xl">
+          <h2 className="mb-2 font-black dark:text-white text-black text-2xl ">Usuarios</h2>
 
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer className="mt-[15px]" width="100%" height={250}>
             <AreaChart data={dataUsuarios}>
 
               <defs>
@@ -355,44 +356,42 @@ useEffect(() => {
         </Card>
 
         {/* ESTADOS DE PEDIDOS */}
-     <Card>
-      
- <Card className="!bg-gray-700 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
-  <h2 className="mb-2 font-black text-white text-2xl">
-    Estado de Pedidos
-  </h2>
-  <div className="my-3 h-[3px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-    <div className="flex justify-between w-full">
-      <h2 className="mb-1 font-black text-green-400 text-left">Pendientes</h2>
-      <h2 className="mb-1 font-black text-blue-400 text-center">Enviados</h2>
-      <h2 className="mb-1 font-black text-yellow-400 text-right">Entregados</h2>
-    </div>
-      <ResponsiveContainer width="100%" height={200}>
-        <RadialBarChart
-          cx="50%"
-          cy="50%"
-          innerRadius="20%"
-          outerRadius="90%"
-          barSize={15}
-          data={dataEstado}
-        >
+     <Card className="!bg-gray-100 dark:!bg-gray-400 p-9 shadow-md rounded-xl">     
+      <Card className="!bg-gray-700 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
+        <h2 className="mb-2 font-black text-white text-2xl">
+          Estado de Pedidos
+        </h2>
+        <div className="my-3 h-[3px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+          <div className="flex justify-between w-full">
+            <h2 className="mb-1 font-black text-green-400 text-left">Pendientes</h2>
+            <h2 className="mb-1 font-black text-blue-400 text-center">Enviados</h2>
+            <h2 className="mb-1 font-black text-yellow-400 text-right">Entregados</h2>
+          </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <RadialBarChart
+                cx="50%"
+                cy="50%"
+                innerRadius="20%"
+                outerRadius="90%"
+                barSize={15}
+                data={dataEstado}
+              >
 
-          <RadialBar
-            dataKey="pedidos"
-            label={{ fill: "#ffffff", position: "insideStart" }}
-          />
+                <RadialBar
+                  dataKey="pedidos"
+                  label={{ fill: "#ffffff", position: "insideStart" }}
+                />
 
-          <Legend />
+                <Legend />
 
-          <Tooltip />
-    
+                <Tooltip />
+          
 
-        </RadialBarChart>
-      </ResponsiveContainer>
-      </Card>
-    </Card>
-  </div>
-
+              </RadialBarChart>
+            </ResponsiveContainer>
+            </Card>
+          </Card>
+          </div>
 
       {/* MODAL UBICACIÓN */}
       <Modal
