@@ -65,7 +65,7 @@ export function ProductCatalog() {
     try {
       await api.post('orders/', { product: productId });
       toast.success(t("reserveSuccess"));
-      loadData(userLocation?.lat, userLocation?.lng);
+      loadData(userLocation?.lat, userLocation?.lng, radius);
     } catch (e: any) {
       toast.error(e.response?.data?.error || t("reserveError"));
     }
@@ -100,13 +100,14 @@ export function ProductCatalog() {
    * Carga los datos de productos y categorías desde la API.
    * Si se proporcionan coordenadas, prioriza la búsqueda por cercanía geográfica.
    */
-  async function loadData(lat?: number, lng?: number) {
+  async function loadData(lat?: number, lng?: number, currentRadius?: number) {
     try {
       setLoading(true);
       setError(null);
       let prodUrl = "products/catalog/";
       if (lat && lng) {
-         prodUrl = `products/nearby/?lat=${lat}&lng=${lng}&radius=100`; // Cargamos todo para calcular
+        const r = currentRadius && currentRadius > 0 ? currentRadius : 12742;
+        prodUrl = `products/nearby/?lat=${lat}&lng=${lng}&radius=${r}`;
       }
       const [prodRes, catRes] = await Promise.all([
         api.get(prodUrl),
@@ -124,8 +125,8 @@ export function ProductCatalog() {
   }
 
   useEffect(() => {
-    loadData(userLocation?.lat, userLocation?.lng);
-  }, [userLocation]);
+    loadData(userLocation?.lat, userLocation?.lng, radius);
+  }, [userLocation, radius]);
 
   // Filtrado reactivo optimizado
   const filteredProducts = useMemo(() => {
