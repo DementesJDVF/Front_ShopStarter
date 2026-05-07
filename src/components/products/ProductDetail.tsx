@@ -6,8 +6,9 @@ import { Button, Spinner } from "flowbite-react";
 import { Icon } from "@iconify/react";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
 import { getAbsoluteImageUrl } from "../../utils/urlHelper";
-import toast from 'react-hot-toast';
 import { useAuth } from "../../context/AuthContext";
+import { useConfirm } from "../../context/ConfirmContext";
+import { showSuccessAlert, showErrorAlert } from "../../utils/Alerts";
 
 type ProductImage = {
   id: number;
@@ -35,6 +36,7 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const { t } = useTranslation("product");
   const { user } = useAuth();
+  const confirm = useConfirm();
 
   const [product, setProduct] = useState<ProductDetailData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,23 +82,24 @@ export default function ProductDetail() {
 
   const handleReserve = async () => {
     if (!product) return;
-    if (!window.confirm(t("reserveConfirmExact", { name: product.name }))) return;
+    const confirmed = await confirm(t("reserveConfirmExact", { name: product.name }));
+    if (!confirmed) return;
 
     try {
       setReserving(true);
       // Validamos stock localmente antes de intentar
       if (product.stock <= 0) {
-          toast.error("Lo sentimos, este producto se acaba de agotar.");
+          showErrorAlert("Lo sentimos, este producto se acaba de agotar.");
           return;
       }
       await api.post('orders/', { 
           product: product.id,
           quantity: 1 // Reservar 1 unidad directa
       });
-      toast.success("¡Reserva exitosa!");
+      showSuccessAlert("¡Reserva exitosa!");
       navigate('/cliente/reservas');
     } catch (e: any) {
-      alert(e.response?.data?.error || t("reserveError"));
+      showErrorAlert(e.response?.data?.error || t("reserveError"));
     } finally {
       setReserving(false);
     }

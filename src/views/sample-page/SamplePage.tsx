@@ -4,6 +4,8 @@ import { Table, Badge, Button, Spinner } from "flowbite-react";
 import api from "../../utils/axios";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
+import { useConfirm } from "../../context/ConfirmContext";
+import { showSuccessAlert, showErrorAlert } from "../../utils/Alerts";
 
 interface OrderItem {
   id: string;
@@ -31,6 +33,7 @@ const SamplePage = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation("samplePage");
+  const confirm = useConfirm();
 
   const fetchData = async () => {
     try {
@@ -53,24 +56,26 @@ const SamplePage = () => {
   }, []);
 
   const handleCancel = async (id: string) => {
-    if (!window.confirm(t("confirmCancel"))) return;
+    const confirmed = await confirm(t("confirmCancel"), { isDestructive: true });
+    if (!confirmed) return;
     try {
       await api.post(`orders/${id}/cancel/`);
-      alert(t("cancelSuccess"));
+      showSuccessAlert(t("cancelSuccess"));
       fetchData();
     } catch (error) {
-      alert(t("cancelError"));
+      showErrorAlert(t("cancelError"));
     }
   };
 
   const handleReport = async (id: string) => {
-    if (!window.confirm(t("confirmReport"))) return;
+    const confirmed = await confirm(t("confirmReport"), { isDestructive: true, title: '⚠️ Reportar vendedor' });
+    if (!confirmed) return;
     try {
       await api.post(`orders/${id}/report_vendor/`);
-      alert(t("reportSent"));
+      showSuccessAlert(t("reportSent"));
       fetchData();
     } catch (error) {
-      alert(t("reportError"));
+      showErrorAlert(t("reportError"));
     }
   };
 
@@ -90,7 +95,7 @@ const SamplePage = () => {
           <h5 className="card-title text-2xl font-bold text-primary">{t("myBookings")}</h5>
           {userProfile && (
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-gray-500 text-sm">{t("yourReputation")}</span>
+              <span className="text-black dark:text-white font-bold text-sm">{t("yourReputation")}</span>
               <div className="flex items-center text-yellow-500 font-bold">
                 <Icon icon="solar:star-bold" className="mr-1" />
                 {parseFloat(userProfile.reputation_score).toFixed(1)}
@@ -125,7 +130,7 @@ const SamplePage = () => {
                     {new Date(order.created_at).toLocaleDateString()}
                   </Table.Cell>
                   <Table.Cell>
-                    {order.items.map(item => item.product_name).join(", ")}
+                    {order.items?.map(item => item.product_name).join(", ") || "---"}
                   </Table.Cell>
                   <Table.Cell>{order.vendor_name}</Table.Cell>
                   <Table.Cell className="font-bold text-primary">${parseFloat(order.total).toLocaleString()}</Table.Cell>

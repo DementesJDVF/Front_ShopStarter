@@ -4,6 +4,7 @@ import { useCart } from '../../../context/CartContext';
 import { Icon as Iconify } from '@iconify/react';
 import api from '../../../utils/axios';
 import { useTranslation } from 'react-i18next';
+import { showSuccessAlert, showErrorAlert } from '../../../utils/Alerts';
 
 const Cart = () => {
   // Controla si el panel lateral (Drawer) del carrito está desplegado o no
@@ -25,11 +26,11 @@ const Cart = () => {
           await Promise.all(promises);
           
           clearCart();
-          alert(t('cart.checkout.success'));
+          showSuccessAlert(t('cart.checkout.success'));
           setIsOpen(false);
       } catch (error) {
           console.error("Error al procesar la orden", error);
-          alert(t('cart.checkout.error'));
+          showErrorAlert(t('cart.checkout.error'));
       } finally {
           setLoading(false);
       }
@@ -40,7 +41,7 @@ const Cart = () => {
       <div className="relative group/menu">
         <span
           onClick={() => setIsOpen(true)}
-          className="h-10 w-10 rounded-full flex justify-center items-center cursor-pointer relative transition hover:text-primary hover:bg-lightprimary text-gray-600 dark:text-gray-300"
+          className="h-10 w-10 rounded-full flex justify-center items-center cursor-pointer relative transition hover:text-white hover:bg-white/10 text-white"
           aria-label={t('cart.ariaLabel')}
         >
           <Iconify icon="solar:cart-large-2-linear" height={22} />

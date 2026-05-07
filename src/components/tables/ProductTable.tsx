@@ -9,6 +9,8 @@ import ImagePreviewModal from "../shared/ImagePreviewModal";
 import { useTranslation } from "react-i18next";
 import { generateAIDescription } from "../../services/aiService";
 import { optimizeImageUrl } from "../../utils/imageOptimizer";
+import { useConfirm } from "../../context/ConfirmContext";
+import { showSuccessAlert, showErrorAlert, showWarningAlert } from "../../utils/Alerts";
 
 interface Product {
   id: string | number;
@@ -134,6 +136,7 @@ const ProductTable = () => {
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | number | null>(null);
   const navigate = useNavigate();
+  const confirm = useConfirm();
   
   // Estados para el visor de imágenes
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -221,13 +224,15 @@ const ProductTable = () => {
   }, [newProduct.preview_url]);
 
   const handleDelete = async (id: string | number) => {
-    if (!window.confirm(t('confirm.delete'))) return;
+    const confirmed = await confirm(t('confirm.delete'), { isDestructive: true });
+    if (!confirmed) return;
     try {
       await api.delete(`products/create/${id}/`);
+      showSuccessAlert(t('alert.deleteSuccess', 'Producto eliminado'));
       fetchProducts();
     } catch (error) {
       console.error(t('error.deleteProduct'), error);
-      alert(t('alert.deleteError'));
+      showErrorAlert(t('alert.deleteError'));
     }
   };
 
@@ -250,7 +255,7 @@ const ProductTable = () => {
   const handleSuggestAI = async () => {
     const hasImage = newProduct.image_file || newProduct.preview_url;
     if (!hasImage) {
-      alert(t('form.selectImageFirst'));
+      showWarningAlert(t('form.selectImageFirst'));
       return;
     }
 
@@ -282,7 +287,7 @@ const ProductTable = () => {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t('alert.aiError');
       console.error(t('error.ai'), err);
-      alert(message);
+      showErrorAlert(message);
       setAiError(message);
     } finally {
       setGeneratingAI(false);
@@ -305,7 +310,7 @@ const ProductTable = () => {
         const base64 = await toBase64(newProduct.image_file);
         data.images = [{ url_image: base64, is_main: true }];
       } else if (!editingId) {
-        alert(t('form.imageRequired'));
+        showWarningAlert(t('form.imageRequired'));
         setSubmitting(false);
         return;
       }
@@ -327,6 +332,7 @@ const ProductTable = () => {
         image_file: null,
         preview_url: ''
       });
+      showSuccessAlert(editingId ? "Producto actualizado correctamente" : "Producto creado correctamente");
       fetchProducts();
     } catch (error: any) {
       const backendError = error.response?.data;
@@ -339,7 +345,7 @@ const ProductTable = () => {
       }
 
       console.error(t('error.processProduct'), error);
-      alert(errorMessage);
+      showErrorAlert(errorMessage);
     } finally {
       setSubmitting(false);
     }

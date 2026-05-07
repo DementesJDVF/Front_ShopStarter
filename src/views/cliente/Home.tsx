@@ -48,13 +48,13 @@ const ClienteHome = () => {
           </Badge>
           <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-[0.9]">
             {t('home.hero_title_line1')} <br/>
-            <span className="text-primary italic">{t('home.hero_title_line2')}</span>
+            <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-[#7a9dff] to-[#9e7aff] italic">{t('home.hero_title_line2')}</span>
           </h1>
           <p className="text-gray-300 text-lg md:text-xl font-medium mb-8 max-w-2xl mx-auto opacity-80">
             {t('home.hero_desc')}
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="xl" className="rounded-2xl font-black px-8 py-2 bg-primary hover:bg-primary/90 transition-all shadow-xl shadow-primary/20"
+            <Button size="xl" className="rounded-2xl font-black px-8 py-2 bg-gradient-to-r from-[#7a9dff] to-[#9e7aff] hover:scale-105 transition-all shadow-xl shadow-indigo-500/20 border-0"
               onClick={() => navigate('/cliente/productos')}
             >
               {t('home.go_catalog')}
@@ -70,7 +70,7 @@ const ClienteHome = () => {
           <div>
             <h2 className="text-3xl font-black text-gray-800 dark:text-white tracking-tight uppercase"
               dangerouslySetInnerHTML={{ __html: t('home.categories_title') }} />
-            <p className="text-gray-500">{t('home.categories_subtitle')}</p>
+            <p className="text-black dark:text-white font-bold">{t('home.categories_subtitle')}</p>
           </div>
           <Button color="gray" outline pill className="font-bold border-2" onClick={() => navigate('/cliente/productos')}>
             {t('home.see_all')}
@@ -106,7 +106,7 @@ const ClienteHome = () => {
             <Badge color="warning" className="w-fit mb-4">{t('home.map_badge')}</Badge>
             <h3 className="text-4xl font-black text-gray-800 dark:text-white leading-tight mb-4 uppercase"
               dangerouslySetInnerHTML={{ __html: t('home.map_title') }} />
-            <p className="text-gray-500 mb-8 leading-relaxed">
+            <p className="text-black dark:text-white font-bold mb-8 leading-relaxed">
               {t('home.map_desc')}
             </p>
             <ul className="space-y-4 mb-8">
@@ -137,7 +137,7 @@ const ClienteHome = () => {
 
       {/* 🛍️ Llamada a la Acción Final */}
       <section className="px-6 text-center" data-aos="fade-up">
-        <div className="bg-gradient-to-r from-[#2CD4D9] via-[#3A17E4] to-[#0A014A] dark:bg-none dark:bg-primary py-20 rounded-[50px] relative overflow-hidden shadow-2xl">
+        <div className="bg-gradient-to-r from-[#000351] to-[#280051] py-20 rounded-[50px] relative overflow-hidden shadow-2xl border border-white/10">
           <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -ml-32 -mt-32 animate-pulse"></div>
           <div className="absolute bottom-0 right-0 w-64 h-64 bg-black/10 rounded-full blur-3xl -mr-32 -mb-32"></div>
           

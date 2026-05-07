@@ -3,7 +3,8 @@ import { Card, Table, Badge, Button, Spinner } from 'flowbite-react';
 import { Icon as Iconify } from '@iconify/react';
 import api from '../../utils/axios';
 import { useTranslation } from 'react-i18next';
-import toast from 'react-hot-toast';
+import { useConfirm } from '../../context/ConfirmContext';
+import { showSuccessAlert, showErrorAlert } from '../../utils/Alerts';
 
 interface Order {
   id: string;
@@ -19,6 +20,7 @@ const ClientOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const confirm = useConfirm();
 
   const fetchOrders = async () => {
     try {
@@ -44,24 +46,25 @@ const ClientOrders: React.FC = () => {
     try {
       setActionLoading(orderId);
       await api.post(`orders/${orderId}/notify-payment/`);
-      toast.success("Notificación de pago enviada al vendedor");
+      showSuccessAlert("Notificación de pago enviada al vendedor");
       await fetchOrders();
     } catch (err) {
-      toast.error("Error al notificar pago");
+      showErrorAlert("Error al notificar pago");
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleCancel = async (orderId: string) => {
-    if (!window.confirm("¿Seguro que quieres cancelar esta reserva? El producto volverá al catálogo.")) return;
+    const confirmed = await confirm("¿Seguro que quieres cancelar esta reserva? El producto volverá al catálogo.", { isDestructive: true });
+    if (!confirmed) return;
     try {
       setActionLoading(orderId);
       await api.post(`orders/${orderId}/cancel/`);
-      toast.success("Reserva liberada");
+      showSuccessAlert("Reserva liberada");
       await fetchOrders();
     } catch (err) {
-      toast.error("Error al cancelar");
+      showErrorAlert("Error al cancelar");
     } finally {
       setActionLoading(null);
     }

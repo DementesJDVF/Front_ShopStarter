@@ -3,6 +3,8 @@ import CardBox from '../../components/shared/CardBox';
 import { Table as FlowTable, Badge, Button, Spinner } from "flowbite-react";
 import api from "../../utils/axios";
 import { Icon } from "@iconify/react";
+import { useConfirm } from "../../context/ConfirmContext";
+import { showSuccessAlert, showErrorAlert } from "../../utils/Alerts";
 
 interface OrderItem {
   id: string;
@@ -28,6 +30,7 @@ const TableView = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const confirm = useConfirm();
 
   const fetchData = async () => {
     try {
@@ -51,7 +54,8 @@ const TableView = () => {
 
   const handleAction = async (id: string, action: 'complete' | 'cancel') => {
     const confirmMsg = action === 'complete' ? "¿Confirmas que el cliente ya pagó y retiró el producto?" : "¿Confirmas que el cliente NO se presentó a la cita?";
-    if (!window.confirm(confirmMsg)) return;
+    const confirmed = await confirm(confirmMsg, { isDestructive: action === 'cancel' });
+    if (!confirmed) return;
 
     try {
       if (action === 'complete') {
@@ -59,10 +63,10 @@ const TableView = () => {
       } else {
         await api.post(`orders/${id}/cancel/`);
       }
-      alert("Operación realizada con éxito. Tu reputación ha sido actualizada.");
+      showSuccessAlert("Operación realizada con éxito. Tu reputación ha sido actualizada.");
       fetchData();
     } catch (error) {
-       alert("Error al procesar la solicitud.");
+       showErrorAlert("Error al procesar la solicitud.");
     }
   };
 

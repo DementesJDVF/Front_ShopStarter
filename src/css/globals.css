@@ -4,6 +4,7 @@
 @import './layouts/header.css';
 @import './theme/default-colors.css';
 @import './override/reboot.css';
+@import './override/accessibility.css';
 
 @tailwind base;
 @tailwind components;
@@ -197,6 +198,19 @@
 
   /* Utilidades de texto y colores generales */
   .text-ld { @apply text-dark dark:text-white; }
+
+  /* Night Mode Gradient Utility */
+  .text-gradient-night {
+    @apply text-primary;
+  }
+  
+  .dark .text-gradient-night {
+    background: linear-gradient(to right, #7a9dff, #9e7aff) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    display: inline-block;
+  }
   
   .animation-delay-2000 {
     animation-delay: 2s;

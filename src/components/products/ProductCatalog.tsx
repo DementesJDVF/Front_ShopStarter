@@ -10,7 +10,8 @@ import api from "../../utils/axios";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
 import { useCart } from "../../context/CartContext";
 import { useMap } from "../../context/MapContext";
-import { toast } from "react-hot-toast";
+import { useConfirm } from "../../context/ConfirmContext";
+import { showSuccessAlert, showErrorAlert } from "../../utils/Alerts";
 
 type ApiProductImage = {
   id: number;
@@ -47,6 +48,7 @@ export function ProductCatalog() {
 
   const { addToCart } = useCart();
   const { userLocation, radius, setRadius } = useMap();
+  const confirm = useConfirm();
 
   // Estados Visor
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -61,13 +63,14 @@ export function ProductCatalog() {
   };
 
   const handleReserve = async (productId: number) => {
-    if (!window.confirm(t("reserveConfirm"))) return;
+    const confirmed = await confirm(t("reserveConfirm"));
+    if (!confirmed) return;
     try {
       await api.post('orders/', { product: productId });
-      toast.success(t("reserveSuccess"));
+      showSuccessAlert(t("reserveSuccess"));
       loadData(userLocation?.lat, userLocation?.lng);
     } catch (e: any) {
-      toast.error(e.response?.data?.error || t("reserveError"));
+      showErrorAlert(e.response?.data?.error || t("reserveError"));
     }
   };
 
@@ -86,14 +89,7 @@ export function ProductCatalog() {
       vendorId: p.vendor.toString(),
       vendorName: p.vendor_name
     });
-    toast.success(t("addedToCart", { name: p.name }), {
-      icon: '🛒',
-      style: {
-        borderRadius: '10px',
-        background: '#333',
-        color: '#fff',
-      },
-    });
+    showSuccessAlert(t("addedToCart", { name: p.name }));
   };
 
   /**
@@ -154,8 +150,8 @@ export function ProductCatalog() {
       <div className="mb-8 border-b border-gray-100 pb-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="text-4xl font-black text-gray-900 tracking-tight">{t("catalogTitle")}</h2>
-            <p className="text-gray-500 mt-2 text-lg">{t("catalogSub")}</p>
+            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">{t("catalogTitle")}</h2>
+            <p className="text-black dark:text-white mt-2 text-lg font-bold">{t("catalogSub")}</p>
           </div>
           
           <div className="flex flex-col gap-2 w-full md:w-auto">
@@ -258,10 +254,10 @@ export function ProductCatalog() {
                 
                 <div className="p-5 flex flex-col gap-2">
                   <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-bold text-gray-800 line-clamp-1 flex-1">{p.name}</h3>
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white line-clamp-1 flex-1">{p.name}</h3>
                   </div>
                   
-                  <p className="text-gray-500 text-sm line-clamp-2 min-h-[40px]">
+                  <p className="text-black dark:text-white text-sm line-clamp-2 min-h-[40px] font-medium">
                     {p.description}
                   </p>
                 
