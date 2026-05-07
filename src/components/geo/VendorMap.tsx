@@ -113,7 +113,7 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
     }
   };
 
-  // 🔌 WebSocket conexión
+  //  WebSocket conexión
   useEffect(() => {
     socketRef.current = new WebSocket("ws://localhost:8000/ws/location/");
 
@@ -132,7 +132,7 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
     return () => clearInterval(check);
   }, [isAdmin]);
 
-  // 📤 VENDEDOR ENVÍA UBICACIÓN
+  //  VENDEDOR ENVÍA UBICACIÓN
   useEffect(() => {
     if (isAdmin) return;
 
@@ -145,7 +145,7 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
     });
   }, [isAdmin]);
 
-  // 📥 ADMIN RECIBE Y MUEVE
+  //  ADMIN RECIBE Y MUEVE
   useEffect(() => {
     if (!isAdmin) return;
 
@@ -162,7 +162,7 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
     };
   }, [isAdmin]);
 
-  // 🧪 SIMULACIÓN (por si no tienes backend)
+  // SIMULACIÓN (por si no tienes backend)
   useEffect(() => {
     if (!isAdmin) return;
 
