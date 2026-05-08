@@ -86,20 +86,30 @@ const RoleBasedMap: React.FC = () => {
 
         navigator.geolocation.getCurrentPosition((pos) => {
             const { latitude: lat, longitude: lng } = pos.coords;
-            
-            // Usar un círculo sutil para la ubicación del usuario, no un PIN de tienda
-            (window as any).L.circleMarker([lat, lng], {
+
+            // 1. Validamos que el mapa siga existiendo antes de hacer nada
+            if (!leafletMap.current) return;
+
+            // Usar un círculo sutil para la ubicación del usuario
+            const userMarker = (window as any).L.circleMarker([lat, lng], {
                 radius: 8,
                 fillColor: "#3b82f6",
                 color: "white",
                 weight: 2,
                 opacity: 1,
                 fillOpacity: 0.8
-            }).addTo(leafletMap.current)
-              .bindPopup("Tu ubicación actual");
+            });
 
-            leafletMap.current.setView([lat, lng], 15);
-        }, (err) => { });
+            // 2. Doble validación antes de añadir al mapa y mover la vista
+            if (leafletMap.current) {
+                userMarker.addTo(leafletMap.current)
+                        .bindPopup("Tu ubicación actual");
+
+                leafletMap.current.setView([lat, lng], 15);
+            }
+        }, (err) => { 
+            console.warn("No se pudo obtener la ubicación:", err.message);
+        });
 
         const checkLeaflet = setInterval(() => {
             if ((window as any).L) {
