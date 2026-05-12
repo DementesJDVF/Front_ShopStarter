@@ -15,6 +15,7 @@ interface OrderItem {
 interface Order {
   id: string;
   vendor_name: string;
+  product_name: string;
   status: string;
   total: string;
   items: OrderItem[];
@@ -42,6 +43,7 @@ const SamplePage = () => {
     return rawOrders.map((order: any) => ({
       id: String(order?.id ?? ''),
       vendor_name: order?.vendor_name ?? '',
+      product_name: order?.product_name || order?.product?.name || 'Producto sin nombre', // <--- Extraer de aquí
       status: order?.status ?? '',
       total: String(order?.total ?? '0'),
       created_at: order?.created_at ?? new Date().toISOString(),
@@ -166,11 +168,7 @@ const SamplePage = () => {
                   </Table.Cell>
 
                   <Table.Cell>
-                    {Array.isArray(order.items) && order.items.length > 0
-                      ? order.items
-                          .map((item) => item?.product_name ?? 'Producto sin nombre')
-                          .join(", ")
-                      : "Sin productos"}
+                    {order.product_name}
                   </Table.Cell>
 
                   <Table.Cell>{order.vendor_name || "N/A"}</Table.Cell>

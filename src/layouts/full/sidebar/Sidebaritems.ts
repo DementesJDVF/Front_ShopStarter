@@ -82,6 +82,12 @@ const SidebarContent: MenuItem[] = [
         url: "/cliente/mapa",
       },
       {
+        name: "Reservas",
+        icon: "solar:calendar-mark-line-duotone",
+        id: uniqueId(),
+        url: "/cliente/reservas",
+      },
+      {
         name: "Reseñas",
         icon: "solar:star-fall-2-outline",
         id: uniqueId(),
