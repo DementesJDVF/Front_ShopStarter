@@ -20,7 +20,7 @@ type ProductDetailData = {
   name: string;
   description: string;
   price: string;
-  stock: number;
+  stock: boolean;
   status: string;
   vendor: string | number;
   vendor_name: string;
@@ -85,7 +85,7 @@ export default function ProductDetail() {
     try {
       setReserving(true);
       // Validamos stock localmente antes de intentar
-      if (product.stock <= 0) {
+      if (!product.stock) {
           toast.error("Lo sentimos, este producto se acaba de agotar.");
           return;
       }
@@ -205,10 +205,10 @@ export default function ProductDetail() {
               <Icon icon="solar:box-linear" className="text-primary text-2xl" />
               <div>
                 <p className="text-gray-400 text-xs">{t("stock")}</p>
-                <p className={`font-bold ${product.stock === 0 ? "text-red-500" : "text-green-600"}`}>
-                  {product.stock === 0
-                    ? t("status.OUT_OF_STOCK")
-                    : `${product.stock} ${t("units")}`}
+                <p className={`font-bold ${!product.stock ? "text-red-500" : "text-green-600"}`}>
+                  {!product.stock
+                    ? t("outOfStock")
+                    : t("inStock")}
                 </p>
               </div>
             </div>
@@ -233,7 +233,7 @@ export default function ProductDetail() {
                 {reserving ? <Spinner size="sm" className="mr-2" /> : <Icon icon="solar:calendar-mark-bold" className="mr-2 text-2xl" />}
                 RESERVAR AHORA
               </Button>
-            ) : (product.status && product.status.toString().toUpperCase().includes('SOLD')) || product.stock <= 0 ? (
+            ) : (product.status && product.status.toString().toUpperCase().includes('SOLD')) || !product.stock ? (
               <Button size="xl" color="gray" disabled className="w-full rounded-2xl">
                 AGOTADO
               </Button>
