@@ -23,11 +23,11 @@ const RoleBasedMap: React.FC = () => {
 
     // Estados para la gestión de ubicaciones (específico para el rol de VENDEDOR)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [selectedPosition, setSelectedPosition] = useState<{lat: number, lng: number} | null>(null);
+    const [selectedPosition, setSelectedPosition] = useState<{ lat: number, lng: number } | null>(null);
     const [locationDescription, setLocationDescription] = useState('');
 
     const [isCatalogModalOpen, setIsCatalogModalOpen] = useState(false);
-    const [selectedVendor, setSelectedVendor] = useState<{id: string, name: string} | null>(null);
+    const [selectedVendor, setSelectedVendor] = useState<{ id: string, name: string } | null>(null);
 
     // Visibilidad del vendedor
     const [isLocationActive, setIsLocationActive] = useState(false);
@@ -37,8 +37,8 @@ const RoleBasedMap: React.FC = () => {
     useEffect(() => {
         // Exponer función global para que Leaflet (HTML crudo) pueda comunicarse con React
         (window as any).openVendorCatalog = (vendorId: string, vendorName: string) => {
-             setSelectedVendor({ id: vendorId, name: vendorName });
-             setIsCatalogModalOpen(true);
+            setSelectedVendor({ id: vendorId, name: vendorName });
+            setIsCatalogModalOpen(true);
         };
 
         (window as any).tracePath = (destLat: number, destLng: number) => {
@@ -90,7 +90,7 @@ const RoleBasedMap: React.FC = () => {
             // 1. Validamos que el mapa siga existiendo antes de hacer nada
             if (!leafletMap.current) return;
 
-            // Usar un círculo sutil para la ubicación del usuario
+            // Usar un círculo sutil para la ubicación del usuario, no un PIN de tienda
             const userMarker = (window as any).L.circleMarker([lat, lng], {
                 radius: 8,
                 fillColor: "#3b82f6",
@@ -107,7 +107,9 @@ const RoleBasedMap: React.FC = () => {
 
                 leafletMap.current.setView([lat, lng], 15);
             }
-        }, (err) => { 
+
+
+        }, (err) => {
             console.warn("No se pudo obtener la ubicación:", err.message);
         });
 
@@ -216,7 +218,7 @@ const RoleBasedMap: React.FC = () => {
             const markers: any[] = [];
             locations.forEach((loc: any) => {
                 if (!loc?.latitude || !loc?.longitude) return; // saltar entradas incompletas
-                
+
                 // Si la ubicación está apagada, NO la mostramos en el mapa (limpieza total solicitada)
                 if (loc.is_active === false) return;
 
@@ -312,7 +314,7 @@ const RoleBasedMap: React.FC = () => {
                     <h1 className="text-3xl font-black text-gray-800 dark:text-white uppercase tracking-tight">
                         {getMapTitle()}
                     </h1>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-black dark:text-white font-bold">
                         {user?.role === 'VENDEDOR'
                             ? t('desc_vendedor')
                             : t('desc_otro')}
@@ -333,7 +335,7 @@ const RoleBasedMap: React.FC = () => {
                                 className="rounded-xl shadow-2xl border-2 border-white/80 backdrop-blur-md"
                             >
                                 <div className="flex items-center gap-2">
-                                    {toggling ? <Spinner size="sm"/> : <Icon icon={isLocationActive ? "solar:map-point-wave-bold" : "solar:map-point-remove-bold"} height={20}/>}
+                                    {toggling ? <Spinner size="sm" /> : <Icon icon={isLocationActive ? "solar:map-point-wave-bold" : "solar:map-point-remove-bold"} height={20} />}
                                     <span className="font-black italic">
                                         {isLocationActive ? "UBICACIÓN: ENCENDIDA" : "UBICACIÓN: APAGADA"}
                                     </span>
@@ -349,8 +351,8 @@ const RoleBasedMap: React.FC = () => {
                             >
                                 <div className="flex items-center gap-2">
                                     {gettingLocation
-                                        ? <Spinner size="sm"/>
-                                        : <Icon icon="solar:map-point-wave-linear" height={20}/>}
+                                        ? <Spinner size="sm" />
+                                        : <Icon icon="solar:map-point-wave-linear" height={20} />}
                                     <span className="font-bold">
                                         {userLocation ? "ACTUALIZAR UBICACIÓN" : "MI UBICACIÓN"}
                                     </span>
@@ -376,7 +378,7 @@ const RoleBasedMap: React.FC = () => {
             <Modal show={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} size="md">
                 <Modal.Header>{t('modal_nueva_ubicacion')}</Modal.Header>
                 <Modal.Body>
-                   <div className="space-y-4">
+                    <div className="space-y-4">
                         <div className="flex gap-4 p-3 bg-gray-50 rounded-xl items-center border border-gray-100">
                             <Icon icon="solar:map-point-wave-bold-duotone" className="text-primary" height={24} />
                             <div>
@@ -397,7 +399,7 @@ const RoleBasedMap: React.FC = () => {
                                 onChange={(e) => setLocationDescription(e.target.value)}
                             />
                         </div>
-                   </div>
+                    </div>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button color="primary" onClick={handleSaveLocation} disabled={!locationDescription}>{t('guardar_punto')}</Button>
@@ -416,9 +418,9 @@ const RoleBasedMap: React.FC = () => {
             {/* Botón flotante para detener navegación */}
             {isRoutingActive && (
                 <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-[1000] animate-bounce-short">
-                    <Button 
-                        color="failure" 
-                        size="xl" 
+                    <Button
+                        color="failure"
+                        size="xl"
                         onClick={() => { (window as any).stopRouting(); setIsRoutingActive(false); }}
                         className="rounded-full shadow-2xl font-black flex items-center gap-2 border-4 border-white"
                     >
