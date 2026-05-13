@@ -8,7 +8,6 @@ import { Icon } from "@iconify/react";
 import "./ProductCatalog.css";
 import api from "../../utils/axios";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
-import { useCart } from "../../context/CartContext";
 import { useMap } from "../../context/MapContext";
 import { useConfirm } from "../../context/ConfirmContext";
 import { showSuccessAlert, showErrorAlert } from "../../utils/Alerts";
@@ -46,7 +45,6 @@ export function ProductCatalog() {
   const navigate = useNavigate();
   const { t } = useTranslation("product");
 
-  const { addToCart } = useCart();
   const { userLocation, radius, setRadius } = useMap();
   const confirm = useConfirm();
 
@@ -74,23 +72,7 @@ export function ProductCatalog() {
     }
   };
 
-  /**
-   * Gestiona la adición de un producto al carrito local.
-   */
-  const handleAddToCart = (p: ApiProduct) => {
-    const rawImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
-    const mainImage = getAbsoluteImageUrl(rawImage);
-    addToCart({
-      id: p.id.toString(),
-      name: p.name,
-      price: parseFloat(p.price),
-      quantity: 1,
-      image: mainImage,
-      vendorId: p.vendor.toString(),
-      vendorName: p.vendor_name
-    });
-    showSuccessAlert(t("addedToCart", { name: p.name }));
-  };
+
 
 
   async function loadData(lat?: number, lng?: number, currentRadius?: number) {
@@ -277,11 +259,11 @@ export function ProductCatalog() {
                             ? 'bg-primary text-white hover:bg-indigo-700 shadow-primary/20 cursor-pointer active:scale-95'
                             : 'bg-gray-100 text-gray-400 cursor-not-allowed grayscale'
                           }`}
-                        onClick={() => handleAddToCart(p)}
-                        title={!canPurchase ? t("notAvailableForPurchase") : t("addToCart")}
+                        onClick={() => handleReserve(p.id)}
+                        title={!canPurchase ? t("notAvailable") : t("res_now")}
                       >
-                        <Icon icon={canPurchase ? "solar:cart-plus-bold-duotone" : "solar:cart-cross-linear"} height={22} />
-                        <span>{canPurchase ? t("add") : t("notAvailable")}</span>
+                        <Icon icon={canPurchase ? "solar:calendar-mark-bold-duotone" : "solar:cart-cross-linear"} height={22} />
+                        <span>{canPurchase ? t("res_now") : t("notAvailable")}</span>
                       </button>
                     </div>
                   </div>
