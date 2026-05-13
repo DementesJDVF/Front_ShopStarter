@@ -71,10 +71,10 @@ const VendorOrders: React.FC = () => {
     <div className="p-6 max-w-6xl mx-auto animate-fade-in font-[var(--main-font)]">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-black text-indigo-900 tracking-tighter uppercase mb-1">
+          <h1 className="text-3xl font-black text-indigo-900 dark:text-white tracking-tighter uppercase mb-1">
             {t('orders.title')}
           </h1>
-          <p className="text-gray-500 font-medium">{t('orders.subtitle')}</p>
+          <p className="text-black dark:text-white font-bold">{t('orders.subtitle')}</p>
         </div>
         <Button color="light" onClick={fetchOrders} disabled={loading} className="rounded-xl shadow-sm">
           <Iconify icon="solar:refresh-circle-bold-duotone" className="mr-2" height={20} /> {t('orders.refresh')}

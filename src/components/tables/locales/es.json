@@ -12,6 +12,9 @@
       "none": "Sin categoría"
     },
     "stock": "Stock: {{count}} unidades",
+    "inStock": "Disponible",
+    "outOfStock": "Agotado",
+    "availability": "Disponibilidad",
     "status": {
       "noStatus": "SIN ESTADO",
       "AVAILABLE": "DISPONIBLE",

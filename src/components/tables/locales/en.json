@@ -12,6 +12,9 @@
       "none": "No category"
     },
     "stock": "Stock: {{count}} units",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "availability": "Availability",
     "status": {
       "noStatus": "NO STATUS"
     },

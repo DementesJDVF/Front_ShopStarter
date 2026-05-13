@@ -6,8 +6,9 @@ import { Button, Spinner, Badge } from "flowbite-react";
 import { Icon } from "@iconify/react";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
 import { getAbsoluteImageUrl } from "../../utils/urlHelper";
-import toast from 'react-hot-toast';
 import { useAuth } from "../../context/AuthContext";
+import { useConfirm } from "../../context/ConfirmContext";
+import { showSuccessAlert, showErrorAlert } from "../../utils/Alerts";
 
 type ProductImage = {
   id: number;
@@ -20,7 +21,7 @@ type ProductDetailData = {
   name: string;
   description: string;
   price: string;
-  stock: number;
+  stock: boolean;
   status: string;
   vendor: string | number;
   vendor_name: string;
@@ -35,6 +36,7 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const { t } = useTranslation("product");
   const { user } = useAuth();
+  const confirm = useConfirm();
 
   const [product, setProduct] = useState<ProductDetailData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,23 +82,23 @@ export default function ProductDetail() {
 
   const handleReserve = async () => {
     if (!product) return;
-    if (!window.confirm(t("reserveConfirmExact", { name: product.name }))) return;
+    const confirmed = await confirm(t("reserveConfirmExact", { name: product.name }));
+    if (!confirmed) return;
 
     try {
       setReserving(true);
-      // Validamos stock localmente antes de intentar
-      if (product.stock <= 0) {
-          toast.error("Lo sentimos, este producto se acaba de agotar.");
+      if (!product.stock) {
+          showErrorAlert("Lo sentimos, este producto se acaba de agotar.");
           return;
       }
       await api.post('orders/', { 
           product: product.id,
-          quantity: 1 // Reservar 1 unidad directa
+          quantity: 1
       });
-      toast.success("¡Reserva exitosa!");
+      showSuccessAlert("¡Reserva exitosa!");
       navigate('/cliente/reservas');
     } catch (e: any) {
-      alert(e.response?.data?.error || t("reserveError"));
+      showErrorAlert(e.response?.data?.error || t("reserveError"));
     } finally {
       setReserving(false);
     }
@@ -223,10 +225,10 @@ export default function ProductDetail() {
               <Icon icon="solar:box-linear" className="text-primary text-2xl" />
               <div>
                 <p className="text-gray-400 text-xs">{t("stock")}</p>
-                <p className={`font-bold ${product.stock === 0 ? "text-red-500" : "text-green-600"}`}>
-                  {product.stock === 0
-                    ? t("status.OUT_OF_STOCK")
-                    : `${product.stock} ${t("units")}`}
+                <p className={`font-bold ${!product.stock ? "text-red-500" : "text-green-600"}`}>
+                  {!product.stock
+                    ? t("outOfStock")
+                    : t("inStock")}
                 </p>
               </div>
             </div>
@@ -240,7 +242,7 @@ export default function ProductDetail() {
                 <Icon icon="solar:info-circle-bold" height={24} />
                 <p className="text-sm font-bold">{t("forbiden")}</p>
               </div>
-            ) : product.status && product.status.toString().toUpperCase().includes('AVAILABLE') && product.stock > 0 ? (
+            ) : product.status && product.status.toString().toUpperCase().includes('AVAILABLE') && product.stock ? (
               <Button 
                 size="xl" 
                 className="w-full font-black text-xl rounded-2xl shadow-lg ring-offset-2 transition-transform active:scale-95"
@@ -251,7 +253,7 @@ export default function ProductDetail() {
                 {reserving ? <Spinner size="sm" className="mr-2" /> : <Icon icon="solar:calendar-mark-bold" className="mr-2 text-2xl" />}
                 {t("res_now")}
               </Button>
-            ) : (product.status && product.status.toString().toUpperCase().includes('SOLD')) || product.stock <= 0 ? (
+            ) : (product.status && product.status.toString().toUpperCase().includes('SOLD')) || !product.stock ? (
               <Button size="xl" color="gray" disabled className="w-full rounded-2xl">
                 {t("stockless")}
               </Button>

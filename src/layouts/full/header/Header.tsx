@@ -10,6 +10,7 @@ import Cart from "./Cart";
 import { useAuth } from "../../../context/AuthContext";
 import FullLogo from "../shared/logo/FullLogo";
 import LanguageSelector from "../../../components/LanguageSelector/LanguageSelector";
+import { A11yHeaderButton } from "../../../components/Accessibility/AccessibilityWidget";
 
 // --- Animado y Reloj en Tiempo Real ---
 const GreetingClock = ({ user }: { user: any }) => {
@@ -49,7 +50,7 @@ const GreetingClock = ({ user }: { user: any }) => {
   });
 
   return (
-    <div className="flex bg-indigo-50/40 dark:bg-slate-950/80 backdrop-blur-2xl border border-indigo-200/40 dark:border-white/10 rounded-full px-6 py-2.5 items-center gap-6 shadow-2xl hover:shadow-[0_0_30px_rgba(58,23,228,0.2)] hover:scale-[1.02] transition-all duration-500 animate-fade-in group relative overflow-hidden">
+    <div className="flex bg-white/10 dark:bg-white/5 backdrop-blur-2xl border border-white/10 rounded-full px-6 py-2.5 items-center gap-6 shadow-2xl hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] hover:scale-[1.02] transition-all duration-500 animate-fade-in group relative overflow-hidden">
       {/* ✨ Efecto de Aura Premium Pulsante */}
       <div className="absolute inset-0 opacity-40 pointer-events-none">
         <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-[#2CD4D9]/20 to-transparent animate-pulse shadow-[0_0_50px_rgba(44,212,217,0.2)]"></div>
@@ -58,16 +59,16 @@ const GreetingClock = ({ user }: { user: any }) => {
 
       {/* Saludo y Fecha */}
       <div className="flex flex-col -mt-0.5 relative z-10">
-        <span className="text-[10px] font-black text-indigo-700 dark:text-white/70 uppercase tracking-[0.2em]">
+        <span className="text-[10px] font-black text-white/60 dark:text-white/70 uppercase tracking-[0.2em]">
           {dateString}
         </span>
         <div className="flex items-center gap-2">
           <span className="text-lg transform transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110 origin-bottom-right">
             {emoji}
           </span>
-          <span className="text-sm font-bold text-[#0A014A] dark:text-white">
+          <span className="text-sm font-bold text-white">
             {greeting},{" "}
-            <span className="text-[#3A17E4] dark:text-[#2CD4D9] font-black">
+            <span className="text-[#7a9dff] dark:text-[#9e7aff] font-black">
               {user?.first_name || user?.username || user?.role || t("friend")}
             </span>
           </span>
@@ -78,13 +79,13 @@ const GreetingClock = ({ user }: { user: any }) => {
       <div className="h-6 w-px bg-white/20 group-hover:opacity-50 transition-opacity relative z-10"></div>
 
       {/* Reloj Dinámico (Efecto Cristal Inverso) */}
-      <div className="flex items-center gap-2 text-[#3A17E4] dark:text-[#2CD4D9] font-mono bg-indigo-100/30 dark:bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full shadow-inner border border-indigo-200/40 dark:border-white/10 relative z-10">
+      <div className="flex items-center gap-2 text-[#7a9dff] dark:text-[#9e7aff] font-mono bg-white/10 dark:bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-full shadow-inner border border-white/10 relative z-10">
         <Icon
           icon="solar:clock-circle-bold-duotone"
           className="text-xl animate-spin-slow"
           style={{ animationDuration: "8s" }}
         />
-        <span className="text-base font-black tracking-tight text-indigo-900 dark:text-white">
+        <span className="text-base font-black tracking-tight text-white">
           {timeString}
         </span>
       </div>
@@ -115,10 +116,10 @@ const Header = () => {
   return (
     <>
       <header
-        className={`sticky top-0 z-[50] transition-all duration-500 ${
+        className={`sticky top-0 z-[50] transition-all duration-500 bg-gradient-to-r from-[#000351] to-[#280051] ${
           isSticky
-            ? "bg-[#0A014A]/60 backdrop-blur-2xl border-b border-[#2CD4D9]/20 py-2 shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
-            : "bg-[#0A014A]/30 backdrop-blur-md py-4 border-b border-white/5"
+            ? "backdrop-blur-2xl border-b border-white/10 py-2 shadow-[0_4px_30px_rgba(0,0,0,0.3)]"
+            : "py-4 border-b border-white/5"
         }`}
       >
         <Navbar fluid className="bg-transparent dark:bg-transparent px-4">
@@ -157,14 +158,17 @@ const Header = () => {
                 <LanguageSelector />
               </div>
 
+              {/* Botón de accesibilidad para daltonismo */}
+              <A11yHeaderButton />
+
               {user?.role === "CLIENTE" && (
                 <div className="flex items-center">
                   <Cart />
                 </div>
               )}
 
-              <div className="flex items-center">
-                <Notification />
+               <div className="flex items-center">
+                <Notification variant="light" />
               </div>
 
               {/* Botón de cambio de tema */}
@@ -188,14 +192,14 @@ const Header = () => {
                     <Icon
                       icon="solar:moon-line-duotone"
                       height={18}
-                      className="text-indigo-500 group-hover:scale-110 transition-transform drop-shadow"
+                      className="text-[#7a9dff] group-hover:scale-110 transition-transform drop-shadow"
                     />
                   )}
                 </div>
               </button>
 
               <div className="h-8 w-[1px] bg-white/10 mx-1 hidden md:block"></div>
-              <Profile />
+              <Profile variant="light" />
             </div>
           </div>
         </Navbar>
