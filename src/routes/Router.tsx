@@ -15,6 +15,7 @@ const Register = lazy(() => import('../views/auth/register/Register'));
 const ForgotPassword = lazy(() => import('../views/auth/login/ForgotPassword'));
 const ResetPassword = lazy(() => import('../views/auth/login/ResetPassword'));
 const Error = lazy(() => import('../views/auth/error/Error'));
+const TerminosCondiciones = lazy(() => import('../pages/TerminosCondiciones'));
 
 // Shared / Product Views
 const ProductDetail = lazy(() => import('../components/products/ProductDetail'));
@@ -60,6 +61,7 @@ const Router = [
           { path: '404', element: <Error /> },
         ]
       },
+      { path: 'terminos', element: <TerminosCondiciones /> },
     ],
   },
 
