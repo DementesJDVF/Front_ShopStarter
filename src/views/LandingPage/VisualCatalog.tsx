@@ -5,7 +5,6 @@ import api from "../../utils/axios";
 import { getAbsoluteImageUrl } from "../../utils/urlHelper";
 import { optimizeImageUrl } from "../../utils/imageOptimizer";
 import { useTranslation } from "react-i18next";
-import { useCart } from "../../context/CartContext";
 import { toast } from "react-hot-toast";
 
 // --- Types ---
@@ -28,25 +27,11 @@ type Product = {
 // --- ProductCard Component ---
 const ProductCard = ({ product }: { product: Product }) => {
   const { t } = useTranslation("product");
-  const { addToCart } = useCart();
   
   const rawImage = product.images?.find((img) => img.is_main)?.url_image || product.images?.[0]?.url_image;
   const imageUrl = getAbsoluteImageUrl(rawImage);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart({
-      id: product.id.toString(),
-      name: product.name,
-      price: parseFloat(product.price),
-      quantity: 1,
-      image: imageUrl,
-      vendorId: "0", // Fallback
-      vendorName: product.vendor_name
-    });
-    toast.success(t("addedToCart", { name: product.name }));
-  };
+
 
   return (
     <Link 
@@ -62,13 +47,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
         
-        {/* Quick Add Button */}
-        <button 
-          onClick={handleAddToCart}
-          className="absolute bottom-3 right-3 w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-lg hover:bg-indigo-700 active:scale-90"
-        >
-          <Icon icon="solar:cart-plus-bold" className="text-xl" />
-        </button>
+
       </div>
       <div className="p-4 flex flex-col flex-1">
         <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-1 group-hover:text-indigo-600 transition-colors">
