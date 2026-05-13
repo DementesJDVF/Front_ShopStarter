@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import api from "../../utils/axios";
 import LocationPicker from "../../components/geo/LocationPicker";
 import { useTranslation } from 'react-i18next';
+import { showSuccessAlert, showErrorAlert } from "../../utils/Alerts";
 
 const Dashboard = () => {
   const { t } = useTranslation('vendedor');
@@ -50,13 +51,13 @@ const Dashboard = () => {
       });
       setVendorLocation({ lat, lng });
       setShowLocationModal(false);
-      alert(t('dashboard.alert.locationUpdated'));
+      showSuccessAlert(t('dashboard.alert.locationUpdated'));
     } catch (err: any) {
       console.error(err);
       if (err.response && err.response.data) {
-        alert(t('dashboard.alert.backendError') + " " + JSON.stringify(err.response.data));
+        showErrorAlert(t('dashboard.alert.backendError') + " " + JSON.stringify(err.response.data));
       } else {
-        alert(t('dashboard.alert.networkError') + " " + (err.message || ''));
+        showErrorAlert(t('dashboard.alert.networkError') + " " + (err.message || ''));
       }
     } finally {
       setSavingLocation(false);
@@ -67,10 +68,10 @@ const Dashboard = () => {
 
   return (
     <div className="p-6">
-      <div className="bg-gradient-to-r from-[#CFFEFF] to-[#BBADFF] dark:bg-none dark:bg-transparent p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+      <div className="bg-gradient-to-r from-[#000351] to-[#280051] p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-start md:items-center mb-8 shadow-xl">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{t('dashboard.title')}</h1>
-          <p className="text-slate-600 dark:text-gray-400 mt-1 italic font-medium">{t('dashboard.subtitle')}</p>
+          <h1 className="text-3xl font-black text-white tracking-tight">{t('dashboard.title')}</h1>
+          <p className="text-white/80 mt-1 italic font-medium">{t('dashboard.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
 
@@ -134,18 +135,16 @@ const Dashboard = () => {
       <div className="relative group">
         <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-indigo-500 rounded-[2.5rem] blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
         <Card className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-none shadow-2xl p-6 md:p-12 text-center rounded-[2.5rem] overflow-hidden">
-          <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-            <Icon icon="solar:chart-square-bold-duotone" width={200} />
-          </div>
+
           
           <div className="relative z-10 flex flex-col items-center gap-8">
             <div className="p-6 bg-gradient-to-br from-primary to-indigo-600 rounded-[2rem] shadow-xl transform hover:scale-110 transition duration-500">
               <Icon icon="solar:widget-bold-duotone" className="text-white" height={48} />
             </div>
             <div className="max-w-xl">
-              <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic leading-none break-words">
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic leading-relaxed break-words">
                 {t('dashboard.heading.line1')} <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2CD4D9] to-[#3A17E4] dark:from-primary dark:to-indigo-500">{t('dashboard.heading.line2')}</span>
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#000351] to-[#280051] dark:from-[#7a9dff] dark:to-[#9e7aff] py-4 px-2">{t('dashboard.heading.line2')}</span>
               </h2>
               <p className="text-gray-500 dark:text-gray-400 mt-6 text-base md:text-lg font-medium leading-relaxed">
                 {t('dashboard.description')}

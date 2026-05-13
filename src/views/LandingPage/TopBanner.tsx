@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useThemeMode } from 'flowbite-react';
 import FullLogo from '../../layouts/full/shared/logo/FullLogo';
 import LenguajeSelector from 'src/components/LanguageSelector/LanguageSelector.tsx';
+import { A11yHeaderButton } from '../../components/Accessibility/AccessibilityWidget';
 
 interface NavbarProps {}
 
@@ -21,7 +22,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
   return (
     <>
       {/* Navbar principal Glassmorphism Premium */}
-      <nav className="fixed w-full z-40 bg-[#a5a6d1]/90 dark:bg-slate-950/90 backdrop-blur-2xl border-b border-indigo-200 dark:border-slate-800 shadow-2xl transition-all duration-500">
+      <nav className="fixed w-full z-40 bg-gradient-to-r from-[#000351] to-[#280051] border-b border-white/10 shadow-2xl transition-all duration-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20 md:h-24 px-1 sm:px-4">
 
@@ -51,7 +52,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
 
               <Link
                 to="/auth/register"
-                className="bg-gradient-to-r from-indigo-600 via-cyan-400 to-indigo-950 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:shadow-[0_10px_30px_rgba(79,70,229,0.3)] hover:scale-[1.05] active:scale-95 transition-all duration-300 shadow-xl"
+                className="bg-[#51009E] text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-[0_0_20px_rgba(81,0,158,0.5)] hover:shadow-[0_0_30px_rgba(81,0,158,0.7)] hover:scale-[1.05] active:scale-95 transition-all duration-300 ring-4 ring-[#51009E]/20"
               >
                 {t('nav.register')}
               </Link>
@@ -66,6 +67,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
                   <Icon icon={mode === 'dark' ? "solar:sun-bold-duotone" : "solar:moon-stars-bold-duotone"} className="w-5 h-5" />
                 </button>
                 <LenguajeSelector />
+                <A11yHeaderButton />
               </div>
             </div>
 
@@ -73,7 +75,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
             <div className="md:hidden flex items-center gap-3">
               <Link
                 to="/auth/register"
-                className="bg-gradient-to-r from-indigo-600 to-indigo-950 text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-90 transition"
+                className="bg-[#51009E] text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(81,0,158,0.4)] active:scale-90 transition"
               >
                 {t('nav.register_mini')}
               </Link>
@@ -84,6 +86,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
                 <Icon icon={mode === 'dark' ? "solar:sun-bold-duotone" : "solar:moon-stars-bold-duotone"} className="w-5 h-5" />
               </button>
               <LenguajeSelector />
+              <A11yHeaderButton />
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
                 className="p-2 rounded-xl text-indigo-950 dark:text-white hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors"
@@ -141,7 +144,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
                 <Link
                   to="/auth/register"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block w-full bg-gradient-to-r from-indigo-600 to-indigo-950 text-white px-5 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl active:scale-95 transition-transform text-center"
+                  className="block w-full bg-gradient-to-r from-[#000351] to-[#280051] text-white px-5 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl active:scale-95 transition-transform text-center"
                 >
                   {t('nav.mobile_start')}
                 </Link>
