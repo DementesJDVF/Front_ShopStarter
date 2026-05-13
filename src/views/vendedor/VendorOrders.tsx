@@ -128,7 +128,8 @@ const VendorOrders: React.FC = () => {
                             onClick={() => handleAction(order.id, 'mark-as-paid')}
                             disabled={actionLoading === order.id}
                           >
-                            {actionLoading === order.id ? <Spinner size="xs" /> : "Marcar PAGADO"}
+                            {actionLoading === order.id ? <Spinner size="xs" /> : ""}
+                            {t('orders.mark')}
                           </Button>
                           <Button 
                             size="xs" 

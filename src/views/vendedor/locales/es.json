@@ -58,6 +58,7 @@
     "actions": "Acciones",
     "finished": "Venta Finalizada",
     "rep_pay": "PAGO REPORTADO",
+    "mark": "Marcar PAGADO",
     "cancel": "Cancelar",
     "refresh": "Refrescar",
     "empty": {

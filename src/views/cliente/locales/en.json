@@ -40,6 +40,6 @@
     "discard":"DISCARD",
     "ship":"DELIVERY PENDING",
     "advise1":"Attention",
-    "advise2":"When you click on `ALREADY PAID`, the seller will receive an immediate notification to verify your payment and ship the product to you."
+    "advise2":"When you click on `ALREADY PAID`, the vendor will receive an immediate notification to verify your payment and ship the product to you."
   }
 }

@@ -58,6 +58,7 @@
     "actions": "Actions",
     "finished": "Sale Ended",
     "rep_pay": "PAYMENT RECEIVED",
+    "mark": "Mark as PAID",
     "cancel": "Cancel",
     "refresh": "Refresh",
     "empty": {
