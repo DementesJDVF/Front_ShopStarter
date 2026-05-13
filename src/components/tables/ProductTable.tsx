@@ -1,4 +1,4 @@
-import { Badge, Dropdown, Progress, Table, Spinner, Button, Modal, Label, TextInput, Select, Textarea, FileInput, Tooltip } from "flowbite-react";
+import { Badge, Dropdown, Progress, Table, Spinner, Button, Modal, Label, TextInput, Select, Textarea, FileInput, Tooltip, ToggleSwitch } from "flowbite-react";
 import { resizeImageForAI } from "../../utils/clientResizer";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { Icon } from "@iconify/react";
@@ -20,7 +20,7 @@ interface Product {
   description?: string;
   price: number;
   status: string;
-  stock: number;
+  stock: boolean;
   category?: string | number;
   category_name: string;
   images: Array<{ url_image: string; is_main: boolean }>;
@@ -68,15 +68,10 @@ const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handle
             <h5 className="text-base font-bold text-wrap">
               ${parseFloat(product.price.toString()).toLocaleString()}
             </h5>
-            <div className="text-xs font-medium text-dark opacity-70 mb-2">
-               {t('table.stock', { count: product.stock })}
-            </div>
-            <div className="me-5">
-              <Progress
-                progress={product.stock > 0 ? 100 : 0}
-                color={product.stock >= 5 ? 'success' : product.stock > 0 ? 'warning' : 'red'}
-                size={"sm"}
-              />
+            <div className="flex items-center gap-2 mt-1">
+              <Badge color={product.stock ? "success" : "failure"} className="w-fit">
+                {product.stock ? t('table.inStock') : t('table.outOfStock')}
+              </Badge>
             </div>
           </Table.Cell>
           <Table.Cell>
@@ -154,7 +149,7 @@ const ProductTable = () => {
     name: '',
     description: '',
     price: '',
-    stock: '',
+    stock: true as boolean,
     category: '',
     image_file: null as File | null,
     preview_url: ''
@@ -243,7 +238,7 @@ const ProductTable = () => {
       name: product.name,
       description: product.description || '', 
       price: product.price.toString(),
-      stock: product.stock.toString(),
+      stock: product.stock,
       category: categoryMatch ? categoryMatch.id.toString() : (product.category?.toString() || ''), 
       image_file: null,
       preview_url: product.images?.[0]?.url_image || ''
@@ -301,7 +296,7 @@ const ProductTable = () => {
         name: newProduct.name,
         description: newProduct.description,
         price: parseFloat(newProduct.price),
-        stock: parseInt(newProduct.stock),
+        stock: newProduct.stock,
         category: parseInt(newProduct.category),
       };
 
@@ -326,7 +321,7 @@ const ProductTable = () => {
         name: '',
         description: '',
         price: '',
-        stock: '',
+        stock: true,
         category: '',
         image_file: null,
         preview_url: ''
@@ -385,7 +380,7 @@ const ProductTable = () => {
                   name: '',
                   description: '',
                   price: '',
-                  stock: '',
+                  stock: true,
                   category: '',
                   image_file: null,
                   preview_url: ''
@@ -540,14 +535,15 @@ const ProductTable = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="stock" value={t('form.stock')} />
-                <TextInput
-                  id="stock"
-                  type="number"
-                  required
-                  value={newProduct.stock}
-                  onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
-                />
+                <Label htmlFor="stock" value={t('table.availability')} />
+                <div className="mt-2">
+                  <ToggleSwitch
+                    id="stock"
+                    checked={newProduct.stock}
+                    label={newProduct.stock ? t('table.inStock') : t('table.outOfStock')}
+                    onChange={(val) => setNewProduct({...newProduct, stock: val})}
+                  />
+                </div>
               </div>
             </div>
 
