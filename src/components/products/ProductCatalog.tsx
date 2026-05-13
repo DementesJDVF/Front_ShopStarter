@@ -10,7 +10,8 @@ import api from "../../utils/axios";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
 import { useCart } from "../../context/CartContext";
 import { useMap } from "../../context/MapContext";
-import { toast } from "react-hot-toast";
+import { useConfirm } from "../../context/ConfirmContext";
+import { showSuccessAlert, showErrorAlert } from "../../utils/Alerts";
 
 type ApiProductImage = {
   id: number;
@@ -38,7 +39,7 @@ type ApiProduct = {
 
 export function ProductCatalog() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
-  const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
+  const [categories, setCategories] = useState<{ id: number, name: string }[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,13 +48,14 @@ export function ProductCatalog() {
 
   const { addToCart } = useCart();
   const { userLocation, radius, setRadius } = useMap();
+  const confirm = useConfirm();
 
- 
+
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
   const [previewTitle, setPreviewTitle] = useState('');
 
-  
+
   const openPreview = (url: string, title: string) => {
     setPreviewUrl(url);
     setPreviewTitle(title);
@@ -61,13 +63,14 @@ export function ProductCatalog() {
   };
 
   const handleReserve = async (productId: number) => {
-    if (!window.confirm(t("reserveConfirm"))) return;
+    const confirmed = await confirm(t("reserveConfirm"));
+    if (!confirmed) return;
     try {
       await api.post('orders/', { product: productId });
-      toast.success(t("reserveSuccess"));
+      showSuccessAlert(t("reserveSuccess"));
       loadData(userLocation?.lat, userLocation?.lng, radius);
     } catch (e: any) {
-      toast.error(e.response?.data?.error || t("reserveError"));
+      showErrorAlert(e.response?.data?.error || t("reserveError"));
     }
   };
 
@@ -86,14 +89,7 @@ export function ProductCatalog() {
       vendorId: p.vendor.toString(),
       vendorName: p.vendor_name
     });
-    toast.success(t("addedToCart", { name: p.name }), {
-      icon: '🛒',
-      style: {
-        borderRadius: '10px',
-        background: '#333',
-        color: '#fff',
-      },
-    });
+    showSuccessAlert(t("addedToCart", { name: p.name }));
   };
 
 
@@ -139,7 +135,7 @@ export function ProductCatalog() {
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
     </div>
   );
-  
+
   if (error) return (
     <div className="text-center p-20 text-red-500 font-[var(--main-font)]">
       <p>Error: {error}</p>
@@ -152,14 +148,14 @@ export function ProductCatalog() {
       <div className="mb-8 border-b border-gray-100 pb-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="text-4xl font-black text-gray-900 tracking-tight">{t("catalogTitle")}</h2>
-            <p className="text-gray-500 mt-2 text-lg">{t("catalogSub")}</p>
+            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">{t("catalogTitle")}</h2>
+            <p className="text-black dark:text-white mt-2 text-lg font-bold">{t("catalogSub")}</p>
           </div>
-          
+
           <div className="flex flex-col gap-2 w-full md:w-auto">
             {userLocation && (
               <div className="flex items-center gap-2 mt-2">
-                <Label htmlFor="radius" value={t("filterByDistance")} className="text-xs whitespace-nowrap"/>
+                <Label htmlFor="radius" value={t("filterByDistance")} className="text-xs whitespace-nowrap" />
                 <Select id="radius" sizing="sm" value={radius} onChange={(e) => setRadius(parseInt(e.target.value))}>
                   <option value={0}>{t("anyDistance")}</option>
                   <option value={5}>{t("lessThan5")}</option>
@@ -170,16 +166,15 @@ export function ProductCatalog() {
             )}
           </div>
         </div>
-        
+
         {/* Filtros de Categoría */}
         <div className="flex gap-2 mt-8 overflow-x-auto pb-2 scrollbar-hide">
           <button
             onClick={() => setSelectedCategory(null)}
-            className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
-              selectedCategory === null 
-              ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105' 
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
+            className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === null
+                ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
           >
             {t("all")}
           </button>
@@ -187,11 +182,10 @@ export function ProductCatalog() {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.name)}
-              className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
-                selectedCategory === cat.name 
-                ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === cat.name
+                  ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
             >
               {cat.name}
             </button>
@@ -211,7 +205,7 @@ export function ProductCatalog() {
             const isOutOfStock = p.stock <= 0;
             const isNotAvailable = !p.status || !p.status.toString().toUpperCase().includes('AVAILABLE');
             const canPurchase = !isOutOfStock && !isNotAvailable;
-            
+
             return (
               <article key={p.id} className={`product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100 bg-white ${!canPurchase ? 'opacity-60' : ''}`}>
                 <div className="relative aspect-square overflow-hidden bg-gray-50">
@@ -228,7 +222,7 @@ export function ProductCatalog() {
                       {t("noImage")}
                     </div>
                   )}
-                  
+
                   <div className="absolute top-3 left-3 flex flex-col gap-2 z-20">
                     {p.category_name && (
                       <div className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm">
@@ -245,7 +239,7 @@ export function ProductCatalog() {
                       </div>
                     ) : null}
                   </div>
-                  
+
                   {p.distance !== undefined && (
                     <div className="absolute top-3 right-3 bg-primary/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-white shadow-sm flex items-center gap-1 z-20">
                       <Icon icon="solar:map-point-linear" />
@@ -253,43 +247,42 @@ export function ProductCatalog() {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="p-5 flex flex-col gap-2">
                   <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-bold text-gray-800 line-clamp-1 flex-1">{p.name}</h3>
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white line-clamp-1 flex-1">{p.name}</h3>
                   </div>
-                  
-                  <p className="text-gray-500 text-sm line-clamp-2 min-h-[40px]">
+
+                  <p className="text-black dark:text-white text-sm line-clamp-2 min-h-[40px] font-medium">
                     {p.description}
                   </p>
-                
-                 <div className="text-xl font-black text-primary min-w-0 truncate">
-                      ${parseFloat(p.price).toLocaleString()}
-                    </div>
+
+                  <div className="text-xl font-black text-primary min-w-0 truncate">
+                    ${parseFloat(p.price).toLocaleString()}
+                  </div>
                   <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
-                    
+
                     <div className="flex gap-2 flex-shrink-0">
-                        <button
-                          className="bg-gray-50 text-gray-400 p-2.5 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300 border border-gray-100 shadow-sm"
-                          title={t("viewDetail")}
-                          onClick={() => navigate(`/app/products/${p.id}`)}
-                        >
-                          <Icon icon="solar:eye-linear" height={22}/>
-                        </button>
-                        
-                        <button
-                          disabled={!canPurchase}
-                          className={`p-2.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-xs font-black flex-1 uppercase tracking-tight ${
-                            canPurchase 
-                            ? 'bg-primary text-white hover:bg-indigo-700 shadow-primary/20 cursor-pointer active:scale-95' 
+                      <button
+                        className="bg-gray-50 text-gray-400 p-2.5 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300 border border-gray-100 shadow-sm"
+                        title={t("viewDetail")}
+                        onClick={() => navigate(`/app/products/${p.id}`)}
+                      >
+                        <Icon icon="solar:eye-linear" height={22} />
+                      </button>
+
+                      <button
+                        disabled={!canPurchase}
+                        className={`p-2.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-xs font-black flex-1 uppercase tracking-tight ${canPurchase
+                            ? 'bg-primary text-white hover:bg-indigo-700 shadow-primary/20 cursor-pointer active:scale-95'
                             : 'bg-gray-100 text-gray-400 cursor-not-allowed grayscale'
                           }`}
-                          onClick={() => handleAddToCart(p)}
-                          title={!canPurchase ? t("notAvailableForPurchase") : t("addToCart")}
-                        >
-                          <Icon icon={canPurchase ? "solar:cart-plus-bold-duotone" : "solar:cart-cross-linear"} height={22}/>
-                          <span>{canPurchase ? t("add") : t("notAvailable")}</span>
-                        </button>
+                        onClick={() => handleAddToCart(p)}
+                        title={!canPurchase ? t("notAvailableForPurchase") : t("addToCart")}
+                      >
+                        <Icon icon={canPurchase ? "solar:cart-plus-bold-duotone" : "solar:cart-cross-linear"} height={22} />
+                        <span>{canPurchase ? t("add") : t("notAvailable")}</span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -300,11 +293,11 @@ export function ProductCatalog() {
       </div>
 
       {/* Visor de Imágenes */}
-      <ImagePreviewModal 
-        isOpen={isPreviewOpen} 
-        onClose={() => setIsPreviewOpen(false)} 
-        imageUrl={previewUrl} 
-        title={previewTitle} 
+      <ImagePreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        imageUrl={previewUrl}
+        title={previewTitle}
       />
     </section>
   );

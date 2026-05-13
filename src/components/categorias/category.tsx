@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import api from "../../utils/axios";
 import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "react-i18next";
+import { useConfirm } from "../../context/ConfirmContext";
+import { showSuccessAlert, showErrorAlert } from "../../utils/Alerts";
 
 type Category = {
   id: number;
@@ -28,6 +30,7 @@ interface CategoryProps {
 const CategoryComponent: React.FC<CategoryProps> = ({ selectedCategoryId, onChange, showAdminManagement = false }) => {
   const { t } = useTranslation('categoryList');
   const { user } = useAuth();
+  const confirm = useConfirm();
   const isAdmin = user?.role === 'ADMIN';
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -89,19 +92,22 @@ const CategoryComponent: React.FC<CategoryProps> = ({ selectedCategoryId, onChan
         await api.post('products/categories/admin/', formData);
       }
       setIsModalOpen(false);
+      showSuccessAlert("Categoría guardada correctamente");
       fetchCategories();
     } catch (err) {
-      alert(t('error.save'));
+      showErrorAlert(t('error.save'));
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm(t('admin.confirmDelete'))) return;
+    const confirmed = await confirm(t('admin.confirmDelete'), { isDestructive: true });
+    if (!confirmed) return;
     try {
       await api.delete(`products/categories/admin/${id}/`);
+      showSuccessAlert("Categoría eliminada");
       fetchCategories();
     } catch (err) {
-      alert(t('error.delete'));
+      showErrorAlert(t('error.delete'));
     }
   };
 

@@ -1,0 +1,149 @@
+/* =====================================================
+   SISTEMA DE ACCESIBILIDAD PARA DALTONISMO - SHOPSTARTER
+   Solo actúa cuando el atributo data-daltonism esté presente en <html>.
+   La interfaz original permanece INTACTA cuando el modo está desactivado.
+   ===================================================== */
+
+/* --------------------------------------------------
+   1. FILTROS SVG PARA DALTONISMO
+   Incrustados como elemento oculto en el DOM vía CSS
+   -------------------------------------------------- */
+.a11y-svg-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------
+   2. ALTO CONTRASTE (Solo CSS)
+   Se aplicarán los filtros de color mediante un overlay en React para evitar
+   el bug de position:fixed en el body, pero el alto contraste de texto/bordes 
+   se mantiene aquí.
+   -------------------------------------------------- */
+
+   /* Solo actúa cuando data-accessibility-contrast="true"
+   Y el modo daltonismo también está activo.
+   -------------------------------------------------- */
+html[data-daltonism][data-accessibility-contrast="true"] body {
+  filter: contrast(1.35) !important;
+}
+
+html[data-daltonism="achromatopsia"][data-accessibility-contrast="true"] body {
+  filter: grayscale(85%) contrast(1.5) !important;
+}
+
+/* Refuerzo de contraste en texto y bordes */
+html[data-accessibility-contrast="true"][data-daltonism] * {
+  text-shadow: none !important;
+}
+
+html[data-accessibility-contrast="true"][data-daltonism] input,
+html[data-accessibility-contrast="true"][data-daltonism] select,
+html[data-accessibility-contrast="true"][data-daltonism] textarea {
+  border-width: 2px !important;
+  border-color: #001E4C !important;
+}
+
+html[data-accessibility-contrast="true"][data-daltonism] a {
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+
+html[data-accessibility-contrast="true"][data-daltonism] button:not([class*="fixed"]) {
+  outline: 2px solid currentColor !important;
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------
+   4. PATRONES VISUALES (FORMAS GEOMÉTRICAS)
+   Solo actúa cuando data-accessibility-patterns="true" + daltonismo activo.
+   Agrega íconos/formas a elementos de estado comunes.
+   -------------------------------------------------- */
+
+/* === ERROR: Triángulo de advertencia === */
+html[data-daltonism][data-accessibility-patterns="true"] .text-error::before,
+html[data-daltonism][data-accessibility-patterns="true"] [class*="text-red"]::before,
+html[data-daltonism][data-accessibility-patterns="true"] .border-error::before,
+html[data-daltonism][data-accessibility-patterns="true"] [role="alert"]::before {
+  content: '▲';
+  display: inline-block;
+  margin-right: 5px;
+  font-size: 0.8em;
+  vertical-align: middle;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+/* === ÉXITO: Círculo con check === */
+html[data-daltonism][data-accessibility-patterns="true"] .text-success::before,
+html[data-daltonism][data-accessibility-patterns="true"] [class*="text-green"]::before,
+html[data-daltonism][data-accessibility-patterns="true"] .border-success::before {
+  content: '●✓';
+  display: inline-block;
+  margin-right: 5px;
+  font-size: 0.75em;
+  vertical-align: middle;
+  line-height: 1;
+  letter-spacing: -3px;
+  opacity: 0.85;
+}
+
+/* === ADVERTENCIA: Hexágono === */
+html[data-daltonism][data-accessibility-patterns="true"] .text-warning::before,
+html[data-daltonism][data-accessibility-patterns="true"] [class*="text-yellow"]::before,
+html[data-daltonism][data-accessibility-patterns="true"] [class*="text-orange"]::before,
+html[data-daltonism][data-accessibility-patterns="true"] .border-warning::before {
+  content: '⬡';
+  display: inline-block;
+  margin-right: 5px;
+  font-size: 0.9em;
+  vertical-align: middle;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+/* === INFORMACIÓN: Cuadrado === */
+html[data-daltonism][data-accessibility-patterns="true"] .text-info::before,
+html[data-daltonism][data-accessibility-patterns="true"] [class*="text-blue"]::before,
+html[data-daltonism][data-accessibility-patterns="true"] .border-info::before {
+  content: '■';
+  display: inline-block;
+  margin-right: 5px;
+  font-size: 0.75em;
+  vertical-align: middle;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+/* Borde diferenciador en badges y alertas */
+html[data-daltonism][data-accessibility-patterns="true"] [role="alert"],
+html[data-daltonism][data-accessibility-patterns="true"] .alert,
+html[data-daltonism][data-accessibility-patterns="true"] [class*="badge"] {
+  border: 2px solid currentColor !important;
+  border-radius: 6px;
+  padding-left: 8px !important;
+}
+
+/* --------------------------------------------------
+   5. MEJORA GENERAL DE LEGIBILIDAD EN MODO ACTIVO
+   Aplica a todos los tipos de daltonismo.
+   -------------------------------------------------- */
+html[data-daltonism] * {
+  letter-spacing: 0.01em;
+}
+
+html[data-daltonism] input:focus,
+html[data-daltonism] select:focus,
+html[data-daltonism] textarea:focus {
+  outline: 3px solid #001E4C !important;
+  outline-offset: 2px;
+}
+
+html[data-daltonism] a:focus-visible,
+html[data-daltonism] button:focus-visible {
+  outline: 3px solid #00324C !important;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
