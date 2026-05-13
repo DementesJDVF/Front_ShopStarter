@@ -21,5 +21,25 @@
   "browse": {
     "title": "Explorar Productos",
     "desc": "Descubre productos increíbles de negocios cercanos."
+  },
+  "reservas":{
+    "title":"Mis reservas",
+    "description":"Gestiona tus productos apartados y notifica tus pagos en tiempo real.",
+    "product":"Producto",
+    "vendor":"Vendedor",
+    "status":"Estado",
+    "actions":"Acciones",
+    "s": {
+      "PENDING": "Pendiente",
+      "RESERVED": "Reservado",
+      "COMPLETED": "Completado",
+      "CANCELLED": "Cancelado"
+    },
+    "no_res":"No tienes reservas activas",
+    "alr_paid":"YA PAGUÉ",
+    "discard":"LIBERAR",
+    "ship":"ENTREGA PENDIENTE",
+    "advise1":"Importante",
+    "advise2":"Al presionar `YA PAGUÉ`, el vendedor recibirá una alerta inmediata para validar tu pago y entregarte el producto."
   }
 }
