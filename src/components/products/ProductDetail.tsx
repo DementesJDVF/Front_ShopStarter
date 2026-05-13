@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import api from "../../utils/axios";
-import { Button, Spinner } from "flowbite-react";
+import { Button, Spinner, Badge } from "flowbite-react";
 import { Icon } from "@iconify/react";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
 import { getAbsoluteImageUrl } from "../../utils/urlHelper";
@@ -58,7 +58,7 @@ export default function ProductDetail() {
     try {
       setLoading(true);
       setError(null);
-      const res = await api.get(`products/${id}/`);
+      const res = await api.get(`products/products/${id}/`);
       setProduct(res.data);
       const mainIdx = res.data.images?.findIndex((img: ProductImage) => img.is_main) ?? 0;
       setActiveImg(mainIdx >= 0 ? mainIdx : 0);
@@ -99,6 +99,25 @@ export default function ProductDetail() {
       alert(e.response?.data?.error || t("reserveError"));
     } finally {
       setReserving(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold text-black">{t("status.PENDING")}</Badge>;
+      case 'AVAILABLE':
+        return <Badge color="success" className="rounded-lg px-3 py-1 font-bold">{t("status.AVAILABLE")}</Badge>;
+      case 'INACTIVE':
+        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">{t("status.INACTIVE")}</Badge>;
+      case 'REJECTED':
+        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">{t("status.REJECTED")}</Badge>;
+      case 'RESERVED':
+        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold text-black">{t("status.RESERVED")}</Badge>;
+      case 'SOLD':
+        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">{t("status.SOLD")}</Badge>;
+      default:
+        return <Badge color="gray">{status}</Badge>;
     }
   };
 
@@ -173,8 +192,7 @@ export default function ProductDetail() {
                 <Icon icon="solar:star-bold" className="mr-1" /> {t("featuredProduct")}
               </span>
             )}
-            <span className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider ${product.status.toUpperCase().trim() === 'AVAILABLE' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
-              {t(`status.${product.status.toUpperCase().trim()}`, product.status)}
+            <span>{getStatusBadge(product.status)}
             </span>
           </div>
 
@@ -220,7 +238,7 @@ export default function ProductDetail() {
             {user && product.vendor?.toString() === user.id?.toString() ? (
               <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center gap-3 text-amber-700">
                 <Icon icon="solar:info-circle-bold" height={24} />
-                <p className="text-sm font-bold">Este es tu producto. Puedes gestionarlo desde tu panel de control.</p>
+                <p className="text-sm font-bold">{t("forbiden")}</p>
               </div>
             ) : product.status && product.status.toString().toUpperCase().includes('AVAILABLE') && product.stock > 0 ? (
               <Button 
@@ -231,11 +249,11 @@ export default function ProductDetail() {
                 disabled={reserving}
               >
                 {reserving ? <Spinner size="sm" className="mr-2" /> : <Icon icon="solar:calendar-mark-bold" className="mr-2 text-2xl" />}
-                RESERVAR AHORA
+                {t("res_now")}
               </Button>
             ) : (product.status && product.status.toString().toUpperCase().includes('SOLD')) || product.stock <= 0 ? (
               <Button size="xl" color="gray" disabled className="w-full rounded-2xl">
-                AGOTADO
+                {t("stockless")}
               </Button>
             ) : (
               <Button size="xl" color="gray" disabled className="w-full rounded-2xl">

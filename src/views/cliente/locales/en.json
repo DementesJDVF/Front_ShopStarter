@@ -21,5 +21,25 @@
   "browse": {
     "title": "Explore Products",
     "desc": "Discover amazing products from nearby businesses."
+  },
+  "reservas":{
+    "title":"My reservativons",
+    "description":"Manage your reserved products and receive real-time payment notifications.",
+    "product":"Product",
+    "vendor":"Vendor",
+    "status":"Status",
+    "actions":"Actions",
+    "s": {
+      "PENDING": "Pending",
+      "RESERVED": "Reserved",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "no_res":"You don't have any reservation",
+    "alr_paid":"ALREADY PAID",
+    "discard":"DISCARD",
+    "ship":"DELIVERY PENDING",
+    "advise1":"Attention",
+    "advise2":"When you click on `ALREADY PAID`, the seller will receive an immediate notification to verify your payment and ship the product to you."
   }
 }

@@ -41,6 +41,7 @@ const Shadow = lazy(() => import("../views/shadows/Shadow"));
 const Alert = lazy(() => import("../views/alerts/Alerts"));
 const Solar = lazy(() => import("../views/icons/Solar"));
 const SamplePage = lazy(() => import('../views/sample-page/SamplePage'));
+const Reviews = lazy(() => import('src/components/reviews/Reviews.tsx'));
 
 const Router = [
   // 1. PUBLIC ROUTES (Landing & Auth)
@@ -49,6 +50,7 @@ const Router = [
     element: <BlankLayout />,
     children: [
       { index: true, element: <HomeRedirect /> },
+      { path: 'catalog', element: <BrowseProducts /> },
       {
         path: 'auth',
         children: [
@@ -96,7 +98,7 @@ const Router = [
           { path: 'mapa', element: <RoleBasedMap /> },
           { path: 'pedidos', element: <VendorOrders /> },
           { path: 'auditoria-ia', element: <AIRecommendationsHistory /> },
-          { path: 'reseñas', element: <SamplePage /> },
+          { path: 'reseñas', element: <Reviews /> },
         ]
       }
     ]

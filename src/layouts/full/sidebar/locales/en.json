@@ -4,6 +4,7 @@
   "Productos": "Products",
   "Mapa": "Map",
   "Pedidos": "Orders",
+  "Reservas": "Reservations",
   "Reseñas": "Reviews",
   "CLIENTE": "Client",
   "Inicio": "Home",
@@ -18,7 +19,6 @@
   "Table": "Table",
   "Form": "Form",
   "Alert": "Alert",
-  "Check Pro Version": "Check Pro Version",
   "Check": "Check",
   "Pro": "Pro"
 }
