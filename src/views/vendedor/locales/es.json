@@ -52,6 +52,13 @@
   "orders": {
     "title": "Recepción de Pedidos",
     "subtitle": "Gestiona y marca las entregas con tus clientes.",
+    "product": "Producto",
+    "client": "Cliente",
+    "estado": "Estado",
+    "actions": "Acciones",
+    "finished": "Venta Finalizada",
+    "rep_pay": "PAGO REPORTADO",
+    "cancel": "Cancelar",
     "refresh": "Refrescar",
     "empty": {
       "title": "Sin pedidos activos",
@@ -67,9 +74,10 @@
     },
     "anonymous": "Anónimo",
     "status": {
-      "pending": "⏳ PENDIENTE",
-      "completed": "✅ EFECTUADO",
-      "cancelled": "❌ CANCELADO"
+      "PAID": "PAGADO",
+      "RESERVED": "RESERVADO",
+      "CANCELLED": "CANCELADO",
+      "PENDING": "PENDIENTE"
     },
     "action": {
       "delivered": "Entregado",

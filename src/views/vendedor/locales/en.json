@@ -52,6 +52,13 @@
   "orders": {
     "title": "Order Reception",
     "subtitle": "Manage and mark deliveries with your customers.",
+    "product": "Product",
+    "client": "Client",
+    "estado": "Status",
+    "actions": "Actions",
+    "finished": "Sale Ended",
+    "rep_pay": "PAYMENT RECEIVED",
+    "cancel": "Cancel",
     "refresh": "Refresh",
     "empty": {
       "title": "No active orders",
@@ -67,9 +74,10 @@
     },
     "anonymous": "Anonymous",
     "status": {
-      "pending": "⏳ PENDING",
-      "completed": "✅ COMPLETED",
-      "cancelled": "❌ CANCELLED"
+      "PAID": "PAID",
+      "RESERVED": "RESERVED",
+      "CANCELLED": "CANCELLED",
+      "PENDING": "PENDING"
     },
     "action": {
       "delivered": "Delivered",

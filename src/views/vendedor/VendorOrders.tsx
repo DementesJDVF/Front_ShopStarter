@@ -55,13 +55,13 @@ const VendorOrders: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'PAID':
-        return <Badge color="success" className="rounded-lg px-3 py-1 font-bold">VENDIDO</Badge>;
+        return <Badge color="success" className="rounded-lg px-3 py-1 font-bold">{t('orders.status.PAID')}</Badge>;
       case 'RESERVED':
-        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold">RESERVADO</Badge>;
+        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold">{t('orders.status.RESERVED')}</Badge>;
       case 'CANCELLED':
-        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">CANCELADO</Badge>;
+        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">{t('orders.status.CANCELLED')}</Badge>;
       case 'PENDING':
-        return <Badge color="indigo" className="rounded-lg px-3 py-1 font-bold">PENDIENTE</Badge>;
+        return <Badge color="indigo" className="rounded-lg px-3 py-1 font-bold">{t('orders.status.PENDING')}</Badge>;
       default:
         return <Badge color="gray">{status}</Badge>;
     }
@@ -98,11 +98,11 @@ const VendorOrders: React.FC = () => {
           ) : (
             <Table hoverable>
               <Table.Head className="bg-gray-50/50 border-b border-gray-100">
-                <Table.HeadCell className="py-4">Producto</Table.HeadCell>
-                <Table.HeadCell>Cliente</Table.HeadCell>
-                <Table.HeadCell>Estado</Table.HeadCell>
+                <Table.HeadCell className="py-4">{t('orders.product')}</Table.HeadCell>
+                <Table.HeadCell>{t('orders.client')}</Table.HeadCell>
+                <Table.HeadCell>{t('orders.estado')}</Table.HeadCell>
                 <Table.HeadCell>Total</Table.HeadCell>
-                <Table.HeadCell className="text-center">Acciones Reales</Table.HeadCell>
+                <Table.HeadCell className="text-center">{t('orders.actions')}</Table.HeadCell>
               </Table.Head>
               <Table.Body className="divide-y divide-gray-100">
                 {orders.map((order) => (
@@ -113,7 +113,7 @@ const VendorOrders: React.FC = () => {
                         <div className="flex flex-col gap-1">
                             {getStatusBadge(order.status)}
                             {order.status === 'RESERVED' && order.payment_notified && (
-                                <Badge color="info" className="animate-pulse rounded-lg font-black text-[10px]">PAGO REPORTADO</Badge>
+                                <Badge color="info" className="animate-pulse rounded-lg font-black text-[10px]">{t('orders.rep_pay')}</Badge>
                             )}
                         </div>
                     </Table.Cell>
@@ -137,13 +137,13 @@ const VendorOrders: React.FC = () => {
                             onClick={() => handleAction(order.id, 'cancel')}
                             disabled={actionLoading === order.id}
                           >
-                            Cancelar
+                            {t('orders.cancel')}
                           </Button>
                         </>
                       )}
                       {order.status === 'PAID' && (
                         <span className="text-xs text-green-500 font-bold flex items-center gap-1">
-                          <Iconify icon="solar:check-read-linear" /> Venta Finalizada
+                          <Iconify icon="solar:check-read-linear" /> {t('orders.finished')}
                         </span>
                       )}
                     </Table.Cell>
