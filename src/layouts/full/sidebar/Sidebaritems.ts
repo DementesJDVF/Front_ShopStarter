@@ -87,12 +87,6 @@ const SidebarContent: MenuItem[] = [
         id: uniqueId(),
         url: "/cliente/reservas",
       },
-      {
-        name: "Reseñas",
-        icon: "solar:star-fall-2-outline",
-        id: uniqueId(),
-        url: "/cliente/reseñas",
-      },
     ],
   },
   {
