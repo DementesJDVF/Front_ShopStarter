@@ -41,6 +41,7 @@ const Alert = lazy(() => import("../views/alerts/Alerts"));
 const Solar = lazy(() => import("../views/icons/Solar"));
 const SamplePage = lazy(() => import('../views/sample-page/SamplePage'));
 const Reviews = lazy(() => import('src/components/reviews/Reviews.tsx'));
+const MyProfile = lazy(() => import("../views/profile/MyProfile"));
 
 const Router = [
   // 1. PUBLIC ROUTES (Landing & Auth)
@@ -132,6 +133,7 @@ const Router = [
         element: <FullLayout />,
         children: [
           { path: 'seguridad', element: <Security /> },
+          { path: 'mi-perfil', element: <MyProfile /> },
         ]
       }
     ]

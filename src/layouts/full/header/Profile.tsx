@@ -48,7 +48,7 @@ const Profile = ({ variant = "dark" }: ProfileProps) => {
 
         <Dropdown.Item
           as={Link}
-          to="#"
+          to="/usuario/mi-perfil"
           className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-gray-700 dark:text-white hover:bg-primary/10"
         >
           <Icon icon="solar:user-circle-outline" className="text-gray-500 dark:text-gray-400" height={20} />
