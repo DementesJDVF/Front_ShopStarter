@@ -3,7 +3,8 @@ import { Card, Table, Badge, Button, Spinner } from 'flowbite-react';
 import { Icon as Iconify } from '@iconify/react';
 import api from '../../utils/axios';
 import { useTranslation } from 'react-i18next';
-import toast from 'react-hot-toast';
+import { useConfirm } from '../../context/ConfirmContext';
+import { showSuccessAlert, showErrorAlert } from '../../utils/Alerts';
 
 interface Order {
   id: string;
@@ -19,6 +20,7 @@ const ClientOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const confirm = useConfirm();
 
   const fetchOrders = async () => {
     try {
@@ -44,24 +46,25 @@ const ClientOrders: React.FC = () => {
     try {
       setActionLoading(orderId);
       await api.post(`orders/${orderId}/notify-payment/`);
-      toast.success("Notificación de pago enviada al vendedor");
+      showSuccessAlert("Notificación de pago enviada al vendedor");
       await fetchOrders();
     } catch (err) {
-      toast.error("Error al notificar pago");
+      showErrorAlert("Error al notificar pago");
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleCancel = async (orderId: string) => {
-    if (!window.confirm("¿Seguro que quieres cancelar esta reserva? El producto volverá al catálogo.")) return;
+    const confirmed = await confirm("¿Seguro que quieres cancelar esta reserva? El producto volverá al catálogo.", { isDestructive: true });
+    if (!confirmed) return;
     try {
       setActionLoading(orderId);
       await api.post(`orders/${orderId}/cancel/`);
-      toast.success("Reserva liberada");
+      showSuccessAlert("Reserva liberada");
       await fetchOrders();
     } catch (err) {
-      toast.error("Error al cancelar");
+      showErrorAlert("Error al cancelar");
     } finally {
       setActionLoading(null);
     }
@@ -70,11 +73,11 @@ const ClientOrders: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'PAID':
-        return <Badge color="success" className="rounded-lg px-3 py-1 font-bold">COMPRADO</Badge>;
+        return <Badge color="success" className="rounded-lg px-3 py-1 font-bold">{t("reservas.s.COMPLETED")}</Badge>;
       case 'RESERVED':
-        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold text-black">RESERVADO</Badge>;
+        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold text-black">{t("reservas.s.RESERVED")}</Badge>;
       case 'CANCELLED':
-        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">CANCELADO</Badge>;
+        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">{t("reservas.s.CANCELLED")}</Badge>;
       default:
         return <Badge color="gray">{status}</Badge>;
     }
@@ -83,8 +86,8 @@ const ClientOrders: React.FC = () => {
   return (
     <div className="p-6 max-w-6xl mx-auto animate-fade-in font-[var(--main-font)]">
       <div className="mb-8">
-        <h1 className="text-4xl font-black text-indigo-900 tracking-tighter uppercase mb-2 italic">Mis Reservas</h1>
-        <p className="text-gray-500 font-medium">Gestiona tus productos apartados y notifica tus pagos en tiempo real.</p>
+        <h1 className="text-4xl font-black text-indigo-900 tracking-tighter uppercase mb-2 italic">{t("reservas.title")}</h1>
+        <p className="text-gray-500 font-medium">{t("reservas.description")}</p>
       </div>
 
       <Card className="border-none shadow-2xl rounded-[2rem] overflow-hidden p-2 bg-white/80 backdrop-blur-md">
@@ -95,17 +98,17 @@ const ClientOrders: React.FC = () => {
             </div>
           ) : orders.length === 0 ? (
             <div className="text-center py-20">
-               <Iconify icon="solar:cart-large-minimalistic-linear" height={80} className="mx-auto text-gray-200 mb-4" />
-               <h3 className="text-xl font-bold text-gray-400 uppercase">No tienes reservas activas</h3>
+              <Iconify icon="solar:cart-large-minimalistic-linear" height={80} className="mx-auto text-gray-200 mb-4" />
+              <h3 className="text-xl font-bold text-gray-400 uppercase">{t("reservas.no_res")}</h3>
             </div>
           ) : (
             <Table hoverable>
               <Table.Head className="bg-indigo-50/50">
-                <Table.HeadCell className="py-5">Producto</Table.HeadCell>
-                <Table.HeadCell>Vendedor</Table.HeadCell>
-                <Table.HeadCell>Estado</Table.HeadCell>
+                <Table.HeadCell className="py-5">{t("reservas.product")}</Table.HeadCell>
+                <Table.HeadCell>{t("reservas.vendor")}</Table.HeadCell>
+                <Table.HeadCell>{t("reservas.status")}</Table.HeadCell>
                 <Table.HeadCell>Total</Table.HeadCell>
-                <Table.HeadCell className="text-center">Acciones</Table.HeadCell>
+                <Table.HeadCell className="text-center">{t("reservas.actions")}</Table.HeadCell>
               </Table.Head>
               <Table.Body className="divide-y">
                 {orders.map((order) => (
@@ -125,7 +128,7 @@ const ClientOrders: React.FC = () => {
                             disabled={actionLoading === order.id}
                           >
                             {actionLoading === order.id ? <Spinner size="xs" /> : <Iconify icon="solar:dollar-minimalistic-bold" className="mr-1" />}
-                            YA PAGUÉ
+                            {t("reservas.alr_paid")}
                           </Button>
                           <Button 
                             size="sm" 
@@ -135,12 +138,12 @@ const ClientOrders: React.FC = () => {
                             onClick={() => handleCancel(order.id)}
                             disabled={actionLoading === order.id}
                           >
-                            LIBERAR
+                            {t("reservas.discard")}
                           </Button>
                         </>
                       )}
                       {order.status === 'PAID' && (
-                         <Badge color="success" className="px-4 py-2 rounded-full font-black">ENTREGA PENDIENTE</Badge>
+                        <Badge color="success" className="px-4 py-2 rounded-full font-black">{t("reservas.ship")}</Badge>
                       )}
                     </Table.Cell>
                   </Table.Row>
@@ -151,10 +154,10 @@ const ClientOrders: React.FC = () => {
         </div>
       </Card>
       <div className="mt-6 p-4 bg-yellow-50 rounded-2xl border border-yellow-100 flex gap-4 items-center">
-         <Iconify icon="solar:info-circle-bold" className="text-yellow-500" height={32} />
-         <p className="text-sm text-yellow-800 font-medium">
-           <b>Importante:</b> Al presionar "YA PAGUÉ", el vendedor recibirá una alerta inmediata para validar tu pago y entregarte el producto.
-         </p>
+        <Iconify icon="solar:info-circle-bold" className="text-yellow-500" height={32} />
+        <p className="text-sm text-yellow-800 font-medium">
+          <b>{t("reservas.advise1")}:</b> {t("reservas.advise2")}
+        </p>
       </div>
     </div>
   );

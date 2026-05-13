@@ -1,0 +1,25 @@
+{
+  "header": {
+    "title": "Your store reviews",
+    "subtitle": "Real opinions from customers about your business."
+  },
+  "errorState": {
+    "title": "Reviews",
+    "subtitle": "Reviews could not be loaded.",
+    "onlyVendors": "This section is only available for authenticated vendors.",
+    "fetchError": "Error fetching reviews"
+  },
+  "summary": {
+    "totalOne": "{{count}} review in total",
+    "totalOther": "{{count}} reviews in total",
+    "stars": "{{count}} ★"
+  },
+  "empty": {
+    "title": "You don't have any reviews yet",
+    "subtitle": "When your customers rate you, they will appear here."
+  },
+  "review": {
+    "defaultClient": "Customer",
+    "noComment": "(No comment)"
+  }
+}

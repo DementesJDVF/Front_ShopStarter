@@ -33,7 +33,7 @@ export default function AddProduct() {
         name: "",
         description: "",
         price: "",
-        stock: "",
+        stock: true as boolean,
         status: "PENDING", // Los productos nuevos nacen pendientes de aprobación
         is_featured: false,
         image1_url: "",
@@ -101,7 +101,7 @@ export default function AddProduct() {
             name: form.name,
             description: form.description,
             price: form.price,
-            stock: form.stock ? Number(form.stock) : 0,
+            stock: form.stock,
             is_featured: form.is_featured,
             status: "PENDING",
         };
@@ -239,16 +239,16 @@ export default function AddProduct() {
                         />
                     </div>
                     <div className="add-product__field">
-                        <label className="add-product__label">{t("stock")}</label>
-                        <input
-                            type="number"
-                            name="stock"
-                            value={form.stock}
-                            onChange={handleChange}
-                            min="0"
-                            placeholder="0"
-                            className="add-product__input"
-                        />
+                        <label className="add-product__checkbox-label">
+                            <input
+                                type="checkbox"
+                                name="stock"
+                                checked={form.stock as boolean}
+                                onChange={handleChange}
+                                className="add-product__checkbox"
+                            />
+                            {form.stock ? t("inStock") : t("outOfStock")}
+                        </label>
                     </div>
                 </div>
 

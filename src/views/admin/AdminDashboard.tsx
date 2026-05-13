@@ -10,7 +10,8 @@ import CategoryComponent from '../../components/categorias/category';
 import ImagePreviewModal from '../../components/shared/ImagePreviewModal';
 import UnauthorizedScreen from '../../components/shared/UnauthorizedScreen';
 import { useAuth } from '../../context/AuthContext';
-import toast from 'react-hot-toast';
+import { useConfirm } from '../../context/ConfirmContext';
+import { showSuccessAlert, showErrorAlert } from '../../utils/Alerts';
 import VendorMap from '../../components/geo/VendorMap';
 import { getAbsoluteImageUrl } from '../../utils/urlHelper';
 import VendorCatalogModal from '../../components/geo/VendorCatalogModal';
@@ -30,11 +31,11 @@ interface Order { id: string; client_name: string; product_name: string; status:
 interface SelectedVendor { id: string; name: string; }
 
 const TableSkeleton = () => (
-    <div className="animate-pulse space-y-4 py-4">
-        {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="h-12 bg-gray-200/50 dark:bg-slate-800/50 rounded-xl"></div>
-        ))}
-    </div>
+  <div className="animate-pulse space-y-4 py-4">
+    {[1, 2, 3, 4, 5].map(i => (
+      <div key={i} className="h-12 bg-gray-200/50 dark:bg-slate-800/50 rounded-xl"></div>
+    ))}
+  </div>
 );
 
 const AdminDashboard: React.FC = () => {
@@ -42,6 +43,7 @@ const AdminDashboard: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const [currentView, setCurrentView] = useState(0);
 
   const [users, setUsers] = useState<User[]>([]);
@@ -69,8 +71,8 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     (window as any).openVendorCatalog = (vendorId: string, vendorName: string) => {
-        setSelectedVendor({ id: vendorId, name: vendorName });
-        setIsCatalogModalOpen(true);
+      setSelectedVendor({ id: vendorId, name: vendorName });
+      setIsCatalogModalOpen(true);
     };
     return () => { delete (window as any).openVendorCatalog; };
   }, []);
@@ -99,201 +101,235 @@ const AdminDashboard: React.FC = () => {
 
   const handleUserStatus = async (id: string, status: string) => {
     try {
-        await api.patch(`users/${id}/status/`, { status });
-        toast.success("Estado de usuario actualizado");
-        fetchData();
-    } catch (err) { toast.error("Error al actualizar usuario"); }
+      await api.patch(`users/${id}/status/`, { status });
+      showSuccessAlert("Estado de usuario actualizado");
+      fetchData();
+    } catch (err) { showErrorAlert("Error al actualizar usuario"); }
   };
 
   const handleProductStatus = async (id: string, status: string) => {
     try {
       await api.patch(`products/create/${id}/`, { status });
-      toast.success(`Producto ${status === 'AVAILABLE' ? 'Aprobado' : 'Rechazado'}`);
+      showSuccessAlert(`Producto ${status === 'AVAILABLE' ? 'Aprobado' : 'Rechazado'}`);
       fetchData();
-    } catch (err) { toast.error("Error al actualizar producto"); }
+    } catch (err) { showErrorAlert("Error al actualizar producto"); }
   };
 
   const handleDelete = async (type: 'users' | 'products', id: string) => {
-    if (!window.confirm("¿Eliminar permanentemente? Esta acción afectará la base de datos real.")) return;
+    const confirmed = await confirm("¿Eliminar permanentemente? Esta acción afectará la base de datos real.", { isDestructive: true });
+    if (!confirmed) return;
     try {
       await api.delete(`${type}/${type === 'users' ? id : 'create/' + id}/`);
-      toast.success("Eliminado correctamente.");
+      showSuccessAlert("Eliminado correctamente.");
       fetchData();
-    } catch (err) { toast.error("Error al eliminar."); }
+    } catch (err) { showErrorAlert("Error al eliminar."); }
   };
 
   const getProductImage = (images: any[]) => {
-      if (!images || images.length === 0) return 'https://via.placeholder.com/150';
-      const main = images.find(img => img.is_main) || images[0];
-      return getAbsoluteImageUrl(main.url_image);
+    if (!images || images.length === 0) return 'https://via.placeholder.com/150';
+    const main = images.find(img => img.is_main) || images[0];
+    return getAbsoluteImageUrl(main.url_image);
   };
 
   return (
     <div className="w-full font-[var(--main-font)]">
       <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-            <h1 className="text-3xl md:text-5xl font-black text-indigo-900 dark:text-white tracking-tighter uppercase italic">
+          <h1 className="text-3xl md:text-5xl font-black text-indigo-900 dark:text-white tracking-tighter uppercase italic">
             ADMIN<span className="text-indigo-500"> DASHBOARD</span>
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 font-medium italic">Control Maestro y Moderación</p>
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 font-medium italic">Control Maestro y Moderación</p>
         </div>
         <div className="flex gap-2">
-            <Badge color="success" size="lg" className="px-4 py-2 border border-green-200">
-                <HiLightningBolt className="mr-1 inline" /> SISTEMA ONLINE
-            </Badge>
+          <Badge color="success" size="lg" className="px-4 py-2 border border-green-200">
+            <HiLightningBolt className="mr-1 inline" /> SISTEMA ONLINE
+          </Badge>
         </div>
       </div>
-      
+
       <div className="bg-white/40 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2.5rem] border border-gray-100 dark:border-slate-800 p-2 md:p-6 shadow-2xl min-h-[600px]">
-        
+
         {currentView === 0 && (
           <div className="animate-fade-in space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl">
-                    <div className="flex items-center gap-4">
-                        <div className="p-4 bg-primary/10 rounded-2xl"><Icon icon="solar:users-group-rounded-bold-duotone" className="text-primary" height="32" /></div>
-                        <div><p className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">Usuarios</p><h3 className="text-4xl font-black text-gray-900 dark:text-white">{users.length}</h3></div>
-                    </div>
-                  </Card>
-                  <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl">
-                    <div className="flex items-center gap-4">
-                        <div className="p-4 bg-secondary/10 rounded-2xl"><Icon icon="solar:box-minimalistic-bold-duotone" className="text-secondary" height="32" /></div>
-                        <div><p className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">Pendientes</p><h3 className="text-4xl font-black text-gray-900 dark:text-white">{pendingProducts.length}</h3></div>
-                    </div>
-                  </Card>
-                  <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl border-l-4 border-l-green-500">
-                    <div className="flex items-center gap-4">
-                        <div className="p-4 bg-green-100 dark:bg-green-900/30 rounded-2xl"><HiShoppingCart className="text-green-600" size={32} /></div>
-                        <div><p className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">Ventas</p><h3 className="text-4xl font-black text-green-600">{orders.length}</h3></div>
-                    </div>
-                  </Card>
-              </div>
-              <div className="grid grid-cols-12 gap-6">
-                <div className="lg:col-span-8 col-span-12"><RevenueForecast/></div>
-                <div className="lg:col-span-4 col-span-12 space-y-6"><NewCustomers /><TotalIncome /></div>
-                <div className="lg:col-span-8 col-span-12"><ProductRevenue /></div>
-                <div className="lg:col-span-4 col-span-12"><DailyActivity /></div>
-                <div className="col-span-12"><BlogCards /></div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-primary/10 rounded-2xl"><Icon icon="solar:users-group-rounded-bold-duotone" className="text-primary" height="32" /></div>
+                  <div><p className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">Usuarios</p><h3 className="text-4xl font-black text-gray-900 dark:text-white">{users.length}</h3></div>
+                </div>
+              </Card>
+              <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-secondary/10 rounded-2xl"><Icon icon="solar:box-minimalistic-bold-duotone" className="text-secondary" height="32" /></div>
+                  <div><p className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">Pendientes</p><h3 className="text-4xl font-black text-gray-900 dark:text-white">{pendingProducts.length}</h3></div>
+                </div>
+              </Card>
+              <Card className="bg-white/80 dark:bg-slate-900/90 border-none shadow-lg rounded-3xl border-l-4 border-l-green-500">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-green-100 dark:bg-green-900/30 rounded-2xl"><HiShoppingCart className="text-green-600" size={32} /></div>
+                  <div><p className="text-sm font-bold text-gray-600 dark:text-gray-300 uppercase">Ventas</p><h3 className="text-4xl font-black text-green-600">{orders.length}</h3></div>
+                </div>
+              </Card>
+            </div>
+            <div className="grid grid-cols-12 gap-6">
+              <div className="lg:col-span-8 col-span-12"><RevenueForecast /></div>
+              <div className="lg:col-span-4 col-span-12 space-y-6"><NewCustomers /><TotalIncome /></div>
+              <div className="lg:col-span-8 col-span-12"><ProductRevenue /></div>
+              <div className="lg:col-span-4 col-span-12"><DailyActivity /></div>
+              <div className="col-span-12"><BlogCards /></div>
+            </div>
           </div>
         )}
 
-        {currentView === 1 && (<div className="animate-fade-in"><CategoryComponent showAdminManagement={true} /></div>)}
+        {currentView === 1 && (
+          <div className="animate-fade-in space-y-6">
+            <h2 className="text-3xl font-black uppercase italic flex items-center gap-3 mb-2">
+              <Icon icon="solar:layers-minimalistic-bold-duotone" className="text-primary text-4xl" />
+              <span className="bg-gradient-to-r from-[#7a9dff] to-[#9e7aff] bg-clip-text text-transparent leading-relaxed py-1">
+                Gestión de Categorías
+              </span>
+            </h2>
+            <CategoryComponent showAdminManagement={true} />
+          </div>
+        )}
 
         {currentView === 2 && (
           <div className="animate-fade-in space-y-6">
-            <h2 className="text-3xl font-black text-indigo-900 uppercase italic flex items-center gap-3"><HiUserCircle className="text-primary text-4xl" /> Gestión de Usuarios</h2>
+            <h2 className="text-3xl font-black uppercase italic flex items-center gap-3 mb-2">
+              <HiUserCircle className="text-primary text-4xl" />
+              <span className="bg-gradient-to-r from-[#7a9dff] to-[#9e7aff] bg-clip-text text-transparent leading-relaxed py-1">
+                Gestión de Usuarios
+              </span>
+            </h2>
             {loading ? <TableSkeleton /> : (
-                <Table hoverable>
-                    <Table.Head className="bg-indigo-50">
-                        <Table.HeadCell>Usuario</Table.HeadCell>
-                        <Table.HeadCell>Rol</Table.HeadCell>
-                        <Table.HeadCell>Estado</Table.HeadCell>
-                        <Table.HeadCell>Acciones</Table.HeadCell>
-                    </Table.Head>
-                    <Table.Body className="divide-y">
-                        {users.map(u => (
-                            <Table.Row key={u.id}>
-                                <Table.Cell className="font-bold">{u.username}<br/><span className="text-xs font-normal text-gray-400">{u.email}</span></Table.Cell>
-                                <Table.Cell><Badge color={u.role === 'ADMIN' ? 'purple' : 'info'}>{u.role}</Badge></Table.Cell>
-                                <Table.Cell><Badge color={u.status === 'ACTIVE' ? 'success' : u.status === 'PENDING' ? 'warning' : 'gray'}>{u.status}</Badge></Table.Cell>
-                                <Table.Cell className="flex gap-2">
-                                    {u.status === 'PENDING' && (
-                                        <Button color="success" size="xs" onClick={() => handleUserStatus(u.id, 'ACTIVE')}><HiCheck className="mr-1"/> Aprobar</Button>
-                                    )}
-                                    <Select value={u.status} onChange={(e) => handleUserStatus(u.id, e.target.value)}>
-                                        <option value="ACTIVE">Activo</option>
-                                        <option value="INACTIVE">Inactivo</option>
-                                        <option value="BLOCKED">Bloqueado</option>
-                                    </Select>
-                                    <Button color="failure" size="xs" onClick={() => handleDelete('users', u.id)}><HiTrash/></Button>
-                                </Table.Cell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
+              <Table hoverable>
+                <Table.Head className="!bg-gradient-to-r !from-[#000351] !to-[#280051]">
+                  <Table.HeadCell className="!text-white !bg-transparent">Usuario</Table.HeadCell>
+                  <Table.HeadCell className="!text-white !bg-transparent">Rol</Table.HeadCell>
+                  <Table.HeadCell className="!text-white !bg-transparent">Estado</Table.HeadCell>
+                  <Table.HeadCell className="!text-white !bg-transparent">Acciones</Table.HeadCell>
+                </Table.Head>
+                <Table.Body className="divide-y">
+                  {users.map(u => (
+                    <Table.Row key={u.id}>
+                      <Table.Cell>
+                        <div className="text-base font-black text-gray-900 dark:text-white">{u.username}</div>
+                        <div className="text-sm font-semibold text-indigo-500 dark:text-indigo-400 mt-0.5">{u.email}</div>
+                      </Table.Cell>
+                      <Table.Cell><Badge color={u.role === 'ADMIN' ? 'purple' : 'info'}>{u.role}</Badge></Table.Cell>
+                      <Table.Cell><Badge color={u.status === 'ACTIVE' ? 'success' : u.status === 'PENDING' ? 'warning' : 'gray'}>{u.status}</Badge></Table.Cell>
+                      <Table.Cell className="flex gap-2">
+                        {u.status === 'PENDING' && (
+                          <Button color="success" size="xs" onClick={() => handleUserStatus(u.id, 'ACTIVE')}><HiCheck className="mr-1" /> Aprobar</Button>
+                        )}
+                        <Select value={u.status} onChange={(e) => handleUserStatus(u.id, e.target.value)}>
+                          <option value="ACTIVE">Activo</option>
+                          <option value="INACTIVE">Inactivo</option>
+                          <option value="BLOCKED">Bloqueado</option>
+                        </Select>
+                        <Button color="failure" size="xs" onClick={() => handleDelete('users', u.id)}><HiTrash /></Button>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
             )}
           </div>
         )}
 
         {currentView === 3 && (
           <div className="animate-fade-in space-y-6">
-            <h2 className="text-3xl font-black text-indigo-900 uppercase italic flex items-center gap-3"><MdOutlinePendingActions className="text-secondary text-4xl" /> Aprobación de Productos</h2>
+            <h2 className="text-3xl font-black uppercase italic flex items-center gap-3 mb-2">
+              <MdOutlinePendingActions className="text-secondary text-4xl" />
+              <span className="bg-gradient-to-r from-[#7a9dff] to-[#9e7aff] bg-clip-text text-transparent leading-relaxed py-1">
+                Aprobación de Productos
+              </span>
+            </h2>
             <p className="text-gray-500 font-medium">Revisa y aprueba los productos enviados por los vendedores antes de que salgan al catálogo público.</p>
             {loading ? <TableSkeleton /> : (
-                <Table hoverable>
-                    <Table.Head className="bg-indigo-50">
-                        <Table.HeadCell>Imagen</Table.HeadCell>
-                        <Table.HeadCell>Producto</Table.HeadCell>
-                        <Table.HeadCell>Vendedor</Table.HeadCell>
-                        <Table.HeadCell>Precio</Table.HeadCell>
-                        <Table.HeadCell>Estado</Table.HeadCell>
-                        <Table.HeadCell>Acciones</Table.HeadCell>
-                    </Table.Head>
-                    <Table.Body className="divide-y">
-                        {allProducts.filter(p => p.status === 'PENDING').map(p => (
-                            <Table.Row key={p.id}>
-                                <Table.Cell>
-                                    <img src={getProductImage(p.images || [])} alt={p.name} className="w-12 h-12 rounded-xl object-cover shadow-sm border border-gray-100" />
-                                </Table.Cell>
-                                <Table.Cell className="font-bold">{p.name}</Table.Cell>
-                                <Table.Cell className="text-xs">{p.vendor_name}</Table.Cell>
-                                <Table.Cell className="font-bold text-indigo-600">${Number(p.price).toLocaleString()}</Table.Cell>
-                                <Table.Cell>
-                                    <Badge color={p.status === 'AVAILABLE' ? 'success' : 'warning'}>{p.status}</Badge>
-                                </Table.Cell>
-                                <Table.Cell className="flex gap-2">
-                                    <Button color="success" size="xs" onClick={() => handleProductStatus(p.id, 'AVAILABLE')}>
-                                        <HiCheck className="mr-1"/> Aprobar
-                                    </Button>
-                                    <Button color="info" size="xs" onClick={() => navigate(`/app/products/${p.id}`)}>
-                                        <Icon icon="solar:eye-outline" className="mr-1 h-4 w-4" /> Detalle
-                                    </Button>
-                                    <Button color="failure" size="xs" onClick={() => handleProductStatus(p.id, 'REJECTED')}>
-                                        <HiTrash className="mr-1 h-4 w-4" /> {t('products.reject')}
-                                    </Button>
-                                </Table.Cell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
+              <Table hoverable>
+                <Table.Head className="!bg-gradient-to-r !from-[#000351] !to-[#280051]">
+                  <Table.HeadCell className="!text-white !bg-transparent">Imagen</Table.HeadCell>
+                  <Table.HeadCell className="!text-white !bg-transparent">Producto</Table.HeadCell>
+                  <Table.HeadCell className="!text-white !bg-transparent">Vendedor</Table.HeadCell>
+                  <Table.HeadCell className="!text-white !bg-transparent">Precio</Table.HeadCell>
+                  <Table.HeadCell className="!text-white !bg-transparent">Estado</Table.HeadCell>
+                  <Table.HeadCell className="!text-white !bg-transparent">Acciones</Table.HeadCell>
+                </Table.Head>
+                <Table.Body className="divide-y">
+                  {allProducts.filter(p => p.status === 'PENDING').map(p => (
+                    <Table.Row key={p.id}>
+                      <Table.Cell>
+                        <img src={getProductImage(p.images || [])} alt={p.name} className="w-12 h-12 rounded-xl object-cover shadow-sm border border-gray-100" />
+                      </Table.Cell>
+                      <Table.Cell className="font-bold">{p.name}</Table.Cell>
+                      <Table.Cell className="text-xs">{p.vendor_name}</Table.Cell>
+                      <Table.Cell className="font-bold text-indigo-600">${Number(p.price).toLocaleString()}</Table.Cell>
+                      <Table.Cell>
+                        <Badge color={p.status === 'AVAILABLE' ? 'success' : 'warning'}>{p.status}</Badge>
+                      </Table.Cell>
+                      <Table.Cell className="flex gap-2">
+                        <Button color="success" size="xs" onClick={() => handleProductStatus(p.id, 'AVAILABLE')}>
+                          <HiCheck className="mr-1" /> Aprobar
+                        </Button>
+                        <Button color="info" size="xs" onClick={() => navigate(`/app/products/${p.id}`)}>
+                          <Icon icon="solar:eye-outline" className="mr-1 h-4 w-4" /> Detalle
+                        </Button>
+                        <Button color="failure" size="xs" onClick={() => handleProductStatus(p.id, 'REJECTED')}>
+                          <HiTrash className="mr-1 h-4 w-4" /> {t('products.reject')}
+                        </Button>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
             )}
           </div>
         )}
 
         {currentView === 4 && (
           <div className="animate-fade-in space-y-6">
-            <h2 className="text-3xl font-black text-green-700 uppercase italic flex items-center gap-3"><HiShoppingCart className="text-green-500 text-4xl" /> Auditoría de Ventas</h2>
+            <h2 className="text-3xl font-black uppercase italic flex items-center gap-3 mb-6">
+              <HiShoppingCart className="text-primary text-4xl" />
+              <span className="bg-gradient-to-r from-[#7a9dff] to-[#9e7aff] bg-clip-text text-transparent leading-relaxed py-1">
+                Auditoría de Ventas
+              </span>
+            </h2>
             {loading ? <TableSkeleton /> : (
-                <Table hoverable>
-                    <Table.Head className="bg-green-50">
-                        <Table.HeadCell>ID</Table.HeadCell>
-                        <Table.HeadCell>Cliente</Table.HeadCell>
-                        <Table.HeadCell>Producto</Table.HeadCell>
-                        <Table.HeadCell>Estado</Table.HeadCell>
-                        <Table.HeadCell>Total</Table.HeadCell>
-                    </Table.Head>
-                    <Table.Body className="divide-y">
-                        {orders.map(o => (
-                            <Table.Row key={o.id}>
-                                <Table.Cell className="text-xs font-mono">{o.id.slice(0,8)}</Table.Cell>
-                                <Table.Cell>{o.client_name}</Table.Cell>
-                                <Table.Cell className="font-bold">{o.product_name}</Table.Cell>
-                                <Table.Cell><Badge color={o.status === 'PAID' ? 'success' : 'warning'}>{o.status}</Badge></Table.Cell>
-                                <Table.Cell className="font-black text-indigo-600">${Number(o.total).toLocaleString()}</Table.Cell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
+              <Table hoverable>
+                <Table.Head className="!bg-gradient-to-r !from-[#000351] !to-[#280051]">
+                  <Table.HeadCell className="!text-white !bg-transparent">ID</Table.HeadCell>
+                  <Table.HeadCell className="!text-white !bg-transparent">Cliente</Table.HeadCell>
+                  <Table.HeadCell className="!text-white !bg-transparent">Producto</Table.HeadCell>
+                  <Table.HeadCell className="!text-white !bg-transparent">Estado</Table.HeadCell>
+                  <Table.HeadCell className="!text-white !bg-transparent">Total</Table.HeadCell>
+                </Table.Head>
+                <Table.Body className="divide-y">
+                  {orders.map(o => (
+                    <Table.Row key={o.id}>
+                      <Table.Cell className="text-xs font-mono">{o.id.slice(0, 8)}</Table.Cell>
+                      <Table.Cell>{o.client_name}</Table.Cell>
+                      <Table.Cell className="font-bold">{o.product_name}</Table.Cell>
+                      <Table.Cell><Badge color={o.status === 'PAID' ? 'success' : 'warning'}>{o.status}</Badge></Table.Cell>
+                      <Table.Cell className="font-black text-indigo-600">${Number(o.total).toLocaleString()}</Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
             )}
           </div>
         )}
 
         {currentView === 5 && (
           <div className="animate-fade-in space-y-6 h-full">
-            <h2 className="text-3xl font-black text-blue-700 uppercase italic flex items-center gap-3"><Icon icon="solar:map-point-wave-bold-duotone" className="text-blue-500 text-4xl" />  (Mapa Global)</h2>
+            <h2 className="text-3xl font-black uppercase italic flex items-center gap-3 mb-2">
+              <Icon icon="solar:map-point-wave-bold-duotone" className="text-primary text-4xl" />
+              <span className="bg-gradient-to-r from-[#7a9dff] to-[#9e7aff] bg-clip-text text-transparent leading-relaxed py-1">
+                Vista de Águila (Mapa Global)
+              </span>
+            </h2>
             <div className="h-[500px] w-full">
-                <VendorMap isAdmin={true} />
+              <VendorMap isAdmin={true} />
             </div>
           </div>
         )}
