@@ -87,14 +87,13 @@ export default function ProductDetail() {
 
     try {
       setReserving(true);
-      // Validamos stock localmente antes de intentar
-      if (product.stock <= 0) {
+      if (!product.stock) {
           showErrorAlert("Lo sentimos, este producto se acaba de agotar.");
           return;
       }
       await api.post('orders/', { 
           product: product.id,
-          quantity: 1 // Reservar 1 unidad directa
+          quantity: 1
       });
       showSuccessAlert("¡Reserva exitosa!");
       navigate('/cliente/reservas');
