@@ -240,7 +240,7 @@ export default function ProductDetail() {
                 <Icon icon="solar:info-circle-bold" height={24} />
                 <p className="text-sm font-bold">{t("forbiden")}</p>
               </div>
-            ) : product.status && product.status.toString().toUpperCase().includes('AVAILABLE') && product.stock > 0 ? (
+            ) : product.status && product.status.toString().toUpperCase().includes('AVAILABLE') && product.stock ? (
               <Button 
                 size="xl" 
                 className="w-full font-black text-xl rounded-2xl shadow-lg ring-offset-2 transition-transform active:scale-95"
