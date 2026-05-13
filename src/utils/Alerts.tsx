@@ -1,5 +1,4 @@
 import toast from 'react-hot-toast';
-import { ReactNode } from 'react';
 import { Icon } from '@iconify/react';
 
 // Estilos base para los toasts (diseño moderno, sombras suaves, borde redondeado)
@@ -25,7 +24,7 @@ const toastOptions = {
 /**
  * Notificación de Éxito
  */
-export const showSuccessAlert = (message: string | ReactNode) => {
+export const showSuccessAlert = (message: any) => {
   toast.success(message, {
     ...toastOptions,
     icon: <span className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 shadow-inner"><Icon icon="solar:check-circle-bold-duotone" className="text-xl" /></span>,
@@ -39,7 +38,7 @@ export const showSuccessAlert = (message: string | ReactNode) => {
 /**
  * Notificación de Error
  */
-export const showErrorAlert = (message: string | ReactNode) => {
+export const showErrorAlert = (message: any) => {
   toast.error(message, {
     ...toastOptions,
     duration: 6000, // Los errores requieren más tiempo para leer
@@ -54,7 +53,7 @@ export const showErrorAlert = (message: string | ReactNode) => {
 /**
  * Notificación de Advertencia
  */
-export const showWarningAlert = (message: string | ReactNode) => {
+export const showWarningAlert = (message: any) => {
   toast(message, {
     ...toastOptions,
     duration: 5000,
@@ -69,7 +68,7 @@ export const showWarningAlert = (message: string | ReactNode) => {
 /**
  * Notificación de Información
  */
-export const showInfoAlert = (message: string | ReactNode) => {
+export const showInfoAlert = (message: any) => {
   toast(message, {
     ...toastOptions,
     icon: <span className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 shadow-inner"><Icon icon="solar:info-circle-bold-duotone" className="text-xl" /></span>,
