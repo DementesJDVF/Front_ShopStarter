@@ -1,14 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { getVendorReviews, Review, ReviewsData } from '../../services/reviewsService';
-
-/**
- * Vista de Reseñas exclusiva para VENDEDOR.
- * - Consume: GET /api/vendors/{vendorId}/reviews/
- * - Filtra automáticamente por el ID del vendedor autenticado (user.id),
- *   por lo que cada vendedor solo ve las reseñas de SU propia tienda.
- */
 
 const Stars: React.FC<{ value: number; size?: number }> = ({ value, size = 18 }) => {
   const full = Math.floor(value);
@@ -26,24 +20,26 @@ const Stars: React.FC<{ value: number; size?: number }> = ({ value, size = 18 })
   );
 };
 
-const formatDate = (iso: string) => {
-  try {
-    const d = new Date(iso);
-    return `${d.toLocaleDateString()} · ${d.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    })}`;
-  } catch {
-    return iso;
-  }
-};
-
 const Reviews: React.FC = () => {
+  const { t, i18n } = useTranslation('Reviews');
   const { user, loading: authLoading } = useAuth();
 
   const [data, setData] = useState<ReviewsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const formatDate = (iso: string) => {
+    try {
+      const d = new Date(iso);
+      const locale = i18n.language || undefined;
+      return `${d.toLocaleDateString(locale)} · ${d.toLocaleTimeString(locale, {
+        hour: '2-digit',
+        minute: '2-digit',
+      })}`;
+    } catch {
+      return iso;
+    }
+  };
 
   useEffect(() => {
     if (authLoading) return;
@@ -51,7 +47,7 @@ const Reviews: React.FC = () => {
     // Seguridad extra en cliente: solo VENDEDOR y con id válido
     if (!user || user.role !== 'VENDEDOR' || !user.id) {
       setLoading(false);
-      setError('Esta sección es solo para vendedores autenticados.');
+      setError(t('errorState.onlyVendors'));
       return;
     }
 
@@ -76,7 +72,7 @@ const Reviews: React.FC = () => {
         };
         setData(safe);
       } catch (err: any) {
-        if (!cancelled) setError(err?.message || 'Error al obtener reseñas');
+        if (!cancelled) setError(err?.message || t('errorState.fetchError'));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -86,7 +82,7 @@ const Reviews: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [user, authLoading]);
+  }, [user, authLoading, t]);
 
   const distribution = useMemo(() => {
     const buckets = [0, 0, 0, 0, 0]; // 1..5
@@ -118,8 +114,10 @@ const Reviews: React.FC = () => {
             <Icon icon="solar:danger-triangle-bold-duotone" width={28} />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white">Reseñas</h2>
-            <p className="text-gray-500 text-sm">No se pudieron cargar las reseñas.</p>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+              {t('errorState.title')}
+            </h2>
+            <p className="text-gray-500 text-sm">{t('errorState.subtitle')}</p>
           </div>
         </div>
         <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm">
@@ -143,11 +141,9 @@ const Reviews: React.FC = () => {
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-800 dark:text-white">
-              Reseñas de tu tienda
+              {t('header.title')}
             </h2>
-            <p className="text-gray-500 text-sm">
-              Opiniones reales de los clientes sobre tu negocio.
-            </p>
+            <p className="text-gray-500 text-sm">{t('header.subtitle')}</p>
           </div>
         </div>
 
@@ -159,7 +155,9 @@ const Reviews: React.FC = () => {
             </span>
             <Stars value={average || 0} size={22} />
             <span className="mt-2 text-sm text-gray-500">
-              {total} {total === 1 ? 'reseña' : 'reseñas'} en total
+              {total === 1
+                ? t('summary.totalOne', { count: total })
+                : t('summary.totalOther', { count: total })}
             </span>
           </div>
 
@@ -171,7 +169,7 @@ const Reviews: React.FC = () => {
               .map((b) => (
                 <div key={b.stars} className="flex items-center gap-3">
                   <span className="text-sm font-semibold text-gray-600 dark:text-gray-300 w-10">
-                    {b.stars} ★
+                    {t('summary.stars', { count: b.stars })}
                   </span>
                   <div className="flex-1 h-2 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
                     <div
@@ -198,11 +196,9 @@ const Reviews: React.FC = () => {
               className="mx-auto text-gray-400 mb-4"
             />
             <h3 className="text-lg font-bold text-gray-600 dark:text-gray-300">
-              Aún no tienes reseñas
+              {t('empty.title')}
             </h3>
-            <p className="text-gray-500">
-              Cuando tus clientes te califiquen, aparecerán aquí.
-            </p>
+            <p className="text-gray-500">{t('empty.subtitle')}</p>
           </div>
         ) : (
           <ul className="flex flex-col gap-4">
@@ -218,7 +214,7 @@ const Reviews: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-800 dark:text-white">
-                        {r.client || 'Cliente'}
+                        {r.client || t('review.defaultClient')}
                       </p>
                       <p className="text-xs text-gray-500">
                         {formatDate(r.created_at)}
@@ -233,7 +229,7 @@ const Reviews: React.FC = () => {
                   </p>
                 ) : (
                   <p className="text-sm italic text-gray-400">
-                    (Sin comentario)
+                    {t('review.noComment')}
                   </p>
                 )}
               </li>

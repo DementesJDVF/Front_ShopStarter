@@ -44,6 +44,9 @@ import TradLoginEN from 'src/views/auth/login/locales/en.json';
 import TradRegisterES from 'src/views/auth/authforms/locales/es.json';
 import TradRegisterEN from 'src/views/auth/authforms/locales/en.json';
 
+import TradReviewsES from  'src/components/reviews/locales/es.json';
+import TradReviewsEN from  'src/components/reviews/locales/en.json';
+
 
 i18n
   .use(initReactI18next)
@@ -65,6 +68,7 @@ i18n
         categoryList: TradCategoryListES,
         login: TradLoginES,
         register: TradRegisterES,
+        Reviews: TradReviewsES,
       },
       en: {
         translation: en,
@@ -82,6 +86,7 @@ i18n
         categoryList: TradCategoryListEN,
         login: TradLoginEN,
         register: TradRegisterEN,
+        Reviews: TradReviewsEN,
       },
     },
     lng: "es",
