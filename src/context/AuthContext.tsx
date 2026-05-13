@@ -35,24 +35,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Validación silenciosa obligatoria de sesión HttpOnly contra el servidor
         api.get('auth/me/').then(res => {
-            setUser(res.data);
+            if (res.data.isAuthenticated) {
+                setUser(res.data);
+            } else {
+                // El servidor dice que no estamos autenticados (200 OK pero con flag false)
+                logout();
+            }
         }).catch((err) => {
           if (err.response?.status === 401 || err.response?.status === 403) {
             logout();
           }
+        }).finally(() => {
+          setLoading(false);
         });
 
       } catch (e) {
         logout();
+        setLoading(false);
       }
     } else {
         // Tratar de recuperar la sesión silente si navegamos y hay una Cookie válida
         api.get('auth/me/').then(res => {
-            setUser(res.data);
-            localStorage.setItem('user', JSON.stringify(res.data));
-        }).catch(() => {});
+            if (res.data.isAuthenticated) {
+                setUser(res.data);
+                localStorage.setItem('user', JSON.stringify(res.data));
+            }
+        }).catch(() => {})
+        .finally(() => {
+          setLoading(false);
+        });
     }
-    setLoading(false);
   }, []);
 
   const login = (userData: User, dummyToken?: string) => {
@@ -63,20 +75,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    // 1. LIMPIEZA LOCAL INMEDIATA (Principio de Optimismo/Seguridad)
+    // Esto evita que la UI permita acciones mientras se procesa el logout en red
+    setUser(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    sessionStorage.clear();
+
     try {
-        // 1. Notificar al backend para invalidar la sesión y borrar Cookies HttpOnly
-        await api.post('auth/logout/');
+        // 2. Notificar al backend de forma secundaria
+        // Usamos axios directo si queremos evitar interceptores, o api sabiendo que puede fallar
+        await api.post('auth/logout/').catch(() => {}); 
     } catch (error) {
-        console.error("Logout falló en servidor, forzando limpieza local:", error);
+        // Ignoramos errores de red en logout, la prioridad es la limpieza local
     } finally {
-        // 2. LIMPIEZA ABSOLUTA DE ESTADO (Principio Fail-Secure)
-        setUser(null);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token'); // Por si acaso hubiera basura
-        sessionStorage.clear();
-        
-        // 3. REDIRECCIÓN FORZADA
-        // Usamos window.location.href para resetear todo el estado de React y la caché
+        // 3. REDIRECCIÓN FORZADA PARA RESETEAR ESTADO GLOBAL
         window.location.href = '/';
     }
   };

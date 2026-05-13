@@ -291,7 +291,7 @@ const AdminDashboard: React.FC = () => {
 
         {currentView === 5 && (
           <div className="animate-fade-in space-y-6 h-full">
-            <h2 className="text-3xl font-black text-blue-700 uppercase italic flex items-center gap-3"><Icon icon="solar:map-point-wave-bold-duotone" className="text-blue-500 text-4xl" /> Vista de Águila (Mapa Global)</h2>
+            <h2 className="text-3xl font-black text-blue-700 uppercase italic flex items-center gap-3"><Icon icon="solar:map-point-wave-bold-duotone" className="text-blue-500 text-4xl" />  (Mapa Global)</h2>
             <div className="h-[500px] w-full">
                 <VendorMap isAdmin={true} />
             </div>
