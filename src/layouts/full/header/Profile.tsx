@@ -5,6 +5,8 @@ import { Link } from "react-router";
 import { useAuth } from "../../../context/AuthContext";
 import { useTranslation } from 'react-i18next';
 import { getUserAvatar } from "../../../utils/avatar";
+import { useEffect, useState } from "react";
+import { ProfileService } from "../../../services/ProfileService";
 
 interface ProfileProps {
   variant?: "light" | "dark";
@@ -15,7 +17,24 @@ const Profile = ({ variant = "dark" }: ProfileProps) => {
   const { logout, user } = useAuth();
   const { t } = useTranslation('header');
 
-  const avatarUrl = getUserAvatar(user?.email || user?.username || 'guest');
+  // 🆕 Cargamos la foto real del usuario, con fallback al identicon
+  const fallbackAvatar = getUserAvatar(user?.email || user?.username || 'guest');
+  const [avatarUrl, setAvatarUrl] = useState<string>(fallbackAvatar);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const pic = await ProfileService.getMyProfilePicture();
+        if (mounted && pic?.image_url) {
+          setAvatarUrl(pic.image_url);
+        }
+      } catch {
+        // si falla, mantenemos el fallback
+      }
+    })();
+    return () => { mounted = false; };
+  }, [user?.id]);
 
   const handleLogout = () => {
     logout();
@@ -35,7 +54,7 @@ const Profile = ({ variant = "dark" }: ProfileProps) => {
                 alt="logo"
                 height="35"
                 width="35"
-                className="rounded-full"
+                className="rounded-full object-cover"
               />
             </span>
             <div className="text-left hidden sm:block">
@@ -53,14 +72,6 @@ const Profile = ({ variant = "dark" }: ProfileProps) => {
         >
           <Icon icon="solar:user-circle-outline" className="text-gray-500 dark:text-gray-400" height={20} />
           {t('profile.myProfile')}
-        </Dropdown.Item>
-        <Dropdown.Item
-          as={Link}
-          to="#"
-          className="px-3 py-3 flex items-center bg-hover group/link w-full gap-3 text-gray-700 dark:text-white hover:bg-primary/10"
-        >
-          <Icon icon="solar:letter-linear" className="text-gray-500 dark:text-gray-400" height={20} />
-          {t('profile.myAccount')}
         </Dropdown.Item>
         <Dropdown.Item
           as={Link}
