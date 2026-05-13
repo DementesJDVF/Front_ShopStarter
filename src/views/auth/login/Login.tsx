@@ -4,6 +4,7 @@ import FullLogo from "src/layouts/full/shared/logo/FullLogo";
 import { useNavigate } from "react-router";
 import { useAuth } from "src/context/AuthContext";
 import { useTranslation } from "react-i18next";
+import { Icon } from "@iconify/react";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -117,15 +119,28 @@ const Login = () => {
                 <label className="text-[11px] font-extrabold text-[#0A014A] dark:text-slate-300 uppercase tracking-widest">{t("login.labelPassword")}</label>
                 <a href="/auth/forgot-password" className="text-[#3A17E4] dark:text-[#2CD4D9] text-[11px] font-black hover:underline uppercase tracking-widest">{t("login.forgotPassword")}</a>
               </div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-white/50 border border-slate-200 rounded-2xl px-5 py-3.5 outline-none focus:border-[#3A17E4] focus:bg-white/80 transition-all duration-300 font-medium text-slate-800 dark:bg-slate-800/50 dark:border-slate-700 dark:text-white placeholder:text-slate-400"
-                autoComplete="current-password"
-                required
-              />
+              <div className="relative group">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-white/50 border border-slate-200 rounded-2xl px-5 py-3.5 pr-12 outline-none focus:border-[#3A17E4] focus:bg-white/80 transition-all duration-300 font-medium text-slate-800 dark:bg-slate-800/50 dark:border-slate-700 dark:text-white placeholder:text-slate-400"
+                  autoComplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#3A17E4] dark:hover:text-[#2CD4D9] transition-colors focus:outline-none"
+                  aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                >
+                  <Icon 
+                    icon={showPassword ? "solar:eye-bold-duotone" : "solar:eye-closed-bold-duotone"} 
+                    className="text-xl"
+                  />
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center gap-3 px-1 mt-1">

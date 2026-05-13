@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import MobileSidebar from "../sidebar/MobileSidebar";
 import Notification from "./notification";
 import Profile from "./Profile";
-import Cart from "./Cart";
 import { useAuth } from "../../../context/AuthContext";
 import FullLogo from "../shared/logo/FullLogo";
 import LanguageSelector from "../../../components/LanguageSelector/LanguageSelector";
@@ -156,12 +155,6 @@ const Header = () => {
               <div className="mr-1">
                 <LanguageSelector />
               </div>
-
-              {user?.role === "CLIENTE" && (
-                <div className="flex items-center">
-                  <Cart />
-                </div>
-              )}
 
               <div className="flex items-center">
                 <Notification />

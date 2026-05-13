@@ -138,15 +138,6 @@ export default function ProductDetail() {
               )}
             </div>
 
-            <div className="flex flex-col gap-3 pt-4 border-t border-gray-100 dark:border-slate-700">
-              <button
-                disabled={!canPurchase}
-                className={`w-full py-3 rounded-2xl font-bold text-white transition-all duration-300 ${
-                  canPurchase ? 'bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20' : 'bg-gray-200 dark:bg-slate-700 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                {isOutOfStock ? 'Sin stock' : isNotAvailable ? 'No disponible' : 'Anadir al carrito'}
-              </button>
             </div>
           </div>
         </div>

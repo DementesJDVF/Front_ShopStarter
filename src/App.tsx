@@ -2,7 +2,6 @@ import { RouterProvider } from "react-router";
 import { Flowbite, ThemeModeScript } from 'flowbite-react';
 import customTheme from './utils/theme/custom-theme';
 import { AuthProvider } from './context/AuthContext';
-import { CartProvider } from './context/CartContext';
 import { MapProvider } from './context/MapContext';
 import router from "./routes/Router";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -33,17 +32,15 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <CartProvider>
-          <MapProvider>
-            <AuthProvider>
-              <ThemeModeScript />
-              <Flowbite theme={{ theme: customTheme }}>
-                <RouterProvider router={router} />
-              </Flowbite>
-              <Toaster position="top-right" />
-            </AuthProvider>
-          </MapProvider>
-        </CartProvider>
+        <MapProvider>
+          <AuthProvider>
+            <ThemeModeScript />
+            <Flowbite theme={{ theme: customTheme }}>
+              <RouterProvider router={router} />
+            </Flowbite>
+            <Toaster position="top-right" />
+          </AuthProvider>
+        </MapProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
