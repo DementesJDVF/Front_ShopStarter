@@ -24,7 +24,7 @@ type ApiProduct = {
   name: string;
   description: string;
   price: string;
-  stock: number;
+  stock: boolean;
   status: string;
   vendor: string | number;
   vendor_name: string;
@@ -202,7 +202,7 @@ export function ProductCatalog() {
           filteredProducts.map((p) => {
             const rawImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
             const mainImage = getAbsoluteImageUrl(rawImage);
-            const isOutOfStock = p.stock <= 0;
+            const isOutOfStock = !p.stock;
             const isNotAvailable = !p.status || !p.status.toString().toUpperCase().includes('AVAILABLE');
             const canPurchase = !isOutOfStock && !isNotAvailable;
 
