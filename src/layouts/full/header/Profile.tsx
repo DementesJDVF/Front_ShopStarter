@@ -4,6 +4,7 @@ import user1 from "/src/assets/images/profile/user-1.jpg";
 import { Link } from "react-router";
 import { useAuth } from "../../../context/AuthContext";
 import { useTranslation } from 'react-i18next';
+import { getUserAvatar } from "../../../utils/avatar";
 
 interface ProfileProps {
   variant?: "light" | "dark";
@@ -13,6 +14,8 @@ const Profile = ({ variant = "dark" }: ProfileProps) => {
   const isDark = variant === "dark";
   const { logout, user } = useAuth();
   const { t } = useTranslation('header');
+
+  const avatarUrl = getUserAvatar(user?.email || user?.username || 'guest');
 
   const handleLogout = () => {
     logout();
@@ -28,7 +31,7 @@ const Profile = ({ variant = "dark" }: ProfileProps) => {
           <div className="flex items-center gap-2 cursor-pointer group-hover/menu:text-primary p-2 rounded-lg hover:bg-lightprimary transition">
             <span className="h-10 w-10 flex justify-center items-center">
               <img
-                src={user1}
+                src={avatarUrl}
                 alt="logo"
                 height="35"
                 width="35"
