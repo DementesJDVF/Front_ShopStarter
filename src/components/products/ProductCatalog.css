@@ -28,6 +28,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  @apply dark:border-gray-900 dark:bg-gray-900;
 }
 
 .product-card__vendor {

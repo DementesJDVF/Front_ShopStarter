@@ -38,7 +38,7 @@
     "no_res":"No tienes reservas activas",
     "alr_paid":"YA PAGUÉ",
     "discard":"LIBERAR",
-    "ship":"ENTREGA PENDIENTE",
+    "ship":"ENTREGADO",
     "advise1":"Importante",
     "advise2":"Al presionar `YA PAGUÉ`, el vendedor recibirá una alerta inmediata para validar tu pago y entregarte el producto."
   }

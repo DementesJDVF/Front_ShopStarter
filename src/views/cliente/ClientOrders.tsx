@@ -86,11 +86,11 @@ const ClientOrders: React.FC = () => {
   return (
     <div className="p-6 max-w-6xl mx-auto animate-fade-in font-[var(--main-font)]">
       <div className="mb-8">
-        <h1 className="text-4xl font-black text-indigo-900 tracking-tighter uppercase mb-2 italic">{t("reservas.title")}</h1>
-        <p className="text-gray-500 font-medium">{t("reservas.description")}</p>
+        <h1 className="text-3xl font-black text-indigo-900 dark:text-white tracking-tighter uppercase mb-1 italic">{t("reservas.title")}</h1>
+        <p className="text-black dark:text-white font-bold">{t("reservas.description")}</p>
       </div>
 
-      <Card className="border-none shadow-2xl rounded-[2rem] overflow-hidden p-2 bg-white/80 backdrop-blur-md">
+      <Card className="border-none shadow-xl rounded-3xl overflow-hidden p-2">
         <div className="overflow-x-auto">
           {loading && orders.length === 0 ? (
             <div className="flex justify-center items-center py-20">
@@ -103,20 +103,20 @@ const ClientOrders: React.FC = () => {
             </div>
           ) : (
             <Table hoverable>
-              <Table.Head className="bg-indigo-50/50">
-                <Table.HeadCell className="py-5">{t("reservas.product")}</Table.HeadCell>
-                <Table.HeadCell>{t("reservas.vendor")}</Table.HeadCell>
-                <Table.HeadCell>{t("reservas.status")}</Table.HeadCell>
-                <Table.HeadCell>Total</Table.HeadCell>
-                <Table.HeadCell className="text-center">{t("reservas.actions")}</Table.HeadCell>
+              <Table.Head className="bg-gray-200 dark:bg-gray-50/50 border-gray-100">
+                <Table.HeadCell className="py-4 dark:text-black">{t("reservas.product")}</Table.HeadCell>
+                <Table.HeadCell className="py-4 dark:text-black">{t("reservas.vendor")}</Table.HeadCell>
+                <Table.HeadCell className="py-4 dark:text-black">{t("reservas.status")}</Table.HeadCell>
+                <Table.HeadCell className="py-4 dark:text-black">Total</Table.HeadCell>
+                <Table.HeadCell className="text-center py-4 dark:text-black">{t("reservas.actions")}</Table.HeadCell>
               </Table.Head>
-              <Table.Body className="divide-y">
+              <Table.Body>
                 {orders.map((order) => (
-                  <Table.Row key={order.id} className="bg-white hover:bg-indigo-50/20 transition-all">
-                    <Table.Cell className="font-black text-slate-800 text-lg">{order.product_name}</Table.Cell>
-                    <Table.Cell className="font-bold text-indigo-500 uppercase">{order.vendor_name}</Table.Cell>
+                  <Table.Row key={order.id} className="bg-white hover:bg-indigo-50/30 transition-colors">
+                    <Table.Cell className="font-black text-gray-900 dark:text-gray-100 py-5">{order.product_name}</Table.Cell>
+                    <Table.Cell className="font-medium text-gray-700 dark:text-gray-300">{order.vendor_name}</Table.Cell>
                     <Table.Cell>{getStatusBadge(order.status)}</Table.Cell>
-                    <Table.Cell className="font-black text-indigo-600 text-xl">${Number(order.total).toLocaleString()}</Table.Cell>
+                    <Table.Cell className="font-bold text-indigo-900 dark:text-indigo-400">${Number(order.total).toLocaleString()}</Table.Cell>
                     <Table.Cell className="flex justify-center gap-2">
                       {order.status === 'RESERVED' && (
                         <>
@@ -132,7 +132,7 @@ const ClientOrders: React.FC = () => {
                           </Button>
                           <Button 
                             size="sm" 
-                            color="gray" 
+                            color="failure" 
                             outline
                             className="rounded-xl"
                             onClick={() => handleCancel(order.id)}

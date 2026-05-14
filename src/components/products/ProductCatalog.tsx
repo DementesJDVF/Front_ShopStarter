@@ -145,7 +145,7 @@ export function ProductCatalog() {
 
   return (
     <section className="catalog font-[var(--main-font)]">
-      <div className="mb-8 border-b border-gray-100 pb-6">
+      <div className="mb-8 border-b border-primary dark:border-gray-300 pb-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">{t("catalogTitle")}</h2>
@@ -172,8 +172,8 @@ export function ProductCatalog() {
           <button
             onClick={() => setSelectedCategory(null)}
             className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === null
-                ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-primary text-white border-b border-white shadow-lg shadow-black/50 scale-105'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-800'
               }`}
           >
             {t("all")}
@@ -183,8 +183,8 @@ export function ProductCatalog() {
               key={cat.id}
               onClick={() => setSelectedCategory(cat.name)}
               className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === cat.name
-                  ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-primary text-white border-b border-white shadow-lg shadow-black/50 scale-105'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-800'
                 }`}
             >
               {cat.name}
@@ -210,7 +210,7 @@ export function ProductCatalog() {
             const canPurchase = !isOutOfStock && !isNotAvailable;
 
             return (
-              <article key={p.id} className={`product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100 bg-white ${!canPurchase ? 'opacity-60' : ''}`}>
+              <article key={p.id} className={`product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100 ${!canPurchase ? 'opacity-60' : ''}`}>
                 <div className="relative aspect-square overflow-hidden bg-gray-50">
                   {mainImage ? (
                     <img
@@ -228,7 +228,7 @@ export function ProductCatalog() {
 
                   <div className="absolute top-3 left-3 flex flex-col gap-2 z-20">
                     {p.category_name && (
-                      <div className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm">
+                      <div className="bg-info text-white backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm">
                         {p.category_name}
                       </div>
                     )}
@@ -239,7 +239,7 @@ export function ProductCatalog() {
                     ) : (
                       <>
                         {p.status === 'RESERVED' && (
-                          <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-amber-500/30">
+                          <div className="bg-amber-500 text-black px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-amber-500/30">
                             {t("reserved")}
                           </div>
                         )}
@@ -253,8 +253,9 @@ export function ProductCatalog() {
                   </div>
 
                   {p.distance !== undefined && (
-                    <div className="absolute top-3 right-3 bg-primary/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-white shadow-sm flex items-center gap-1 z-20">
-                      <Icon icon="solar:map-point-linear" />
+                    <div className="absolute top-3 right-3 bg-gray-100 dark:bg-gray-900 backdrop-blur px-3 py-1 rounded-full 
+                      text-[10px] font-bold text-black dark:text-white shadow-sm flex items-center gap-1 z-20">
+                      <Icon icon="solar:map-point-linear" className="text-black dark:text-white"/>
                       {p.distance} km
                     </div>
                   )}
@@ -269,14 +270,16 @@ export function ProductCatalog() {
                     {p.description}
                   </p>
 
-                  <div className="text-xl font-black text-primary min-w-0 truncate">
+                  <div className="text-xl font-black text-primary dark:text-gray-100 min-w-0 truncate">
                     ${parseFloat(p.price).toLocaleString()}
                   </div>
-                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-900 dark:border-gray-50">
 
                     <div className="flex gap-2 flex-shrink-0">
                       <button
-                        className="bg-gray-50 text-gray-400 p-2.5 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300 border border-gray-100 shadow-sm"
+                        className="bg-gray-50 dark:bg-darkgray text-gray-900 dark:text-gray-50 p-2.5 rounded-xl 
+                          hover:bg-primary/10 hover:text-primary transition-all duration-300 border border-gray-400 
+                          dark:border-gray-700 shadow-sm"
                         title={t("viewDetail")}
                         onClick={() => navigate(`/app/products/${p.id}`)}
                       >

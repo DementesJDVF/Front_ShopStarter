@@ -71,7 +71,7 @@ const VendorOrders: React.FC = () => {
     <div className="p-6 max-w-6xl mx-auto animate-fade-in font-[var(--main-font)]">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-black text-indigo-900 dark:text-white tracking-tighter uppercase mb-1">
+          <h1 className="text-3xl font-black text-indigo-900 dark:text-white tracking-tighter uppercase mb-1 italic">
             {t('orders.title')}
           </h1>
           <p className="text-black dark:text-white font-bold">{t('orders.subtitle')}</p>
@@ -98,10 +98,10 @@ const VendorOrders: React.FC = () => {
           ) : (
             <Table hoverable>
               <Table.Head className="bg-gray-200 dark:bg-gray-50/50 border-gray-100">
-                <Table.HeadCell className="text-center py-4 dark:text-black">{t('orders.product')}</Table.HeadCell>
-                <Table.HeadCell className="text-center py-4 dark:text-black">{t('orders.client')}</Table.HeadCell>
-                <Table.HeadCell className="text-center py-4 dark:text-black">{t('orders.estado')}</Table.HeadCell>
-                <Table.HeadCell className="text-center py-4 dark:text-black">Total</Table.HeadCell>
+                <Table.HeadCell className="py-4 dark:text-black">{t('orders.product')}</Table.HeadCell>
+                <Table.HeadCell className="py-4 dark:text-black">{t('orders.client')}</Table.HeadCell>
+                <Table.HeadCell className="py-4 dark:text-black">{t('orders.estado')}</Table.HeadCell>
+                <Table.HeadCell className="py-4 dark:text-black">Total</Table.HeadCell>
                 <Table.HeadCell className="text-center py-4 dark:text-black">{t('orders.actions')}</Table.HeadCell>
               </Table.Head>
               <Table.Body>
