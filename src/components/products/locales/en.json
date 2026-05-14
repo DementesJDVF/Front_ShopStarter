@@ -54,8 +54,9 @@
     "INACTIVE": "INACTIVE",
     "REJECTED": "REJECTED",
     "RESERVED": "RESERVED",
-    "SOLD": "OUT OF STOCK"
+    "SOLD": "SOLD"
   },
+  "sold": "Sold",
   "backCatalog": "Back to catalog",
   "featured": "Featured",
   "units": "units",

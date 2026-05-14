@@ -36,7 +36,7 @@ interface Category {
 
 const PLACEHOLDER_IMAGE = "https://placehold.co/400x400?text=Imagen+no+disponible";
 
-const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handleEdit, navigate, tableActionData }: any) => (
+const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handleEdit, navigate, tableActionData, handleToggleStock, togglingId }: any) => (
   <Table.Body className="divide-y divide-border dark:divide-darkborder">
     {products.length === 0 ? (
       <Table.Row>
@@ -70,7 +70,14 @@ const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handle
             <h5 className="text-base font-bold text-wrap">
               ${parseFloat(product.price.toString()).toLocaleString()}
             </h5>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-2">
+              <ToggleSwitch
+                checked={product.stock}
+                label=""
+                onChange={() => handleToggleStock(product.id)}
+                disabled={togglingId === product.id}
+                sizing="sm"
+              />
               <Badge color={product.stock ? "success" : "failure"} className="w-fit">
                 {product.stock ? t('table.inStock') : t('table.outOfStock')}
               </Badge>
@@ -134,6 +141,7 @@ const ProductTable = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | number | null>(null);
+  const [togglingId, setTogglingId] = useState<string | number | null>(null);
   const navigate = useNavigate();
   const confirm = useConfirm();
 
@@ -232,6 +240,29 @@ const ProductTable = () => {
     } catch (error) {
       console.error(t('error.deleteProduct'), error);
       showErrorAlert(t('alert.deleteError'));
+    }
+  };
+
+  const handleToggleStock = async (id: string | number) => {
+    setTogglingId(id);
+    // Actualización optimista en UI
+    setProducts(prev =>
+      prev.map(p => p.id === id ? { ...p, stock: !p.stock } : p)
+    );
+    try {
+      const res = await api.patch(`products/create/${id}/toggle-stock/`);
+      // Sincronizar con el valor real del servidor
+      setProducts(prev =>
+        prev.map(p => p.id === id ? { ...p, stock: res.data.stock } : p)
+      );
+    } catch (error: any) {
+      // Revertir si hubo error
+      setProducts(prev =>
+        prev.map(p => p.id === id ? { ...p, stock: !p.stock } : p)
+      );
+      showErrorAlert(error.response?.data?.detail || 'No se pudo cambiar la disponibilidad.');
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -419,6 +450,8 @@ const ProductTable = () => {
                 navigate={navigate}
                 PLACEHOLDER_IMAGE={PLACEHOLDER_IMAGE}
                 tableActionData={tableActionData}
+                handleToggleStock={handleToggleStock}
+                togglingId={togglingId}
               />
             </Table>
           </div>
