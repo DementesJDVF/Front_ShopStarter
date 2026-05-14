@@ -29,7 +29,7 @@ const AuthRegister = () => {
         document_number: '',
         birth_date: '',
         is_human: false,
-        accepted_terms: false,
+        terms_accepted: false,
         honeypot: '',
     });
 
@@ -96,7 +96,7 @@ const AuthRegister = () => {
         e.preventDefault();
         if (step < 3) { nextStep(); return; }
         if (!validateStep()) return;
-        if (!formData.accepted_terms) { setError(t("errors.termsRequired")); return; }
+        if (!formData.terms_accepted) { setError(t("errors.termsRequired")); return; }
 
         setLoading(true);
         setError(null);
@@ -291,7 +291,7 @@ const AuthRegister = () => {
                             )}
 
                             <div className="flex items-start gap-4 p-5 bg-[#3A17E4]/5 rounded-3xl border border-[#3A17E4]/20 mt-2 hover:bg-[#3A17E4]/10 transition-all shadow-sm group">
-                                <Checkbox id="accepted_terms" checked={formData.accepted_terms} onChange={handleChange} required className="text-[#3A17E4] focus:ring-[#3A17E4] h-5 w-5 mt-1 cursor-pointer rounded-lg" />
+                                <Checkbox id="terms_accepted" checked={formData.terms_accepted} onChange={handleChange} required className="text-[#3A17E4] focus:ring-[#3A17E4] h-5 w-5 mt-1 cursor-pointer rounded-lg" />
                                 <div className="text-xs font-bold text-[#0A014A] leading-relaxed">
                                     {t("form.termsText")} <button type="button" onClick={() => setShowTerms(true)} className="text-[#3A17E4] font-black hover:underline outline-none">{t("form.termsLink")}</button> {t("form.termsText2")}
                                 </div>
