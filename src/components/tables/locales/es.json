@@ -12,18 +12,16 @@
       "none": "Sin categoría"
     },
     "stock": "Stock: {{count}} unidades",
-    "inStock": "Disponible",
+    "inStock": "No Agotado",
     "outOfStock": "Agotado",
     "availability": "Disponibilidad",
     "status": {
-      "noStatus": "SIN ESTADO",
-      "AVAILABLE": "DISPONIBLE",
       "PENDING": "PENDIENTE",
-      "RESERVED": "RESERVADO",
-      "SOLD": "VENDIDO",
+      "AVAILABLE": "DISPONIBLE",
       "INACTIVE": "INACTIVO",
       "REJECTED": "RECHAZADO",
-      "ARCHIVED": "ARCHIVADO"
+      "RESERVED": "RESERVADO",
+      "SOLD": "VENDIDO"
     },
     "action": {
       "view": "Ver Detalle",

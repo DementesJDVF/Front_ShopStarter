@@ -85,10 +85,13 @@ const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handle
           </Table.Cell>
           <Table.Cell>
             <Badge
-              color={product.status === 'AVAILABLE' ? 'success' : 'lightsecondary'}
-              className="uppercase"
+              color={product.status==='AVAILABLE'?'success':
+                product.status==='PENDING'||product.status==='RESERVED'?'warning':
+                product.status==='REJECTED'?'failure':'lightsecondary'}
+              className={product.status==='PENDING'||product.status==='RESERVED'?'uppercase rounded-lg px-3 py-1 font-bold text-black':
+                'uppercase rounded-lg px-3 py-1 font-bold'}
             >
-              {t('table.status.' + product.status, product.status)}
+              {t('table.status.'+product.status)}
             </Badge>
           </Table.Cell>
           <Table.Cell>

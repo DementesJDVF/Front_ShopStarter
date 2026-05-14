@@ -57,7 +57,7 @@ const VendorOrders: React.FC = () => {
       case 'PAID':
         return <Badge color="success" className="rounded-lg px-3 py-1 font-bold">{t('orders.status.PAID')}</Badge>;
       case 'RESERVED':
-        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold">{t('orders.status.RESERVED')}</Badge>;
+        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold text-black">{t('orders.status.RESERVED')}</Badge>;
       case 'CANCELLED':
         return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">{t('orders.status.CANCELLED')}</Badge>;
       case 'PENDING':
@@ -97,18 +97,18 @@ const VendorOrders: React.FC = () => {
             </div>
           ) : (
             <Table hoverable>
-              <Table.Head className="bg-gray-50/50 border-b border-gray-100">
-                <Table.HeadCell className="py-4">{t('orders.product')}</Table.HeadCell>
-                <Table.HeadCell>{t('orders.client')}</Table.HeadCell>
-                <Table.HeadCell>{t('orders.estado')}</Table.HeadCell>
-                <Table.HeadCell>Total</Table.HeadCell>
-                <Table.HeadCell className="text-center">{t('orders.actions')}</Table.HeadCell>
+              <Table.Head className="bg-gray-200 dark:bg-gray-50/50 border-gray-100">
+                <Table.HeadCell className="text-center py-4 dark:text-black">{t('orders.product')}</Table.HeadCell>
+                <Table.HeadCell className="text-center py-4 dark:text-black">{t('orders.client')}</Table.HeadCell>
+                <Table.HeadCell className="text-center py-4 dark:text-black">{t('orders.estado')}</Table.HeadCell>
+                <Table.HeadCell className="text-center py-4 dark:text-black">Total</Table.HeadCell>
+                <Table.HeadCell className="text-center py-4 dark:text-black">{t('orders.actions')}</Table.HeadCell>
               </Table.Head>
-              <Table.Body className="divide-y divide-gray-100">
+              <Table.Body>
                 {orders.map((order) => (
                   <Table.Row key={order.id} className="bg-white hover:bg-indigo-50/30 transition-colors">
-                    <Table.Cell className="font-black text-gray-900 py-5">{order.product_name}</Table.Cell>
-                    <Table.Cell className="font-medium text-gray-500">{order.client_name}</Table.Cell>
+                    <Table.Cell className="font-black text-gray-900 dark:text-gray-100 py-5">{order.product_name}</Table.Cell>
+                    <Table.Cell className="font-medium text-gray-700 dark:text-gray-300">{order.client_name}</Table.Cell>
                     <Table.Cell>
                         <div className="flex flex-col gap-1">
                             {getStatusBadge(order.status)}
@@ -117,7 +117,7 @@ const VendorOrders: React.FC = () => {
                             )}
                         </div>
                     </Table.Cell>
-                    <Table.Cell className="font-bold text-indigo-600">${Number(order.total).toLocaleString()}</Table.Cell>
+                    <Table.Cell className="font-bold text-indigo-900 dark:text-indigo-400">${Number(order.total).toLocaleString()}</Table.Cell>
                     <Table.Cell className="flex justify-center gap-2">
                       {order.status === 'RESERVED' && (
                         <>

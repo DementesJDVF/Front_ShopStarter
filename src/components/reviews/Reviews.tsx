@@ -9,7 +9,8 @@ const Stars: React.FC<{ value: number; size?: number }> = ({ value, size = 18 })
   const hasHalf = value - full >= 0.25 && value - full < 0.75;
   const totalFull = hasHalf ? full : Math.round(value);
   return (
-    <div className="flex items-center gap-0.5 text-amber-400">
+    <div className="flex items-center gap-0.5 text-amber-400
+      drop-shadow-[0_0_2px_rgba(0,0,0,1)] dark:drop-shadow-[0_0_2px_rgba(255,255,255,1)]">
       {Array.from({ length: 5 }).map((_, i) => {
         let icon = 'solar:star-line-duotone';
         if (i < totalFull) icon = 'solar:star-bold';
@@ -134,10 +135,11 @@ const Reviews: React.FC = () => {
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="bg-white dark:bg-darkgray p-6 rounded-2xl shadow-sm">
+      <div className="bg-gray-100 dark:bg-darkgray p-6 rounded-2xl shadow-sm">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
-            <Icon icon="solar:star-fall-2-bold-duotone" width={28} />
+            <Icon icon="solar:star-fall-2-bold-duotone"
+            className="text-amber-400 drop-shadow-[0_0_2px_rgba(0,0,0,1)] dark:drop-shadow-[0_0_2px_rgba(255,255,255,1)]" width={28} />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-800 dark:text-white">
@@ -171,7 +173,8 @@ const Reviews: React.FC = () => {
                   <span className="text-sm font-semibold text-gray-600 dark:text-gray-300 w-10">
                     {t('summary.stars', { count: b.stars })}
                   </span>
-                  <div className="flex-1 h-2 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                  <div className="flex-1 h-2 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden
+                  border border-gray-600 dark:border-gray-400">
                     <div
                       className="h-full bg-amber-400"
                       style={{ width: `${b.percent}%` }}
@@ -187,7 +190,7 @@ const Reviews: React.FC = () => {
       </div>
 
       {/* Lista de reseñas */}
-      <div className="bg-white dark:bg-darkgray p-6 rounded-2xl shadow-sm">
+      <div className="bg-gray-100 dark:bg-darkgray p-6 rounded-2xl shadow-sm">
         {reviews.length === 0 ? (
           <div className="text-center p-12 py-20 bg-gray-50 dark:bg-dark rounded-2xl border border-dashed border-gray-200">
             <Icon
@@ -205,11 +208,12 @@ const Reviews: React.FC = () => {
             {reviews.map((r) => (
               <li
                 key={r.id}
-                className="border border-gray-100 dark:border-gray-800 rounded-2xl p-4 hover:shadow-sm transition-shadow"
+                className="border border-gray-300 dark:border-gray-900 rounded-2xl p-4 hover:shadow-md 
+                  hover:shadow-gray-900 dark:hover:shadow-gray-100 transition-shadow"
               >
                 <div className="flex items-start justify-between gap-4 mb-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold uppercase">
+                    <div className="w-10 h-10 rounded-full bg-white border border-gray-500 text-primary flex items-center justify-center font-bold uppercase">
                       {(r.client || '?').charAt(0)}
                     </div>
                     <div>

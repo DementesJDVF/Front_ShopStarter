@@ -136,7 +136,7 @@ export default function ProductDetail() {
     <div className="rounded-2xl shadow-xl bg-white dark:bg-darkgray p-8 max-w-5xl mx-auto font-[var(--main-font)]">
       <button
         onClick={() => navigate(-1)}
-        className="mb-6 flex items-center gap-2 text-sm text-primary hover:text-darkprimary transition-colors font-bold"
+        className="mb-6 flex items-center gap-2 text-sm text-primary hover:text-darkprimary transition-colors font-bold dark:text-gray-200"
       >
         <Icon icon="solar:alt-arrow-left-linear" /> {t("backCatalog")}
       </button>
@@ -203,13 +203,13 @@ export default function ProductDetail() {
           </h1>
 
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-primary">
+            <span className="text-4xl font-black dark:text-gray-300  text-primary">
               ${Number(product.price).toLocaleString()}
             </span>
-            <span className="text-gray-400 text-sm">{t("priceCurrency")}</span>
+            <span className="text-gray-900 dark:text-gray-300 text-sm">{t("priceCurrency")}</span>
           </div>
 
-          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed border-t pt-4">
+          <p className="text-lg text-gray-900 dark:text-gray-300 leading-relaxed border-t pt-4">
             {product.description}
           </p>
 
@@ -217,14 +217,14 @@ export default function ProductDetail() {
             <div className="bg-gray-50 dark:bg-dark p-4 rounded-2xl flex items-center gap-3">
               <Icon icon="solar:shop-2-linear" className="text-primary text-2xl" />
               <div>
-                <p className="text-gray-400 text-xs">{t("vendor")}</p>
+                <p className="text-black dark:text-gray-200 text-xs">{t("vendor")}</p>
                 <p className="font-bold text-dark dark:text-white uppercase tracking-tighter">{product.vendor_name}</p>
               </div>
             </div>
             <div className="bg-gray-50 dark:bg-dark p-4 rounded-2xl flex items-center gap-3">
               <Icon icon="solar:box-linear" className="text-primary text-2xl" />
               <div>
-                <p className="text-gray-400 text-xs">{t("stock")}</p>
+                <p className="text-black dark:text-gray-200 text-xs">{t("stock")}</p>
                 <p className={`font-bold ${!product.stock ? "text-red-500" : "text-green-600"}`}>
                   {!product.stock
                     ? t("outOfStock")
@@ -262,7 +262,7 @@ export default function ProductDetail() {
                 {t("notAvailable")} (Estado detectado: {product.status})
               </Button>
             )}
-            <p className="text-center text-xs text-gray-400 mt-3 italic">
+            <p className="text-center text-xs text-black dark:text-gray-300 mt-3 italic">
               {t("reserveInfo")}
             </p>
           </div>

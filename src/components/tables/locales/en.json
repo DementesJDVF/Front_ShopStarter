@@ -16,7 +16,12 @@
     "outOfStock": "Out of Stock",
     "availability": "Availability",
     "status": {
-      "noStatus": "NO STATUS"
+      "PENDING": "PENDING",
+      "AVAILABLE": "AVAILABLE",
+      "INACTIVE": "INACTIVE",
+      "REJECTED": "REJECTED",
+      "RESERVED": "RESERVED",
+      "SOLD": "SOLD"
     },
     "action": {
       "view": "View Details",
