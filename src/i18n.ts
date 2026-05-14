@@ -47,6 +47,9 @@ import TradRegisterEN from 'src/views/auth/authforms/locales/en.json';
 import TradReviewsES from  'src/components/reviews/locales/es.json';
 import TradReviewsEN from  'src/components/reviews/locales/en.json';
 
+import TradProfileES from 'src/views/profile/locales/es.json'
+import TradProfileEN from 'src/views/profile/locales/en.json'
+
 
 i18n
   .use(initReactI18next)
@@ -69,6 +72,7 @@ i18n
         login: TradLoginES,
         register: TradRegisterES,
         Reviews: TradReviewsES,
+        Profile: TradProfileES,
       },
       en: {
         translation: en,
@@ -87,6 +91,7 @@ i18n
         login: TradLoginEN,
         register: TradRegisterEN,
         Reviews: TradReviewsEN,
+        Profile: TradProfileEN,
       },
     },
     lng: "es",
