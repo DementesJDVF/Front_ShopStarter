@@ -173,7 +173,7 @@ export function ProductCatalog() {
             onClick={() => setSelectedCategory(null)}
             className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === null
                 ? 'bg-primary text-white border-b border-white shadow-lg shadow-black/50 scale-105'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-800'
+                : 'bg-gray-50 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-600'
               }`}
           >
             {t("all")}
@@ -184,7 +184,7 @@ export function ProductCatalog() {
               onClick={() => setSelectedCategory(cat.name)}
               className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === cat.name
                   ? 'bg-primary text-white border-b border-white shadow-lg shadow-black/50 scale-105'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-800'
+                  : 'bg-gray-50 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-600'
                 }`}
             >
               {cat.name}
@@ -278,7 +278,7 @@ export function ProductCatalog() {
                     <div className="flex gap-2 flex-shrink-0">
                       <button
                         className="bg-gray-50 dark:bg-darkgray text-gray-900 dark:text-gray-50 p-2.5 rounded-xl 
-                          hover:bg-primary/10 hover:text-primary transition-all duration-300 border border-gray-400 
+                          hover:bg-gray-300 dark:hover:bg-gray-800 transition-all duration-300 border border-gray-400 
                           dark:border-gray-700 shadow-sm"
                         title={t("viewDetail")}
                         onClick={() => navigate(`/app/products/${p.id}`)}
