@@ -1,4 +1,4 @@
-import { Badge, Dropdown, Progress, Table, Spinner, Button, Modal, Label, TextInput, Select, Textarea, FileInput, Tooltip } from "flowbite-react";
+import { Badge, Dropdown, Progress, Table, Spinner, Button, Modal, Label, TextInput, Select, Textarea, FileInput, Tooltip, ToggleSwitch } from "flowbite-react";
 import { resizeImageForAI } from "../../utils/clientResizer";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { Icon } from "@iconify/react";
@@ -13,6 +13,8 @@ import IAErrorAlert from "../ia/IAErrorAlert";
 import IACriticalBadge from "../ia/IACriticalBadge";
 // ===== FIN NUEVO =====
 import { optimizeImageUrl } from "../../utils/imageOptimizer";
+import { useConfirm } from "../../context/ConfirmContext";
+import { showSuccessAlert, showErrorAlert, showWarningAlert } from "../../utils/Alerts";
 
 interface Product {
   id: string | number;
@@ -20,7 +22,7 @@ interface Product {
   description?: string;
   price: number;
   status: string;
-  stock: number;
+  stock: boolean;
   category?: string | number;
   category_name: string;
   images: Array<{ url_image: string; is_main: boolean }>;
@@ -68,15 +70,10 @@ const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handle
             <h5 className="text-base font-bold text-wrap">
               ${parseFloat(product.price.toString()).toLocaleString()}
             </h5>
-            <div className="text-xs font-medium text-dark opacity-70 mb-2">
-               {t('table.stock', { count: product.stock })}
-            </div>
-            <div className="me-5">
-              <Progress
-                progress={product.stock > 0 ? 100 : 0}
-                color={product.stock >= 5 ? 'success' : product.stock > 0 ? 'warning' : 'red'}
-                size={"sm"}
-              />
+            <div className="flex items-center gap-2 mt-1">
+              <Badge color={product.stock ? "success" : "failure"} className="w-fit">
+                {product.stock ? t('table.inStock') : t('table.outOfStock')}
+              </Badge>
             </div>
           </Table.Cell>
           <Table.Cell>
@@ -98,8 +95,8 @@ const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handle
               )}
             >
               {tableActionData.map((items: any, index: number) => (
-                <Dropdown.Item 
-                  key={index} 
+                <Dropdown.Item
+                  key={index}
                   className="flex gap-3"
                   onClick={() => {
                     if (items.listtitle === "Borrar") {
@@ -115,8 +112,8 @@ const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handle
                   <span>
                     {items.listtitle === "Borrar" ? t('table.action.delete')
                       : items.listtitle === "Editar" ? t('table.action.edit')
-                      : items.listtitle === "Ver Detalle" ? t('table.action.view')
-                      : items.listtitle
+                        : items.listtitle === "Ver Detalle" ? t('table.action.view')
+                          : items.listtitle
                     }
                   </span>
                 </Dropdown.Item>
@@ -138,7 +135,8 @@ const ProductTable = () => {
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | number | null>(null);
   const navigate = useNavigate();
-  
+  const confirm = useConfirm();
+
   // Estados para el visor de imágenes
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -149,12 +147,12 @@ const ProductTable = () => {
     setPreviewTitle(title);
     setIsPreviewOpen(true);
   };
-  
+
   const [newProduct, setNewProduct] = useState({
     name: '',
     description: '',
     price: '',
-    stock: '',
+    stock: true as boolean,
     category: '',
     image_file: null as File | null,
     preview_url: ''
@@ -186,7 +184,7 @@ const ProductTable = () => {
     try {
       const response = await api.get('products/get-categories/');
       console.log(t('fetch.categoriesLoaded'), response.data);
-      
+
       let cats: Category[] = [];
       const data = response.data;
 
@@ -208,7 +206,7 @@ const ProductTable = () => {
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-    
+
     // Cleanup de URLs de previsualización al desmontar
     return () => {
       if (newProduct.preview_url && newProduct.preview_url.startsWith('blob:')) {
@@ -225,13 +223,15 @@ const ProductTable = () => {
   }, [newProduct.preview_url]);
 
   const handleDelete = async (id: string | number) => {
-    if (!window.confirm(t('confirm.delete'))) return;
+    const confirmed = await confirm(t('confirm.delete'), { isDestructive: true });
+    if (!confirmed) return;
     try {
       await api.delete(`products/create/${id}/`);
+      showSuccessAlert(t('alert.deleteSuccess', 'Producto eliminado'));
       fetchProducts();
     } catch (error) {
       console.error(t('error.deleteProduct'), error);
-      alert(t('alert.deleteError'));
+      showErrorAlert(t('alert.deleteError'));
     }
   };
 
@@ -241,9 +241,9 @@ const ProductTable = () => {
     setEditingId(product.id);
     setNewProduct({
       name: product.name,
-      description: product.description || '', 
+      description: product.description || '',
       price: product.price.toString(),
-      stock: product.stock.toString(),
+      stock: product.stock,
       category: categoryMatch ? categoryMatch.id.toString() : (product.category?.toString() || ''), 
       image_file: null,
       preview_url: product.images?.[0]?.url_image || ''
@@ -254,7 +254,7 @@ const ProductTable = () => {
   const handleSuggestAI = async () => {
     const hasImage = newProduct.image_file || newProduct.preview_url;
     if (!hasImage) {
-      alert(t('form.selectImageFirst'));
+      showWarningAlert(t('form.selectImageFirst'));
       return;
     }
 
@@ -268,13 +268,13 @@ const ProductTable = () => {
       } else {
         formData.append('image_url', newProduct.preview_url);
       }
-      
+
       if (editingId) {
         formData.append('product_id', editingId.toString());
       }
 
       const result = await generateAIDescription(formData);
-      
+
       // Efecto Typewriter para fluidez máxima
       let currentText = "";
       const words = result.split(" ");
@@ -286,7 +286,7 @@ const ProductTable = () => {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t('alert.aiError');
       console.error(t('error.ai'), err);
-      alert(message);
+      showErrorAlert(message);
       setAiError(message);
     } finally {
       setGeneratingAI(false);
@@ -301,7 +301,7 @@ const ProductTable = () => {
         name: newProduct.name,
         description: newProduct.description,
         price: parseFloat(newProduct.price),
-        stock: parseInt(newProduct.stock),
+        stock: newProduct.stock,
         category: parseInt(newProduct.category),
       };
 
@@ -309,11 +309,11 @@ const ProductTable = () => {
         const base64 = await toBase64(newProduct.image_file);
         data.images = [{ url_image: base64, is_main: true }];
       } else if (!editingId) {
-        alert(t('form.imageRequired'));
+        showWarningAlert(t('form.imageRequired'));
         setSubmitting(false);
         return;
       }
-      
+
       if (editingId) {
         await api.put(`products/create/${editingId}/`, data);
       } else {
@@ -326,11 +326,12 @@ const ProductTable = () => {
         name: '',
         description: '',
         price: '',
-        stock: '',
+        stock: true,
         category: '',
         image_file: null,
         preview_url: ''
       });
+      showSuccessAlert(editingId ? "Producto actualizado correctamente" : "Producto creado correctamente");
       fetchProducts();
     } catch (error: any) {
       const backendError = error.response?.data;
@@ -343,7 +344,7 @@ const ProductTable = () => {
       }
 
       console.error(t('error.processProduct'), error);
-      alert(errorMessage);
+      showErrorAlert(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -385,7 +386,7 @@ const ProductTable = () => {
                   name: '',
                   description: '',
                   price: '',
-                  stock: '',
+                  stock: true,
                   category: '',
                   image_file: null,
                   preview_url: ''
@@ -400,27 +401,27 @@ const ProductTable = () => {
             </div>
         </div>
         <div className="mt-3">
-            <div className="overflow-x-auto font-[var(--main-font)]">
-              <Table hoverable>
-                <Table.Head>
-                  <Table.HeadCell className="p-6">{t('table.head.product')}</Table.HeadCell>
-                  <Table.HeadCell>{t('table.head.category')}</Table.HeadCell>
-                  <Table.HeadCell>{t('table.head.priceStock')}</Table.HeadCell>
-                  <Table.HeadCell>{t('table.head.status')}</Table.HeadCell>
-                  <Table.HeadCell></Table.HeadCell>
-                </Table.Head>
-                <MemoizedTableBody 
-                  products={products} 
-                  t={t} 
-                  openPreview={openPreview} 
-                  handleDelete={handleDelete} 
-                  handleEdit={handleEdit} 
-                  navigate={navigate} 
-                  PLACEHOLDER_IMAGE={PLACEHOLDER_IMAGE}
-                  tableActionData={tableActionData}
-                />
-              </Table>
-            </div>
+          <div className="overflow-x-auto font-[var(--main-font)]">
+            <Table hoverable>
+              <Table.Head>
+                <Table.HeadCell className="p-6">{t('table.head.product')}</Table.HeadCell>
+                <Table.HeadCell>{t('table.head.category')}</Table.HeadCell>
+                <Table.HeadCell>{t('table.head.priceStock')}</Table.HeadCell>
+                <Table.HeadCell>{t('table.head.status')}</Table.HeadCell>
+                <Table.HeadCell></Table.HeadCell>
+              </Table.Head>
+              <MemoizedTableBody
+                products={products}
+                t={t}
+                openPreview={openPreview}
+                handleDelete={handleDelete}
+                handleEdit={handleEdit}
+                navigate={navigate}
+                PLACEHOLDER_IMAGE={PLACEHOLDER_IMAGE}
+                tableActionData={tableActionData}
+              />
+            </Table>
+          </div>
         </div>
       </div>
 
@@ -436,7 +437,7 @@ const ProductTable = () => {
                 id="name"
                 required
                 value={newProduct.name}
-                onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
               />
             </div>
 
@@ -455,20 +456,20 @@ const ProductTable = () => {
                       // Redimensionar en el cliente para proteger la RAM de Railway
                       const resizedBlob = await resizeImageForAI(originalFile);
                       const file = new File([resizedBlob], originalFile.name, { type: 'image/jpeg' });
-                      
+
                       // Revocar URL anterior si existe para liberar memoria
                       if (newProduct.preview_url && newProduct.preview_url.startsWith('blob:')) {
                         URL.revokeObjectURL(newProduct.preview_url);
                       }
                       setNewProduct({
-                        ...newProduct, 
+                        ...newProduct,
                         image_file: file,
                         preview_url: URL.createObjectURL(file)
                       });
                     } catch (err) {
                       console.error("Error al redimensionar imagen:", err);
                       setNewProduct({
-                        ...newProduct, 
+                        ...newProduct,
                         image_file: originalFile,
                         preview_url: URL.createObjectURL(originalFile)
                       });
@@ -478,15 +479,16 @@ const ProductTable = () => {
               />
               {newProduct.preview_url && (
                 <div className="mt-2 text-center">
-                   <img 
-                    src={newProduct.preview_url} 
-                    alt="preview" 
+                  <img
+                    src={newProduct.preview_url}
+                    alt="preview"
                     className="h-32 mx-auto rounded-lg border shadow-sm object-cover"
                     onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
-                   />
+                  />
                 </div>
               )}
             </div>
+
             {/* ===== NUEVO: Sprint IA y Funcionalidad ===== */}
             <IAErrorAlert visible={!!aiError} mensaje={aiError || "Error en el servicio de IA"} />
             <div className="flex justify-center mt-1"><IACriticalBadge label="Descripcion IA" severity="alta" /></div>
@@ -494,23 +496,23 @@ const ProductTable = () => {
 
             {/* 3. Botón IA */}
             <div className="flex justify-center">
-              <Tooltip 
+              <Tooltip
                 content={!newProduct.image_file && !newProduct.preview_url ? "Sube una imagen para habilitar la sugerencia de IA" : "Generar descripción automática"}
                 placement="top"
               >
-               <Button
-                color="light"
-                pill
-                size="sm"
-                onClick={handleSuggestAI}
-                disabled={generatingAI || (!newProduct.image_file && !newProduct.preview_url)}
-               >
-                 {generatingAI ? (
-                   <><Spinner size="sm" className="mr-2"/> {t('ai.processing')}</>
-                 ) : (
-                   <><Icon icon="solar:magic-stick-3-bold-duotone" className="mr-2 text-indigo-500" /> {t('ai.suggest')}</>
-                 )}
-               </Button>
+                <Button
+                  color="light"
+                  pill
+                  size="sm"
+                  onClick={handleSuggestAI}
+                  disabled={generatingAI || (!newProduct.image_file && !newProduct.preview_url)}
+                >
+                  {generatingAI ? (
+                    <><Spinner size="sm" className="mr-2" /> {t('ai.processing')}</>
+                  ) : (
+                    <><Icon icon="solar:magic-stick-3-bold-duotone" className="mr-2 text-indigo-500" /> {t('ai.suggest')}</>
+                  )}
+                </Button>
               </Tooltip>
             </div>
 
@@ -523,7 +525,7 @@ const ProductTable = () => {
                 rows={4}
                 value={newProduct.description}
                 placeholder={t('form.descriptionPlaceholder')}
-                onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
               />
             </div>
 
@@ -536,18 +538,19 @@ const ProductTable = () => {
                   type="number"
                   required
                   value={newProduct.price}
-                  onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                  onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
                 />
               </div>
               <div>
-                <Label htmlFor="stock" value={t('form.stock')} />
-                <TextInput
-                  id="stock"
-                  type="number"
-                  required
-                  value={newProduct.stock}
-                  onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
-                />
+                <Label htmlFor="stock" value={t('table.availability')} />
+                <div className="mt-2">
+                  <ToggleSwitch
+                    id="stock"
+                    checked={newProduct.stock}
+                    label={newProduct.stock ? t('table.inStock') : t('table.outOfStock')}
+                    onChange={(val) => setNewProduct({...newProduct, stock: val})}
+                  />
+                </div>
               </div>
             </div>
 
@@ -558,7 +561,7 @@ const ProductTable = () => {
                 id="category"
                 required
                 value={newProduct.category}
-                onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
               >
                 <option value="">{t('form.category.selectPlaceholder')}</option>
                 {categories.map((cat) => (
@@ -575,11 +578,11 @@ const ProductTable = () => {
           </form>
         </Modal.Body>
       </Modal>
-      <ImagePreviewModal 
-        isOpen={isPreviewOpen} 
-        onClose={() => setIsPreviewOpen(false)} 
-        imageUrl={previewUrl} 
-        title={previewTitle} 
+      <ImagePreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        imageUrl={previewUrl}
+        title={previewTitle}
       />
     </>
   );

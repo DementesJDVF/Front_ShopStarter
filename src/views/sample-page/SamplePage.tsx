@@ -4,6 +4,8 @@ import { Table, Badge, Button, Spinner } from "flowbite-react";
 import api from "../../utils/axios";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
+import { useConfirm } from "../../context/ConfirmContext";
+import { showSuccessAlert, showErrorAlert } from "../../utils/Alerts";
 
 interface OrderItem {
   id: string;
@@ -32,13 +34,14 @@ const SamplePage = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation("samplePage");
+  const confirm = useConfirm();
 
   const normalizeOrders = (rawData: any): Order[] => {
     const rawOrders = Array.isArray(rawData?.results)
       ? rawData.results
       : Array.isArray(rawData)
-      ? rawData
-      : [];
+        ? rawData
+        : [];
 
     return rawOrders.map((order: any) => ({
       id: String(order?.id ?? ''),
@@ -49,11 +52,11 @@ const SamplePage = () => {
       created_at: order?.created_at ?? new Date().toISOString(),
       items: Array.isArray(order?.items)
         ? order.items.map((item: any) => ({
-            id: String(item?.id ?? ''),
-            product_name: item?.product_name ?? 'Producto sin nombre',
-            quantity: Number(item?.quantity ?? 0),
-            price_at_purchase: String(item?.price_at_purchase ?? '0'),
-          }))
+          id: String(item?.id ?? ''),
+          product_name: item?.product_name ?? 'Producto sin nombre',
+          quantity: Number(item?.quantity ?? 0),
+          price_at_purchase: String(item?.price_at_purchase ?? '0'),
+        }))
         : [],
     }));
   };
@@ -80,24 +83,26 @@ const SamplePage = () => {
   }, []);
 
   const handleCancel = async (id: string) => {
-    if (!window.confirm(t("confirmCancel"))) return;
+    const confirmed = await confirm(t("confirmCancel"), { isDestructive: true });
+    if (!confirmed) return;
     try {
       await api.post(`orders/${id}/cancel/`);
-      alert(t("cancelSuccess"));
+      showSuccessAlert(t("cancelSuccess"));
       fetchData();
     } catch (error) {
-      alert(t("cancelError"));
+      showErrorAlert(t("cancelError"));
     }
   };
 
   const handleReport = async (id: string) => {
-    if (!window.confirm(t("confirmReport"))) return;
+    const confirmed = await confirm(t("confirmReport"), { isDestructive: true, title: '⚠️ Reportar vendedor' });
+    if (!confirmed) return;
     try {
       await api.post(`orders/${id}/report_vendor/`);
-      alert(t("reportSent"));
+      showSuccessAlert(t("reportSent"));
       fetchData();
     } catch (error) {
-      alert(t("reportError"));
+      showErrorAlert(t("reportError"));
     }
   };
 
@@ -123,7 +128,7 @@ const SamplePage = () => {
           </h5>
           {userProfile && (
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-gray-500 text-sm">{t("yourReputation")}</span>
+              <span className="text-black dark:text-white font-bold text-sm">{t("yourReputation")}</span>
               <div className="flex items-center text-yellow-500 font-bold">
                 <Icon icon="solar:star-bold" className="mr-1" />
                 {parseFloat(userProfile.reputation_score || "0").toFixed(1)}
@@ -168,8 +173,8 @@ const SamplePage = () => {
                   </Table.Cell>
 
                   <Table.Cell>
-                    {order.product_name}
-                  </Table.Cell>
+                    {order.product_name || order.items?.map(item => item.product_name).join(", ") || "---"}
+                  </Table.Cell >
 
                   <Table.Cell>{order.vendor_name || "N/A"}</Table.Cell>
 
@@ -198,13 +203,13 @@ const SamplePage = () => {
                       </div>
                     )}
                   </Table.Cell>
-                </Table.Row>
+                </Table.Row >
               ))}
-            </Table.Body>
-          </Table>
-        </div>
+            </Table.Body >
+          </Table >
+        </div >
       )}
-    </CardBox>
+    </CardBox >
   );
 };
 

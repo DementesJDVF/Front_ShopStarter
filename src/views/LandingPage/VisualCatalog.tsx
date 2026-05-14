@@ -115,7 +115,7 @@ const CategorySection = ({ category }: { category: Category }) => {
               {category.name}
             </h3>
           </div>
-          <p className="text-slate-500 dark:text-slate-400 font-medium">
+          <p className="text-black dark:text-white font-bold">
             {category.description || `Explora lo mejor en ${category.name.toLowerCase()}`}
           </p>
         </div>
@@ -171,7 +171,7 @@ const VisualCatalog = () => {
       {/* --- Section 1: Categories Grid --- */}
       <div className="mb-20" data-aos="fade-down">
         <div className="text-center mb-12">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-400 font-black tracking-[0.2em] uppercase text-xs mb-4 block">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#000351] to-[#280051] dark:from-[#7a9dff] dark:to-[#9e7aff] font-black tracking-[0.3em] uppercase text-sm md:text-base mb-4 block">
             {t("visualCatalog.tag")}
           </span>
           <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter">

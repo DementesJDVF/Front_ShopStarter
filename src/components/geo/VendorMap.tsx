@@ -12,116 +12,248 @@ interface VendorMapProps {
  * Componente de Mapa de Vendedores con soporte para Vista de Águila (Admin).
  */
 const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
+
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMap = useRef<any>(null);
-  const routingLayer = useRef<any>(null); // 🔥 Para limpiar el camino anterior
+  const routingLayer = useRef<any>(null);
+
+  // 🔥 WebSocket simulado
+  const socketRef = useRef<WebSocket | null>(null);
+
+  // 🔥 Guardar markers
+  const markersRef = useRef<{ [key: string]: any }>({});
+
   const [loading, setLoading] = useState(true);
+
   const { userLocation, requestLocation } = useMap();
 
   const initMap = async () => {
+
     const L = (window as any).L;
+
     if (!L || !mapRef.current) return;
 
     if (leafletMap.current) {
-        leafletMap.current.remove();
+      leafletMap.current.remove();
     }
 
-    leafletMap.current = L.map(mapRef.current, { zoomControl: false }).setView([2.4419, -76.6062], 13);
-    L.control.zoom({ position: 'bottomright' }).addTo(leafletMap.current);
+    // 🔥 limpiar markers anteriores
+    markersRef.current = {};
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap contributors'
+    leafletMap.current = L.map(mapRef.current, {
+      zoomControl: false
+    }).setView([2.4419, -76.6062], 13);
+
+    L.control.zoom({
+      position: 'bottomright'
     }).addTo(leafletMap.current);
 
+    L.tileLayer(
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+      }
+    ).addTo(leafletMap.current);
+
     try {
+
       setLoading(true);
-      const endpoint = isAdmin ? 'geo/locations/all_locations/' : 'geo/vendors-locations/';
+
+      const endpoint = isAdmin
+        ? 'geo/locations/all_locations/'
+        : 'geo/vendors-locations/';
+
       const response = await api.get(endpoint);
-      
-      // 🔥 CORRECCIÓN: Manejar tanto arrays como objetos con 'results' (DRF Pagination)
+
+      // 🔥 Manejar arrays y paginación
       const data = response.data.results || response.data;
       const locations = Array.isArray(data) ? data : [];
 
-      // Marcador de usuario (Si existe)
+      // 📍 Marcador usuario
       if (userLocation) {
-          const userIcon = L.divIcon({
-              className: 'custom-div-icon',
-              html: `<div style="background-color: #3b82f6; width: 15px; height: 15px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>`,
-              iconSize: [15, 15],
-              iconAnchor: [7, 7]
-          });
-          L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
-            .addTo(leafletMap.current)
-            .bindPopup("<b>Tú estás aquí</b>");
+
+        const userIcon = L.divIcon({
+          className: 'custom-div-icon',
+          html: `
+            <div
+              style="
+                background-color: #3b82f6;
+                width: 15px;
+                height: 15px;
+                border-radius: 50%;
+                border: 3px solid white;
+                box-shadow: 0 0 10px rgba(0,0,0,0.3);
+              "
+            ></div>
+          `,
+          iconSize: [15, 15],
+          iconAnchor: [7, 7]
+        });
+
+        L.marker(
+          [userLocation.lat, userLocation.lng],
+          { icon: userIcon }
+        )
+          .addTo(leafletMap.current)
+          .bindPopup("<b>Tú estás aquí</b>");
       }
 
       if (locations.length > 0) {
+
         const markers: any[] = [];
+
         locations.forEach((loc: any) => {
+
           if (loc.latitude && loc.longitude) {
-            let popupContent = `<b>${loc.description || loc.vendor_name || 'Vendedor'}</b>`;
-            
+
+            let popupContent =
+              `<b>${loc.description || loc.vendor_name || 'Vendedor'}</b>`;
+
+            // 🔥 POPUP ADMIN
             if (isAdmin) {
-                const productsHtml = loc.products?.map((p: any) => `
+
+              const productsHtml =
+                loc.products?.map((p: any) => `
                   <div class="flex items-center gap-2 bg-gray-50 dark:bg-slate-800 rounded-lg p-1 border border-gray-100 dark:border-slate-700 mb-1">
-                    <img src="${p.image || 'https://via.placeholder.com/100'}" class="w-10 h-10 rounded object-cover shadow-sm" />
+
+                    <img
+                      src="${p.image || 'https://via.placeholder.com/100'}"
+                      class="w-10 h-10 rounded object-cover shadow-sm"
+                    />
+
                     <div class="overflow-hidden">
-                        <p class="text-[10px] font-bold text-gray-800 dark:text-gray-200 truncate">${p.name}</p>
-                        <p class="text-[9px] text-green-600 font-black">$${Number(p.price).toLocaleString()}</p>
+
+                      <p class="text-[10px] font-bold text-gray-800 dark:text-gray-200 truncate">
+                        ${p.name}
+                      </p>
+
+                      <p class="text-[9px] text-green-600 font-black">
+                        $${Number(p.price).toLocaleString()}
+                      </p>
+
                     </div>
+
                   </div>
-                `).join('') || '<p class="text-xs text-gray-400 italic">Sin productos activos</p>';
+                `).join('') ||
+                '<p class="text-xs text-gray-400 italic">Sin productos activos</p>';
 
-                popupContent = `
-                  <div class="p-2 min-w-[220px] font-sans">
-                    <h3 class="font-black text-indigo-900 dark:text-white border-b border-indigo-100 dark:border-slate-700 mb-2 uppercase italic text-lg leading-tight">${loc.user_name || 'VENDEDOR'}</h3>
-                    <p class="text-[11px] text-gray-500 mb-2"><b>Email:</b> ${loc.user_email}</p>
-                    
-                    <div class="mb-3">
-                        <p class="text-[10px] font-bold text-indigo-500 uppercase mb-1 tracking-wider">Catálogo Destacado</p>
-                        <div class="max-h-[160px] overflow-y-auto pr-1">
-                            ${productsHtml}
-                        </div>
+              popupContent = `
+                <div class="p-2 min-w-[220px] font-sans">
+
+                  <h3 class="font-black text-indigo-900 dark:text-white border-b border-indigo-100 dark:border-slate-700 mb-2 uppercase italic text-lg leading-tight">
+                    ${loc.user_name || 'VENDEDOR'}
+                  </h3>
+
+                  <p class="text-[11px] text-gray-500 mb-2">
+                    <b>Email:</b> ${loc.user_email}
+                  </p>
+
+                  <div class="mb-3">
+
+                    <p class="text-[10px] font-bold text-indigo-500 uppercase mb-1 tracking-wider">
+                      Catálogo Destacado
+                    </p>
+
+                    <div class="max-h-[160px] overflow-y-auto pr-1">
+                      ${productsHtml}
                     </div>
 
-                    <button onclick="window.openVendorCatalog('${loc.user}', '${(loc.user_name || 'Vendedor').replace(/'/g, "\\'")}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-xl text-[11px] transition-all shadow-md flex items-center justify-center gap-2 mb-2">
-                        <span>INSPECCIONAR CATÁLOGO</span>
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
-
-                    <div class="flex items-center justify-between border-t border-gray-100 dark:border-slate-700 pt-2 mt-2">
-                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${loc.user_status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${loc.user_status}</span>
-                        <span class="text-[9px] text-gray-400 italic">ShopStarter Admin</span>
-                    </div>
                   </div>
-                `;
+
+                  <button
+                    onclick="window.openVendorCatalog(
+                      '${loc.user}',
+                      '${(loc.user_name || 'Vendedor').replace(/'/g, "\\'")}'
+                    )"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-xl text-[11px] transition-all shadow-md flex items-center justify-center gap-2 mb-2"
+                  >
+
+                    <span>INSPECCIONAR CATÁLOGO</span>
+
+                    <svg
+                      class="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                      />
+                    </svg>
+
+                  </button>
+
+                  <div class="flex items-center justify-between border-t border-gray-100 dark:border-slate-700 pt-2 mt-2">
+
+                    <div class="flex items-center gap-1 text-[10px]">
+
+                      ${
+                        loc.user_status === 'ACTIVE'
+                          ? `
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span class="text-green-600 font-bold">Activo</span>
+                          `
+                          : `
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                            <span class="text-red-600 font-bold">Inactivo</span>
+                          `
+                      }
+
+                    </div>
+
+                    <span class="text-[9px] text-gray-400 italic">
+                      ShopStarter Admin
+                    </span>
+
+                  </div>
+
+                </div>
+              `;
             }
 
-            const marker = L.marker([Number(loc.latitude), Number(loc.longitude)])
+            // 🔥 CREAR MARKER
+            const marker = L.marker([
+              Number(loc.latitude),
+              Number(loc.longitude)
+            ])
               .addTo(leafletMap.current)
               .bindPopup(popupContent);
 
-            // 🔥 CAMINO RÁPIDO (GAME MODE)
+            // 🔥 GUARDAR REFERENCIA
+            const userId = loc.user || loc.id;
+            markersRef.current[userId] = marker;
+
+            // 🔥 GAME MODE
             marker.on('click', () => {
-                if (userLocation && !isAdmin) {
-                    // Limpiar camino anterior
-                    if (routingLayer.current) leafletMap.current.removeLayer(routingLayer.current);
-                    
-                    // Dibujar línea "Neon"
-                    routingLayer.current = L.polyline([
-                        [userLocation.lat, userLocation.lng],
-                        [Number(loc.latitude), Number(loc.longitude)]
-                    ], {
-                        color: '#6366f1',
-                        weight: 5,
-                        opacity: 0.7,
-                        dashArray: '10, 10',
-                        lineCap: 'round'
-                    }).addTo(leafletMap.current);
-                    
-                    leafletMap.current.fitBounds(routingLayer.current.getBounds().pad(0.2));
+
+              if (userLocation && !isAdmin) {
+
+                if (routingLayer.current) {
+                  leafletMap.current.removeLayer(routingLayer.current);
                 }
+
+                routingLayer.current = L.polyline(
+                  [
+                    [userLocation.lat, userLocation.lng],
+                    [Number(loc.latitude), Number(loc.longitude)]
+                  ],
+                  {
+                    color: '#6366f1',
+                    weight: 5,
+                    opacity: 0.7,
+                    dashArray: '10, 10',
+                    lineCap: 'round'
+                  }
+                ).addTo(leafletMap.current);
+
+                leafletMap.current.fitBounds(
+                  routingLayer.current.getBounds().pad(0.2)
+                );
+              }
             });
 
             markers.push(marker);
@@ -129,50 +261,108 @@ const VendorMap: React.FC<VendorMapProps> = ({ isAdmin = false }) => {
         });
 
         if (markers.length > 0) {
+
           const group = L.featureGroup(markers);
-          leafletMap.current.fitBounds(group.getBounds().pad(0.1));
+
+          leafletMap.current.fitBounds(
+            group.getBounds().pad(0.1)
+          );
         }
       }
+
     } catch (error) {
+
       console.error("Error al cargar ubicaciones:", error);
+
     } finally {
+
       setLoading(false);
     }
   };
 
+  // 🔥 INIT MAP
   useEffect(() => {
+
     const checkLeaflet = setInterval(() => {
+
       if ((window as any).L) {
         clearInterval(checkLeaflet);
         initMap();
       }
+
     }, 100);
 
     return () => {
+
       if (leafletMap.current) {
         leafletMap.current.remove();
         leafletMap.current = null;
       }
+
       clearInterval(checkLeaflet);
     };
-  }, [isAdmin, userLocation]); // 🔥 Re-inicializar si cambia el rol o mi ubicación
 
+  }, [isAdmin, userLocation]);
+
+  // 🔥 WEBSOCKET SIMULADO
   useEffect(() => {
-    // 🔥 REAL-TIME MAP: Refrescar locaciones cada 15 segundos
+
+    if (!isAdmin) return;
+
     const interval = setInterval(() => {
-        initMap();
-    }, 15000);
+
+      const ids = Object.keys(markersRef.current);
+
+      ids.forEach((id) => {
+
+        const marker = markersRef.current[id];
+
+        if (!marker) return;
+
+        const pos = marker.getLatLng();
+
+        // 🔥 movimiento aleatorio
+        const newLat =
+          pos.lat + (Math.random() - 0.5) * 0.001;
+
+        const newLng =
+          pos.lng + (Math.random() - 0.5) * 0.001;
+
+        marker.setLatLng([newLat, newLng]);
+      });
+
+    }, 2000);
+
     return () => clearInterval(interval);
+
+  }, [isAdmin]);
+
+  // 🔥 Actualización cada 15s
+  useEffect(() => {
+
+    const interval = setInterval(() => {
+      initMap();
+    }, 50000);
+
+    return () => clearInterval(interval);
+
   }, [isAdmin, userLocation]);
 
   return (
     <div className="relative w-full h-full min-h-[500px] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800">
+
       {loading && (
         <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white/60 backdrop-blur-sm">
           <Spinner size="xl" color="info" />
         </div>
       )}
-      <div ref={mapRef} className="w-full h-full" style={{ minHeight: '500px' }} />
+
+      <div
+        ref={mapRef}
+        className="w-full h-full"
+        style={{ minHeight: '500px' }}
+      />
+
     </div>
   );
 };
