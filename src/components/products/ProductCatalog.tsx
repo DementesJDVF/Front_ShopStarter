@@ -203,7 +203,10 @@ export function ProductCatalog() {
             const rawImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
             const mainImage = getAbsoluteImageUrl(rawImage);
             const isOutOfStock = !p.stock;
-            const isNotAvailable = !p.status || !p.status.toString().toUpperCase().includes('AVAILABLE');
+            // Un producto es comprable si el vendedor lo tiene activo (stock)
+            // y no está en un estado crítico (REJECTED/INACTIVE). 
+            // AVAILABLE, RESERVED y SOLD ahora son permitidos para compra múltiple si el switch está ON.
+            const isNotAvailable = !p.status || !['AVAILABLE', 'RESERVED', 'SOLD'].includes(p.status.toUpperCase());
             const canPurchase = !isOutOfStock && !isNotAvailable;
 
             return (
@@ -233,11 +236,20 @@ export function ProductCatalog() {
                       <div className="bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-red-500/30">
                         {t("outOfStock")}
                       </div>
-                    ) : isNotAvailable ? (
-                      <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-amber-500/30">
-                        {t("reserved")}
-                      </div>
-                    ) : null}
+                    ) : (
+                      <>
+                        {p.status === 'RESERVED' && (
+                          <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-amber-500/30">
+                            {t("reserved")}
+                          </div>
+                        )}
+                        {p.status === 'SOLD' && (
+                          <div className="bg-indigo-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-indigo-500/30">
+                            {t("sold", "Vendido")}
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
 
                   {p.distance !== undefined && (
