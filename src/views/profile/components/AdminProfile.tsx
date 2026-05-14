@@ -1,40 +1,49 @@
 import { MyProfile } from "../../../services/ProfileService";
 import ProfileFieldRow from "./ProfileFieldRow";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   profile: MyProfile;
+  drafts: Record<string, string>;
+  setDraftField: (field: string, value: string) => void;
   onUpdated: () => void;
 }
 
-const AdminProfile = ({ profile, onUpdated }: Props) => {
+const AdminProfile = ({ profile, drafts, setDraftField }: Props) => {
+  const { t } = useTranslation("Profile");
   const isEditable = (f: string) => profile.editable_fields.includes(f);
+
+  const docOptions = [
+    { value: "CC", label: t("documents.CC") },
+    { value: "CE", label: t("documents.CE") },
+    { value: "TI", label: t("documents.TI") },
+    { value: "PASS", label: t("documents.PASS") },
+  ];
+
+  const row = (label: string, field: string, type: any = "text", extra: any = {}) => (
+    <ProfileFieldRow
+      label={label}
+      field={field}
+      originalValue={(profile as any)[field]}
+      draftValue={drafts[field]}
+      onChange={setDraftField}
+      type={type}
+      editable={isEditable(field)}
+      {...extra}
+    />
+  );
 
   return (
     <div>
-      <ProfileFieldRow label="Nombre de usuario" field="username" value={profile.username} editable={isEditable("username")} onUpdated={onUpdated} />
-      <ProfileFieldRow label="Correo electrónico" field="email" type="email" value={profile.email} editable={isEditable("email")} onUpdated={onUpdated} />
-      <ProfileFieldRow label="Nombre completo" field="full_name" value={profile.full_name} editable={isEditable("full_name")} onUpdated={onUpdated} />
-      <ProfileFieldRow label="Teléfono" field="phone_number" type="tel" value={profile.phone_number} editable={isEditable("phone_number")} onUpdated={onUpdated} />
-      <ProfileFieldRow
-        label="Tipo de documento"
-        field="document_type"
-        type="select"
-        options={[
-          { value: "CC", label: "Cédula de Ciudadanía" },
-          { value: "CE", label: "Cédula de Extranjería" },
-          { value: "TI", label: "Tarjeta de Identidad" },
-          { value: "PASS", label: "Pasaporte" },
-        ]}
-        value={profile.document_type}
-        editable={isEditable("document_type")}
-        onUpdated={onUpdated}
-      />
-      <ProfileFieldRow label="Número de documento" field="document_number" value={profile.document_number} editable={isEditable("document_number")} onUpdated={onUpdated} />
-      <ProfileFieldRow label="Fecha de nacimiento" field="birth_date" type="date" value={profile.birth_date} editable={isEditable("birth_date")} onUpdated={onUpdated} />
-
-      {/* Solo lectura */}
-      <ProfileFieldRow label="Rol" field="role" value={profile.role} editable={false} onUpdated={onUpdated} />
-      <ProfileFieldRow label="Estado" field="status" value={profile.status} editable={false} onUpdated={onUpdated} />
+      {row(t("fields.username"), "username")}
+      {row(t("fields.email"), "email", "email")}
+      {row(t("fields.fullName"), "full_name")}
+      {row(t("fields.phone"), "phone_number", "tel")}
+      {row(t("fields.documentType"), "document_type", "select", { options: docOptions })}
+      {row(t("fields.documentNumber"), "document_number")}
+      {row(t("fields.birthDate"), "birth_date", "date")}
+      {row(t("fields.role"), "role")}
+      {row(t("fields.status"), "status")}
     </div>
   );
 };

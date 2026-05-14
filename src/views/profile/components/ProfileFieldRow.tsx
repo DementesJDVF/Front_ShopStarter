@@ -1,110 +1,79 @@
-import { useState } from "react";
-import { Button, TextInput, Select } from "flowbite-react";
 import { Icon } from "@iconify/react";
-import { ProfileService } from "../../../services/ProfileService";
-import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   label: string;
   field: string;
-  value: string | null | undefined;
+  originalValue: string | null | undefined;
+  draftValue: string | undefined;
+  onChange: (field: string, value: string) => void;
   type?: "text" | "email" | "tel" | "date" | "select";
   options?: { value: string; label: string }[];
   editable: boolean;
-  onUpdated: () => void;
 }
 
 const ProfileFieldRow = ({
   label,
   field,
-  value,
+  originalValue,
+  draftValue,
+  onChange,
   type = "text",
   options,
   editable,
-  onUpdated,
 }: Props) => {
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(value || "");
-  const [saving, setSaving] = useState(false);
+  const { t } = useTranslation("Profile");
+  const currentValue = draftValue !== undefined ? draftValue : originalValue || "";
+  const isChanged = draftValue !== undefined;
 
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-      await ProfileService.updateMyProfile({ [field]: draft } as any);
-      toast.success(`${label} actualizado`);
-      setEditing(false);
-      onUpdated();
-    } catch (e: any) {
-      const msg =
-        e?.response?.data?.[field]?.[0] ||
-        e?.response?.data?.detail ||
-        "Error al guardar";
-      toast.error(msg);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setDraft(value || "");
-    setEditing(false);
-  };
+  const baseInputClass =
+    "w-full bg-white/70 dark:bg-dark/70 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition disabled:opacity-60 disabled:cursor-not-allowed";
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700 gap-3">
-      <div className="md:w-1/3">
-        <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-          {label}
-        </span>
-      </div>
-      <div className="flex-1 flex items-center gap-2">
-        {editing ? (
-          <>
-            {type === "select" && options ? (
-              <Select
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                className="flex-1"
-              >
-                <option value="">— Selecciona —</option>
-                {options.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </Select>
-            ) : (
-              <TextInput
-                type={type}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                className="flex-1"
-              />
-            )}
-            <Button
-              size="sm"
-              color="success"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              <Icon icon="solar:check-circle-bold" width={18} />
-            </Button>
-            <Button size="sm" color="gray" onClick={handleCancel} disabled={saving}>
-              <Icon icon="solar:close-circle-bold" width={18} />
-            </Button>
-          </>
+    <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-6 items-start sm:items-center py-4 border-b border-primary/10 dark:border-gray-800 last:border-b-0">
+      <label className="text-sm font-semibold text-gray-900 dark:text-white sm:text-right flex items-center sm:justify-end gap-1.5">
+        {label}
+        {isChanged && (
+          <span
+            title={t("fields.unsavedTooltip")}
+            className="inline-block w-2 h-2 rounded-full bg-primary"
+          />
+        )}
+      </label>
+
+      <div className="flex items-center gap-2">
+        {type === "select" && options ? (
+          <select
+            value={currentValue}
+            onChange={(e) => onChange(field, e.target.value)}
+            disabled={!editable}
+            className={baseInputClass}
+          >
+            <option value="">{t("fields.selectPlaceholder")}</option>
+            {options.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
         ) : (
-          <>
-            <span className="flex-1 text-gray-800 dark:text-gray-100 break-all">
-              {value || <em className="text-gray-400">— sin definir —</em>}
-            </span>
-            {editable && (
-              <Button size="sm" color="light" onClick={() => setEditing(true)}>
-                <Icon icon="solar:pen-bold" width={16} className="mr-1" />
-                Editar
-              </Button>
-            )}
-          </>
+          <input
+            type={type}
+            value={currentValue}
+            onChange={(e) => onChange(field, e.target.value)}
+            disabled={!editable}
+            placeholder={
+              editable ? `${t("fields.yourFieldPrefix")} ${label.toLowerCase()}` : ""
+            }
+            className={baseInputClass}
+          />
+        )}
+        {!editable && (
+          <Icon
+            icon="solar:lock-keyhole-minimalistic-bold"
+            width={16}
+            className="text-gray-400 flex-shrink-0"
+          />
         )}
       </div>
     </div>

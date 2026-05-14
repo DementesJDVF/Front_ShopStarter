@@ -1,164 +1,281 @@
-import { useRef, useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import Cropper from "react-easy-crop";
 import { ProfileService, MyProfile } from "../../../services/ProfileService";
 import { getUserAvatar } from "../../../utils/avatar";
-import { Button, Spinner, Tooltip } from "flowbite-react";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
-
-// Importamos las utilidades que usas en productos
-import { resizeImageForAI } from "../../../utils/clientResizer";
-import { optimizeImageUrl } from "../../../utils/imageOptimizer";
-import { showSuccessAlert, showErrorAlert } from "../../../utils/Alerts";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   profile: MyProfile;
   onUpdated: () => void;
 }
 
-const AvatarUploader = ({ profile, onUpdated }: Props) => {
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+interface PixelArea {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
-  // Fallback de avatar basado en el usuario
-  const fallback = getUserAvatar(profile.email || profile.username || "guest");
-  
-  // Prioridad de imagen: 1. Preview local, 2. Imagen optimizada de Cloudinary, 3. Fallback
-  const currentUrl = previewUrl || 
-    (profile.profile_picture?.image_url ? optimizeImageUrl(profile.profile_picture.image_url, 400) : fallback);
+const OUTPUT_SIZE = 333;
 
-  // Cleanup del objeto URL para evitar fugas de memoria
-  useEffect(() => {
-    return () => {
-      if (previewUrl?.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
-
-  const toBase64 = (file: File) => new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
+const createImage = (url: string): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = (e) => reject(e);
+    img.src = url;
   });
 
-  const handleSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const originalFile = e.target.files?.[0];
-    if (!originalFile) return;
+const getCroppedImage = async (imageSrc: string, area: PixelArea): Promise<Blob> => {
+  const img = await createImage(imageSrc);
+  const canvas = document.createElement("canvas");
+  canvas.width = OUTPUT_SIZE;
+  canvas.height = OUTPUT_SIZE;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("No canvas context");
 
+  ctx.drawImage(img, area.x, area.y, area.width, area.height, 0, 0, OUTPUT_SIZE, OUTPUT_SIZE);
+
+  return await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error("No se pudo generar la imagen"));
+      },
+      "image/jpeg",
+      0.92
+    );
+  });
+};
+
+const AvatarUploader = ({ profile, onUpdated }: Props) => {
+  const { t } = useTranslation("Profile");
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<PixelArea | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const fallback = getUserAvatar(profile.email || profile.username || "guest");
+  const currentUrl = profile.profile_picture?.image_url || fallback;
+
+  const onCropComplete = useCallback((_: any, areaPixels: PixelArea) => {
+    setCroppedAreaPixels(areaPixels);
+  }, []);
+
+  useEffect(() => {
+    if (imageSrc) {
+      const original = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = original;
+      };
+    }
+  }, [imageSrc]);
+
+  useEffect(() => {
+    if (!imageSrc) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !uploading) handleCloseCropper();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageSrc, uploading]);
+
+  const handleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageSrc(reader.result as string);
+      setZoom(1);
+      setCrop({ x: 0, y: 0 });
+    };
+    reader.readAsDataURL(file);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const handleCloseCropper = () => {
+    setImageSrc(null);
+    setCroppedAreaPixels(null);
+    setZoom(1);
+    setCrop({ x: 0, y: 0 });
+  };
+
+  const handleConfirmCrop = async () => {
+    if (!imageSrc || !croppedAreaPixels) return;
     try {
       setUploading(true);
-      
-      // 1. Mostrar preview local inmediato para mejor UX
-      const localBlob = URL.createObjectURL(originalFile);
-      setPreviewUrl(localBlob);
-
-      // 2. REDIMENSIONAMIENTO (Crucial para Railway)
-      // Reducimos la resolución en el navegador del usuario.
-      const resizedBlob = await resizeImageForAI(originalFile);
-      
-      // 3. RECONSTRUCCIÓN DEL ARCHIVO
-      // Convertimos el Blob optimizado en un File plano que el Service pueda aceptar.
-      const fileToUpload = new File([resizedBlob], originalFile.name, {
-        type: "image/jpeg",
-      });
-
-      // 4. ENVÍO AL BACKEND
-      // El backend recibe un archivo de ~100KB en lugar de ~5MB.
-      // Railway lo procesa rápido y Cloudinary recibe la versión ya optimizada.
-      await ProfileService.uploadProfilePicture(fileToUpload);
-
-      showSuccessAlert("¡Actualizado! Tu nueva foto de perfil ya está lista.");
+      const blob = await getCroppedImage(imageSrc, croppedAreaPixels);
+      const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+      await ProfileService.uploadProfilePicture(file);
+      toast.success(t("avatar.updated"));
+      handleCloseCropper();
       onUpdated();
-      setPreviewUrl(null); // Limpiamos el preview para usar la URL real de Cloudinary
     } catch (err: any) {
-      setPreviewUrl(null);
-      const errorMsg = err?.response?.data?.error || "No se pudo subir la imagen";
-      showErrorAlert(`Error de subida, ${errorMsg}`);
+      toast.error(err?.response?.data?.error || t("avatar.uploadError"));
     } finally {
       setUploading(false);
-      // Limpiamos el input para poder subir la misma imagen si se desea
-      if (fileRef.current) fileRef.current.value = "";
     }
   };
 
   const handleDelete = async () => {
     if (!profile.profile_picture) return;
-    
-    // Podrías usar tu context useConfirm aquí si lo prefieres
-    if (!window.confirm("¿Deseas eliminar tu foto actual?")) return;
-
+    if (!window.confirm(t("avatar.deleteConfirm"))) return;
     try {
-      setUploading(true);
       await ProfileService.deleteProfilePicture();
-      showSuccessAlert("Eliminada: Ahora usas el avatar por defecto");
+      toast.success(t("avatar.deleted"));
       onUpdated();
     } catch {
-      showErrorAlert("Error: No se pudo eliminar la foto");
-    } finally {
-      setUploading(false);
+      toast.error(t("avatar.deleteError"));
     }
   };
 
+  const modal = imageSrc
+    ? createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !uploading) handleCloseCropper();
+          }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="relative bg-white dark:bg-darkgray rounded-2xl shadow-2xl w-full max-w-xl max-h-[95vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {t("avatar.modalTitle")}
+              </h3>
+              <button
+                type="button"
+                onClick={handleCloseCropper}
+                disabled={uploading}
+                className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 disabled:opacity-50"
+                aria-label={t("avatar.close")}
+              >
+                <Icon icon="solar:close-circle-bold" width={22} />
+              </button>
+            </div>
+
+            <div className="relative w-full h-80 bg-gray-900 flex-shrink-0">
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            </div>
+
+            <div className="px-6 py-4 space-y-3 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <Icon icon="solar:magnifer-zoom-out-linear" width={18} className="text-gray-500" />
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.01}
+                  value={zoom}
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="flex-1 accent-primary"
+                />
+                <Icon icon="solar:magnifer-zoom-in-linear" width={18} className="text-gray-500" />
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                {t("avatar.modalHint", { size: OUTPUT_SIZE })}
+              </p>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={handleCloseCropper}
+                disabled={uploading}
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition disabled:opacity-50"
+              >
+                {t("avatar.cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCrop}
+                disabled={uploading}
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold text-white bg-primary hover:bg-primary/90 disabled:opacity-60 transition"
+              >
+                {uploading ? (
+                  <>
+                    <Icon icon="solar:refresh-bold" width={16} className="animate-spin" />
+                    {t("avatar.uploading")}
+                  </>
+                ) : (
+                  <>
+                    <Icon icon="solar:check-circle-bold" width={16} />
+                    {t("avatar.apply")}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )
+    : null;
+
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative group">
-        <div className="relative w-32 h-32">
+    <>
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative">
           <img
             src={currentUrl}
             alt="avatar"
-            className={`w-full h-full rounded-full object-cover border-4 shadow-lg transition-all duration-300 ${
-              uploading ? "opacity-40 scale-95 border-gray-300" : "border-primary/20 group-hover:border-primary/50"
-            }`}
-            onError={(e) => (e.currentTarget.src = fallback)}
+            className="w-32 h-32 md:w-36 md:h-36 rounded-full object-cover border-4 border-primary/30 shadow-md"
           />
-          
-          {uploading && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Spinner size="xl" color="info" />
-            </div>
-          )}
         </div>
 
-        {/* Botón flotante de eliminar sobre la imagen (opcional) */}
-        {!uploading && profile.profile_picture && (
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileRef}
+          onChange={handleSelect}
+          className="hidden"
+        />
+
+        <div className="flex gap-2">
           <button
-            onClick={handleDelete}
-            className="absolute -top-1 -right-1 bg-red-500 text-white p-1.5 rounded-full shadow-md hover:bg-red-600 transition-colors"
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-primary hover:bg-primary/90 disabled:opacity-60 transition"
           >
-            <Icon icon="solar:trash-bin-trash-bold" width={14} />
+            <Icon icon="solar:camera-bold" width={14} />
+            {t("avatar.change")}
           </button>
-        )}
+          {profile.profile_picture && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50 transition"
+            >
+              <Icon icon="solar:trash-bin-trash-bold" width={14} />
+            </button>
+          )}
+        </div>
       </div>
 
-      <input
-        type="file"
-        accept="image/*"
-        ref={fileRef}
-        onChange={handleSelect}
-        className="hidden"
-      />
-      
-      <div className="flex gap-2">
-        <Button
-          size="sm"
-          gradientDuoTone="purpleToBlue"
-          onClick={() => fileRef.current?.click()}
-          disabled={uploading}
-          className="flex items-center"
-        >
-          <Icon 
-            icon={uploading ? "line-md:uploading-loop" : "solar:camera-add-bold"} 
-            width={18} 
-            className="mr-2" 
-          />
-          {uploading ? "Procesando..." : "Cambiar Foto"}
-        </Button>
-      </div>
-
-      <p className="text-xs text-gray-500 italic">
-        Sugerencia: Usa una imagen cuadrada para mejores resultados.
-      </p>
-    </div>
+      {modal}
+    </>
   );
 };
 
