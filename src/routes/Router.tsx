@@ -15,6 +15,7 @@ const Register = lazy(() => import('../views/auth/register/Register'));
 const ForgotPassword = lazy(() => import('../views/auth/login/ForgotPassword'));
 const ResetPassword = lazy(() => import('../views/auth/login/ResetPassword'));
 const Error = lazy(() => import('../views/auth/error/Error'));
+const TerminosCondiciones = lazy(() => import('../pages/TerminosCondiciones'));
 
 // Shared / Product Views
 const ProductDetail = lazy(() => import('../components/products/ProductDetail'));
@@ -41,6 +42,7 @@ const Alert = lazy(() => import("../views/alerts/Alerts"));
 const Solar = lazy(() => import("../views/icons/Solar"));
 const SamplePage = lazy(() => import('../views/sample-page/SamplePage'));
 const Reviews = lazy(() => import('src/components/reviews/Reviews.tsx'));
+const MyProfile = lazy(() => import("../views/profile/MyProfile"));
 
 const Router = [
   // 1. PUBLIC ROUTES (Landing & Auth)
@@ -60,6 +62,7 @@ const Router = [
           { path: '404', element: <Error /> },
         ]
       },
+      { path: 'terminos', element: <TerminosCondiciones /> },
     ],
   },
 
@@ -132,6 +135,7 @@ const Router = [
         element: <FullLayout />,
         children: [
           { path: 'seguridad', element: <Security /> },
+          { path: 'mi-perfil', element: <MyProfile /> },
         ]
       }
     ]
