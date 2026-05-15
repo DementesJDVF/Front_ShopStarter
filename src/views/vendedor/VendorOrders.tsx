@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Table, Badge, Button, Spinner } from 'flowbite-react';
+import { Card, Button, Spinner } from 'flowbite-react';
 import { Icon as Iconify } from '@iconify/react';
 import api from '../../utils/axios';
 import { useTranslation } from 'react-i18next';
-import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { getUserAvatar } from '../../utils/avatar';
 
 interface Order {
   id: string;
@@ -13,13 +14,15 @@ interface Order {
   total: number;
   created_at: string;
   payment_notified: boolean;
+  client_avatar?: string | null;
+  product_image?: string | null;
 }
 
 const VendorOrders: React.FC = () => {
   const { t } = useTranslation('vendedor');
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchOrders = async () => {
     try {
@@ -38,33 +41,18 @@ const VendorOrders: React.FC = () => {
     fetchOrders();
   }, []);
 
-  const handleAction = async (orderId: string, actionUrl: 'mark-as-paid' | 'cancel') => {
-    try {
-      setActionLoading(orderId);
-      await api.post(`orders/${orderId}/${actionUrl}/`);
-      toast.success(actionUrl === 'mark-as-paid' ? "¡Venta completada con éxito!" : "Reserva cancelada");
-      await fetchOrders();
-    } catch (err) {
-      console.error(`Error al ejecutar ${actionUrl}`, err);
-      toast.error("No se pudo completar la acción. Intenta de nuevo.");
-    } finally {
-      setActionLoading(null);
-    }
-  };
+  // Agrupar pedidos por cliente.
+  const groupedByClient = orders.reduce<Record<string, Order[]>>((acc, order) => {
+    const key = order.client_name || t('orders.anonymous');
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(order);
+    return acc;
+  }, {});
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PAID':
-        return <Badge color="success" className="rounded-lg px-3 py-1 font-bold">{t('orders.status.PAID')}</Badge>;
-      case 'RESERVED':
-        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold text-black">{t('orders.status.RESERVED')}</Badge>;
-      case 'CANCELLED':
-        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">{t('orders.status.CANCELLED')}</Badge>;
-      case 'PENDING':
-        return <Badge color="indigo" className="rounded-lg px-3 py-1 font-bold">{t('orders.status.PENDING')}</Badge>;
-      default:
-        return <Badge color="gray">{status}</Badge>;
-    }
+  const clientNames = Object.keys(groupedByClient);
+
+  const goToClient = (clientName: string) => {
+    navigate(`/vendedor/pedidos/${encodeURIComponent(clientName)}`);
   };
 
   return (
@@ -82,78 +70,58 @@ const VendorOrders: React.FC = () => {
       </div>
 
       <Card className="border-none shadow-xl rounded-3xl overflow-hidden p-2">
-        <div className="overflow-x-auto">
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <Spinner size="xl" color="info" />
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <Spinner size="xl" color="info" />
+          </div>
+        ) : clientNames.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="bg-blue-50/50 inline-block p-6 rounded-full mb-4">
+              <Iconify icon="solar:box-minimalistic-outline" height={48} className="text-blue-300" />
             </div>
-          ) : orders.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="bg-blue-50/50 inline-block p-6 rounded-full mb-4">
-                <Iconify icon="solar:box-minimalistic-outline" height={48} className="text-blue-300" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-700">{t('orders.empty.title')}</h3>
-              <p className="text-gray-400 mt-2">{t('orders.empty.msg')}</p>
-            </div>
-          ) : (
-            <Table hoverable>
-              <Table.Head className="bg-gray-200 dark:bg-gray-50/50 border-gray-100">
-                <Table.HeadCell className="py-4 dark:text-black">{t('orders.product')}</Table.HeadCell>
-                <Table.HeadCell className="py-4 dark:text-black">{t('orders.client')}</Table.HeadCell>
-                <Table.HeadCell className="py-4 dark:text-black">{t('orders.estado')}</Table.HeadCell>
-                <Table.HeadCell className="py-4 dark:text-black">Total</Table.HeadCell>
-                <Table.HeadCell className="text-center py-4 dark:text-black">{t('orders.actions')}</Table.HeadCell>
-              </Table.Head>
-              <Table.Body>
-                {orders.map((order) => (
-                  <Table.Row key={order.id} className="bg-white hover:bg-indigo-50/30 transition-colors">
-                    <Table.Cell className="font-black text-gray-900 dark:text-gray-100 py-5">{order.product_name}</Table.Cell>
-                    <Table.Cell className="font-medium text-gray-700 dark:text-gray-300">{order.client_name}</Table.Cell>
-                    <Table.Cell>
-                        <div className="flex flex-col gap-1">
-                            {getStatusBadge(order.status)}
-                            {order.status === 'RESERVED' && order.payment_notified && (
-                                <Badge color="info" className="animate-pulse rounded-lg font-black text-[10px]">{t('orders.rep_pay')}</Badge>
-                            )}
-                        </div>
-                    </Table.Cell>
-                    <Table.Cell className="font-bold text-indigo-900 dark:text-indigo-400">${Number(order.total).toLocaleString()}</Table.Cell>
-                    <Table.Cell className="flex justify-center gap-2">
-                      {order.status === 'RESERVED' && (
-                        <>
-                          <Button 
-                            size="xs" 
-                            color="success" 
-                            className="rounded-lg shadow-sm font-bold"
-                            onClick={() => handleAction(order.id, 'mark-as-paid')}
-                            disabled={actionLoading === order.id}
-                          >
-                            {actionLoading === order.id ? <Spinner size="xs" /> : ""}
-                            {t('orders.mark')}
-                          </Button>
-                          <Button 
-                            size="xs" 
-                            color="failure" 
-                            className="rounded-lg shadow-sm font-bold"
-                            onClick={() => handleAction(order.id, 'cancel')}
-                            disabled={actionLoading === order.id}
-                          >
-                            {t('orders.cancel')}
-                          </Button>
-                        </>
-                      )}
-                      {order.status === 'PAID' && (
-                        <span className="text-xs text-green-500 font-bold flex items-center gap-1">
-                          <Iconify icon="solar:check-read-linear" /> {t('orders.finished')}
-                        </span>
-                      )}
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-            </Table>
-          )}
-        </div>
+            <h3 className="text-lg font-bold text-gray-700">{t('orders.empty.title')}</h3>
+            <p className="text-gray-400 mt-2">{t('orders.empty.msg')}</p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-gray-100">
+            {clientNames.map((clientName) => {
+              const clientOrders = groupedByClient[clientName];
+              // Foto real si el backend la mandara; si no, identicon DiceBear (igual que Profile.tsx).
+              const realAvatar = clientOrders.find((o) => o.client_avatar)?.client_avatar;
+              const avatarUrl = realAvatar || getUserAvatar(clientName);
+
+              return (
+                <li key={clientName}>
+                  <button
+                    type="button"
+                    onClick={() => goToClient(clientName)}
+                    className="w-full flex items-center justify-between gap-4 px-4 py-4 hover:bg-indigo-50/40 transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={avatarUrl}
+                        alt={clientName}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-indigo-100 shadow-sm bg-white"
+                      />
+                      <div>
+                        <p className="font-black text-gray-900 dark:text-gray-100">{clientName}</p>
+                        <p className="text-xs text-gray-500">
+                          {clientOrders.length}{' '}
+                          {clientOrders.length === 1 ? 'pedido' : 'pedidos'}
+                        </p>
+                      </div>
+                    </div>
+                    <Iconify
+                      icon="solar:alt-arrow-right-bold-duotone"
+                      height={24}
+                      className="text-indigo-500"
+                    />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </Card>
     </div>
   );
