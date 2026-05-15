@@ -28,31 +28,32 @@ const VendorOrders: React.FC = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-
-      // 🆕 Fetch en paralelo: pedidos + usuarios (para obtener avatares reales).
-      const [ordersRes, usersRes] = await Promise.all([
-        api.get('orders/'),
-        api.get('users/list/').catch(() => ({ data: [] })), // si falla, no rompe nada
-      ]);
-
-      const ordersData = ordersRes.data.results ? ordersRes.data.results : ordersRes.data;
+      // 1. Primero obtenemos las órdenes
+      const ordersRes = await api.get('orders/');
+      const ordersData = ordersRes.data.results || ordersRes.data;
       setOrders(ordersData);
-
-      // Construir mapa username -> foto real (si tienen).
-      const usersData = usersRes.data?.results ? usersRes.data.results : usersRes.data;
+      // 2. Extraer IDs de clientes únicos (evitamos duplicados)
+      // Asumo que el campo es order.client o order.user_id
+      const clientIds = Array.from(new Set(
+        ordersData.map((o: any) => o.client).filter((id: any) => id !== undefined)
+      )) as number[];
+      // 3. Consultar los detalles de esos usuarios específicos en paralelo
+      const userRequests = clientIds.map(id => 
+        api.get(`users/listusers/${id}`).catch(() => null)
+      );
+      const usersResponses = await Promise.all(userRequests);
+      // 4. Construir el mapa de avatares (usando el nombre del cliente como clave para tu lógica actual)
       const map: Record<string, string> = {};
-      if (Array.isArray(usersData)) {
-        usersData.forEach((u: any) => {
-          const url =
-            u?.profile_picture?.image_url ||
-            u?.profile_picture_url ||
-            u?.avatar_url ||
-            null;
-          if (url && u?.username) {
+      usersResponses.forEach((res) => {
+        if (res && res.data) {
+          const u = res.data;
+          const url = u.profile_picture?.image_url || u.avatar_url;
+          // Usamos el nombre del cliente como clave para que coincida con tu agrupador
+          if (url && u.username) {
             map[u.username] = url;
           }
-        });
-      }
+        }
+      });
       setAvatarMap(map);
     } catch (err) {
       console.error('Error cargando pedidos:', err);

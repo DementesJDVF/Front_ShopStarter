@@ -41,46 +41,72 @@ const VendorOrderDetail: React.FC = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-
-      // 🆕 Traemos en paralelo: pedidos + usuarios (avatares) + productos (imágenes).
-      const [ordersRes, usersRes, productsRes] = await Promise.all([
-        api.get('orders/'),
-        api.get('users/list/').catch(() => ({ data: [] })),
-        api.get('products/create/').catch(() => ({ data: [] })),
-      ]);
-
-      const ordersData = ordersRes.data.results ? ordersRes.data.results : ordersRes.data;
+      const ordersRes = await api.get('orders/');
+      const ordersData = ordersRes.data.results || ordersRes.data;
       setOrders(ordersData);
-
-      // Mapa username -> foto real
-      const usersData = usersRes.data?.results ? usersRes.data.results : usersRes.data;
+      // 1. Extraer IDs de clientes
+      const clientIds = Array.from(new Set(
+        ordersData.map((o: any) => o.client).filter(Boolean)
+      ));
+      // 2. Extraer IDs de productos (Soporta múltiples estructuras)
+      const productIds = Array.from(new Set(
+        ordersData.flatMap((o: any) => {
+          const ids = [];
+          if (o.items) o.items.forEach((i: any) => ids.push(i.product));
+          if (o.product) ids.push(typeof o.product === 'object' ? o.product.id : o.product);
+          return ids;
+        })
+      )).filter(Boolean);
+      // 3. Peticiones en paralelo con manejo de errores para productos borrados
+      // ¡ESTA LÍNEA ES LA QUE FALTABA! -> Definir las constantes y esperar el resultado
+      const [usersResponses, productsResponses] = await Promise.all([
+        // A. Peticiones de usuarios
+        Promise.all(clientIds.map(id => api.get(`users/listusers/${id}`).catch(() => null))),
+        // B. Peticiones de productos con silenciador de 404
+        Promise.all(productIds.map(id => 
+          api.get(`products/products/${id}`, {
+            validateStatus: (status) => (status >= 200 && status < 300) || status === 404 
+          })
+          .then((res) => {
+            if (res.status === 404) {
+              console.warn(`Producto ${id} detectado como borrado (404).`);
+              return { data: { id, name: 'Producto no disponible', images: [], is_deleted: true } };
+            }
+            return res;
+          })
+          .catch(() => {
+            return { data: { id, name: 'Error de carga', images: [], is_deleted: true } };
+          })
+        ))
+      ]);
+      // 4. Mapa de Avatares (Ahora sí encontrará usersResponses)
       const aMap: Record<string, string> = {};
-      if (Array.isArray(usersData)) {
-        usersData.forEach((u: any) => {
-          const url =
-            u?.profile_picture?.image_url ||
-            u?.profile_picture_url ||
-            u?.avatar_url ||
-            null;
-          if (url && u?.username) aMap[u.username] = url;
-        });
-      }
+      usersResponses.forEach((res: any) => {
+        if (res?.data) {
+          const u = res.data;
+          const url = u.profile_picture?.image_url || u.avatar_url;
+          if (url && u.username) aMap[u.username] = url;
+        }
+      });
       setAvatarMap(aMap);
-
-      // Mapa product_name -> imagen principal
-      const productsData = productsRes.data?.results ? productsRes.data.results : productsRes.data;
+      // 5. Mapa de Productos (Ahora sí encontrará productsResponses)
       const pMap: Record<string, string> = {};
-      if (Array.isArray(productsData)) {
-        productsData.forEach((p: any) => {
-          const main = p?.images?.find((i: any) => i?.is_main) || p?.images?.[0];
-          if (main?.url_image && p?.name) {
-            pMap[p.name] = getAbsoluteImageUrl(main.url_image);
+      productsResponses.forEach((res: any) => {
+        if (res?.data) {
+          const p = res.data;
+          const main = p.images?.find((i: any) => i.is_main) || p.images?.[0];
+          if (main?.url_image) {
+            const fullUrl = getAbsoluteImageUrl(main.url_image);
+            if (p.name) pMap[p.name] = fullUrl;
+            if (p.id) pMap[p.id.toString()] = fullUrl;
+          } else {
+            if (p.name) pMap[p.name] = ''; 
           }
-        });
-      }
+        }
+      });
       setProductImageMap(pMap);
     } catch (err) {
-      console.error('Error cargando pedidos:', err);
+      console.error('Error cargando datos:', err);
     } finally {
       setLoading(false);
     }
@@ -119,15 +145,22 @@ const VendorOrderDetail: React.FC = () => {
     }
   };
 
-  // Resolver imagen de producto: 1) backend la mande 2) producto anidado 3) mapa productos 4) null.
   const resolveProductImage = (order: Order): string | null => {
-    if (order.product_image) return order.product_image;
-    const nestedMain =
-      order.product?.images?.find((i) => i?.is_main) || order.product?.images?.[0];
+    // 1. Imagen que ya venga grabada en la orden (el "snapshot")
+    if (order.product_image) return getAbsoluteImageUrl(order.product_image);
+    // 2. Imagen del objeto producto anidado (si el backend lo incluyó)
+    const nestedMain = order.product?.images?.find((i) => i?.is_main) || order.product?.images?.[0];
     if (nestedMain?.url_image) return getAbsoluteImageUrl(nestedMain.url_image);
+    // 3. Buscar en el mapa global usando el NOMBRE como llave
     if (order.product_name && productImageMap[order.product_name]) {
       return productImageMap[order.product_name];
     }
+    // 4. Buscar en el mapa global usando el ID como llave (ideal si el nombre cambió)
+    const productId = typeof order.product === 'object' ? order.product.id : order.product;
+    if (productId && productImageMap[productId.toString()]) {
+      return productImageMap[productId.toString()];
+    }
+    // 5. Si el producto se borró y no hay rastro, devolvemos null para mostrar el icono de caja
     return null;
   };
 
@@ -197,29 +230,37 @@ const VendorOrderDetail: React.FC = () => {
               return (
                 <div
                   key={order.id}
-                  className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white rounded-2xl shadow-sm p-4 border border-indigo-50"
+                  className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-white rounded-2xl shadow-sm p-4 border border-indigo-50"
                 >
-                  {productImg ? (
-                    <img
-                      src={productImg}
-                      alt={order.product_name}
-                      className="w-20 h-20 rounded-xl object-cover border border-gray-100"
-                      onError={(e) => {
-                        // Si la imagen falla, ocultarla y dejar el placeholder.
-                        (e.currentTarget as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-20 h-20 rounded-xl bg-gray-100 flex items-center justify-center">
-                      <Iconify icon="solar:box-minimalistic-bold-duotone" height={36} className="text-gray-400" />
-                    </div>
-                  )}
+                  {/* Imagen - Tamaño fijo para que no baile */}
+                  <div className="shrink-0">
+                    {productImg ? (
+                      <img
+                        src={productImg}
+                        alt={order.product_name}
+                        className="w-20 h-20 rounded-xl object-cover border border-gray-100 shadow-sm"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-xl bg-gray-100 flex items-center justify-center border border-dashed border-gray-300">
+                        <Iconify icon="solar:box-minimalistic-bold-duotone" height={36} className="text-gray-400" />
+                      </div>
+                    )}
+                  </div>
 
-                  <div className="flex-1 min-w-0">
-                    <p className="font-black text-gray-900 truncate">{order.product_name}</p>
+                  {/* Contenido - min-w-0 es vital para que el truncate funcione */}
+                  <div className="flex-1 min-w-0 w-full">
+                    <p className="font-black text-gray-900 truncate text-lg uppercase tracking-tight">
+                      {order.product_name || 'Producto eliminado'}
+                    </p>
 
-                    <div className="flex flex-wrap gap-1 mt-1">
+                    <div className="flex flex-wrap gap-1.5 mt-1">
                       {getStatusBadge(order.status)}
+                      {!productImg && (
+                        <Badge color="failure" className="rounded-lg font-black text-[10px] uppercase">
+                          Fuera de catálogo
+                        </Badge>
+                      )}
                       {order.status === 'RESERVED' && order.payment_notified && (
                         <Badge color="info" className="animate-pulse rounded-lg font-black text-[10px]">
                           {t('orders.rep_pay')}
@@ -227,37 +268,39 @@ const VendorOrderDetail: React.FC = () => {
                       )}
                     </div>
 
-                    <p className="mt-1 font-bold text-indigo-900 dark:text-indigo-400">
+                    <p className="mt-2 font-black text-indigo-600 dark:text-indigo-400 text-xl">
                       ${Number(order.total).toLocaleString()}
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 sm:justify-end">
+                  {/* Botones - Ajuste responsivo para que no choquen */}
+                  <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
                     {order.status === 'RESERVED' && (
                       <>
                         <Button
                           size="xs"
                           color="success"
-                          className="rounded-lg shadow-sm font-bold"
+                          className="rounded-xl shadow-sm font-bold flex-1 sm:flex-none"
                           onClick={() => handleAction(order.id, 'mark-as-paid')}
                           disabled={actionLoading === order.id}
                         >
-                          {actionLoading === order.id ? <Spinner size="xs" /> : ''}
+                          {actionLoading === order.id ? <Spinner size="xs" /> : <Iconify icon="solar:check-circle-bold" className="mr-1" />}
                           {t('orders.mark')}
                         </Button>
                         <Button
                           size="xs"
                           color="failure"
-                          className="rounded-lg shadow-sm font-bold"
+                          className="rounded-xl shadow-sm font-bold flex-1 sm:flex-none"
                           onClick={() => handleAction(order.id, 'cancel')}
                           disabled={actionLoading === order.id}
                         >
+                          <Iconify icon="solar:close-circle-bold" className="mr-1" />
                           {t('orders.cancel')}
                         </Button>
                       </>
                     )}
                     {order.status === 'PAID' && (
-                      <span className="text-xs text-green-500 font-bold flex items-center gap-1">
+                      <span className="text-sm text-green-500 font-black flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full">
                         <Iconify icon="solar:check-read-linear" /> {t('orders.finished')}
                       </span>
                     )}
