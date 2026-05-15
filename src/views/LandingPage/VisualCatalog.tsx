@@ -19,7 +19,8 @@ type Product = {
   id: number;
   name: string;
   price: string;
-  category_name: string;
+  categories: Array<{ id: number; name: string }>;
+  category_names: string[];
   images: { url_image: string; is_main: boolean }[];
   vendor_name: string;
 };
@@ -71,7 +72,7 @@ const CategorySection = ({ category }: { category: Category }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await api.get(`products/catalog/?category=${category.id}&page_size=4`);
+        const res = await api.get(`products/catalog/?categories=${category.id}&page_size=4`);
         setProducts(res.data.results || res.data || []);
       } catch (err) {
         console.error(`Error fetching products for category ${category.name}`, err);
@@ -98,10 +99,10 @@ const CategorySection = ({ category }: { category: Category }) => {
             {category.description || `Explora lo mejor en ${category.name.toLowerCase()}`}
           </p>
         </div>
-        <Link 
-          to={`/app/products?category=${category.name}`}
-          className="group flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-widest text-xs hover:gap-3 transition-all"
-        >
+<Link
+           to={`/app/products?categories=${category.id}`}
+           className="group flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-widest text-xs hover:gap-3 transition-all"
+         >
           {t("visualCatalog.viewAll")}
           <Icon icon="solar:alt-arrow-right-bold" className="text-lg" />
         </Link>
@@ -165,9 +166,9 @@ const VisualCatalog = () => {
             ))
           ) : (
             categories.map((cat) => (
-              <Link
-                key={cat.id}
-                to={`/app/products?category=${cat.name}`}
+<Link
+                 key={cat.id}
+                 to={`/app/products?categories=${cat.id}`}
                 className="group relative flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:shadow-indigo-200/50 hover:-translate-y-2 transition-all duration-500 overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-700" />
