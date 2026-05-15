@@ -33,6 +33,7 @@ const VendorOrderDetail = lazy(() => import('../views/vendedor/VendorOrderDetail
 const AIRecommendationsHistory = lazy(() => import('../views/vendedor/AIRecommendationsHistory.tsx'));
 const Security = lazy(() => import('../views/shared/Security.tsx'));
 const MyProfile = lazy(() => import("../views/profile/MyProfile"));
+const Reviews = lazy(() => import('../views/reviews/Reviews.tsx'));
 
 // UI / Sample Views
 const Typography = lazy(() => import("../views/typography/Typography"));
@@ -98,7 +99,7 @@ const Router = [
           { path: 'pedidos', element: <VendorOrders /> },
           { path: 'pedidos/:clientName', element: <VendorOrderDetail /> },
           { path: 'auditoria-ia', element: <AIRecommendationsHistory /> },
-          { path: 'reseñas', element: <SamplePage /> },
+          { path: 'reseñas', element: <Reviews /> },
         ]
       }
     ]

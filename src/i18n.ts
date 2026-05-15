@@ -44,8 +44,8 @@ import TradLoginEN from 'src/views/auth/login/locales/en.json';
 import TradRegisterES from 'src/views/auth/authforms/locales/es.json';
 import TradRegisterEN from 'src/views/auth/authforms/locales/en.json';
 
-import TradReviewsES from  'src/components/reviews/locales/es.json';
-import TradReviewsEN from  'src/components/reviews/locales/en.json';
+import TradReviewsES from  'src/views/reviews/locales/es.json';
+import TradReviewsEN from  'src/views/reviews/locales/en.json';
 
 import TradProfileES from 'src/views/profile/locales/es.json'
 import TradProfileEN from 'src/views/profile/locales/en.json'
