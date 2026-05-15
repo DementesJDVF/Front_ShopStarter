@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProfileService, MyProfile as MyProfileType } from "../../services/ProfileService";
+import { Badge } from 'flowbite-react';
 import AvatarUploader from "./components/AvatarUploader";
 import ClientProfile from "./components/ClientProfile";
 import VendorProfile from "./components/VendorProfile";
@@ -100,6 +101,34 @@ const MyProfile = () => {
       : t("edit.pendingMany", { count: changesCount })
     : t("edit.noPending");
 
+  const getRoleBadge = (role: string) => {
+      switch (role) {
+        case 'ADMIN':
+          return <Badge color="purple" className="border-b border-black rounded-lg px-3 py-1 font-bold">{t(`header.role.${role}`)}</Badge>;
+        case 'VENDEDOR':
+          return <Badge color="info" className="rounded-lg px-3 py-1 font-bold">{t(`header.role.${role}`)}</Badge>;
+        case 'CLIENTE':
+          return <Badge color="info" className="rounded-lg px-3 py-1 font-bold">{t(`header.role.${role}`)}</Badge>;
+        default:
+          return <Badge color="gray">{role}</Badge>;
+      }
+    };
+  
+  const getStatusBadge = (status: string) => {
+      switch (status) {
+        case 'ACTIVE':
+          return <Badge color="success" className="rounded-lg px-3 py-1 font-bold">{t(`header.status.${status}`)}</Badge>;
+        case 'INACTIVE':
+          return <Badge color="warningw" className="rounded-lg px-3 py-1 font-bold text-black">{t(`header.status.${status}`)}</Badge>;
+        case 'PENDING':
+          return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold text-black">{t(`header.status.${status}`)}</Badge>;
+        case 'BLOCKED':
+          return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">{t(`header.status.${status}`)}</Badge>;
+        default:
+          return <Badge color="gray">{status}</Badge>;
+      }
+    }; 
+
   return (
     <div
       className="min-h-screen py-8 px-4 font-[var(--main-font)]
@@ -110,7 +139,7 @@ const MyProfile = () => {
         {/* HEADER */}
         <div
           className="rounded-2xl shadow-md border border-primary/10 dark:border-gray-800 p-6 md:p-10 mb-6
-                     bg-gradient-to-br from-primary/15 via-white/70 to-lightprimary/50
+                     bg-gradient-to-br from-white/80 via-primary/5 to-lightprimary/30
                      dark:from-darkgray dark:via-darkgray/80 dark:to-dark
                      backdrop-blur-sm"
         >
@@ -124,33 +153,33 @@ const MyProfile = () => {
                 <h1 className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white">
                   {profile.username}
                 </h1>
-                <span className="inline-block self-center sm:self-auto text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-md bg-primary/20 text-primary border border-primary/30">
-                  {profile.role}
+                <span>
+                  {getRoleBadge(profile.role)}
                 </span>
               </div>
 
               <div className="flex justify-center sm:justify-start gap-6 md:gap-10 mb-4 text-sm">
                 <div className="text-center sm:text-left">
-                  <span className="font-semibold text-gray-900 dark:text-white">{profile.status}</span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <p className="uppercase font-semibold text-gray-900 dark:text-white">
                     {t("header.stats.status")}
                   </p>
+                  <span className="font-semibold text-gray-900 dark:text-white">{getStatusBadge(profile.status)}</span>
                 </div>
                 <div className="text-center sm:text-left">
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {Number(profile.reputation_score).toFixed(2)}
-                  </span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {t("header.stats.reputation")}
-                  </p>
-                </div>
-                <div className="text-center sm:text-left">
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {profile.is_active ? t("header.stats.active") : t("header.stats.inactive")}
-                  </span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <p className="uppercase font-semibold text-gray-900 dark:text-white">
                     {t("header.stats.account")}
                   </p>
+                  <span className="font-semibold text-gray-700 dark:text-gray-200">
+                    {profile.is_active ? t("header.stats.active") : t("header.stats.inactive")}
+                  </span>
+                </div>
+                <div className="text-center sm:text-left">
+                  <p className="uppercase font-semibold text-gray-900 dark:text-white">
+                    {t("header.stats.reputation")}
+                  </p>
+                  <span className="font-semibold text-gray-700 dark:text-gray-200">
+                    {Number(profile.reputation_score).toFixed(1)}
+                  </span>
                 </div>
               </div>
 
@@ -158,7 +187,7 @@ const MyProfile = () => {
                 <p className="font-semibold text-gray-900 dark:text-white">
                   {profile.full_name || t("header.stats.noName")}
                 </p>
-                <p className="text-gray-500 dark:text-gray-400">{profile.email}</p>
+                <p className="font-semibold text-gray-700 dark:text-gray-200">{profile.email}</p>
               </div>
             </div>
           </div>
@@ -171,25 +200,26 @@ const MyProfile = () => {
                      dark:from-darkgray dark:via-darkgray/80 dark:to-dark
                      backdrop-blur-sm"
         >
-          <div className="px-6 md:px-10 py-5 border-b border-primary/10 dark:border-gray-800">
+          <div className="px-6 md:px-10 py-5 border-b border-gray-400 dark:border-gray-800">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               {t("edit.title")}
             </h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs text-gray-900 dark:text-gray-300 mt-1">
               {t("edit.subtitle")}
             </p>
           </div>
 
           <div className="px-6 md:px-10 py-6">{renderByRole()}</div>
 
-          <div className="px-6 md:px-10 py-5 border-t border-primary/10 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <span className="text-xs text-gray-500 dark:text-gray-400">{pendingText}</span>
+          <div className="px-6 md:px-10 py-5 border-t border-gray-400 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <span className="text-xs text-gray-900 dark:text-gray-300">{pendingText}</span>
             <button
               type="button"
               onClick={handleSubmitAll}
               disabled={!hasChanges || saving}
               className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white
-                         bg-primary hover:bg-primary/90 disabled:bg-gray-300 dark:disabled:bg-gray-700
+                         bg-primary hover:brightness-200 disabled:hover:brightness-100 transition-all disabled:bg-gray-400
+                         dark:disabled:bg-gray-700 dark:disabled:text-gray-900
                          disabled:cursor-not-allowed shadow-sm transition"
             >
               {saving ? (

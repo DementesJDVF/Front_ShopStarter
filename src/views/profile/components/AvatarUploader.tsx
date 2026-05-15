@@ -240,7 +240,7 @@ const AvatarUploader = ({ profile, onUpdated }: Props) => {
           <img
             src={currentUrl}
             alt="avatar"
-            className="w-32 h-32 md:w-36 md:h-36 rounded-full object-cover border-4 border-primary/30 shadow-md"
+            className="w-32 h-32 md:w-36 md:h-36 rounded-full object-cover border-4 border-primary shadow-md"
           />
         </div>
 
@@ -257,7 +257,8 @@ const AvatarUploader = ({ profile, onUpdated }: Props) => {
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-primary hover:bg-primary/90 disabled:opacity-60 transition"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold 
+              text-white bg-primary hover:brightness-200 disabled:opacity-60 transition"
           >
             <Icon icon="solar:camera-bold" width={14} />
             {t("avatar.change")}
@@ -266,7 +267,8 @@ const AvatarUploader = ({ profile, onUpdated }: Props) => {
             <button
               type="button"
               onClick={handleDelete}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50 transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-200 
+                bg-red-900 hover:bg-red-700 dark:text-red-900 dark:bg-red-300 dark:hover:bg-red-500 transition"
             >
               <Icon icon="solar:trash-bin-trash-bold" width={14} />
             </button>

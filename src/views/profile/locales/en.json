@@ -8,6 +8,17 @@
       "active": "Active",
       "inactive": "Inactive",
       "noName": "No name"
+    },
+    "role":{
+      "ADMIN":"ADMIN",
+      "VENDEDOR":"VENDOR",
+      "CLIENTE":"CLIENT"
+    },
+    "status":{
+      "ACTIVE":"ACTIVE",
+      "INACTIVE":"INACTIVE",
+      "PENDING":"PENDING",
+      "BLOCKED":"BLOCKED"
     }
   },
   "edit": {
