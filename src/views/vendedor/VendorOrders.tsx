@@ -108,7 +108,9 @@ const VendorOrders: React.FC = () => {
             <p className="text-gray-400 mt-2">{t('orders.empty.msg')}</p>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-gray-800 dark:divide-gray-200
+            bg-gradient-to-br from-gray-50 via-gray-200 to-primary/5
+            dark:from-dark dark:via-darkgray dark:to-dark">
             {clientNames.map((clientName) => {
               const clientOrders = groupedByClient[clientName];
 
@@ -123,13 +125,14 @@ const VendorOrders: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => goToClient(clientName)}
-                    className="w-full flex items-center justify-between gap-4 px-4 py-4 hover:bg-indigo-50/40 transition-colors text-left"
+                    className="w-full flex items-center justify-between gap-4 px-4 py-4 hover:bg-gray-300
+                      dark:hover:bg-indigo-50/40 transition-colors text-left"
                   >
                     <div className="flex items-center gap-4">
                       <img
                         src={avatarUrl}
                         alt={clientName}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-indigo-100 shadow-sm bg-white"
+                        className="w-12 h-12 rounded-full object-cover border-2 border-primary dark:border-gray-300 shadow-sm bg-white"
                         onError={(e) => {
                           // Si la URL falla, caer al dicebear sin romper el render.
                           (e.currentTarget as HTMLImageElement).src = getUserAvatar(clientName);
@@ -146,7 +149,7 @@ const VendorOrders: React.FC = () => {
                     <Iconify
                       icon="solar:alt-arrow-right-bold-duotone"
                       height={24}
-                      className="text-indigo-500"
+                      className="text-indigo-500 dark:text-amber-400"
                     />
                   </button>
                 </li>

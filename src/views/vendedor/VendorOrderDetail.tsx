@@ -181,13 +181,13 @@ const VendorOrderDetail: React.FC = () => {
             className="rounded-xl shadow-sm"
           >
             <Iconify icon="solar:alt-arrow-left-bold-duotone" className="mr-1" height={20} />
-            Volver
+            {t('orders.back')}
           </Button>
 
           <img
             src={avatarUrl}
             alt={clientName}
-            className="w-14 h-14 rounded-full object-cover border-2 border-indigo-100 shadow-sm bg-white"
+            className="w-14 h-14 rounded-full object-cover border-2 border-primary dark:border-indigo-100 shadow-sm bg-white"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = getUserAvatar(clientName);
             }}
@@ -199,7 +199,7 @@ const VendorOrderDetail: React.FC = () => {
             </h1>
             <p className="text-black dark:text-white font-bold text-sm">
               {clientOrders.length}{' '}
-              {clientOrders.length === 1 ? 'pedido' : 'pedidos'}
+              {clientOrders.length === 1 ? t('orders.pedido') : t('orders.pedido')+"s"}
             </p>
           </div>
         </div>
@@ -210,13 +210,15 @@ const VendorOrderDetail: React.FC = () => {
         </Button>
       </div>
 
-      <Card className="border-none shadow-xl rounded-3xl overflow-hidden p-4">
+      <Card className="border-none shadow-xl rounded-3xl overflow-hidden p-4
+        bg-gradient-to-br from-primary/10 via-lightprimary/40 to-primary/5
+        dark:from-dark dark:via-darkgray dark:to-dark">
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <Spinner size="xl" color="info" />
           </div>
         ) : clientOrders.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="text-center py-16 ">
             <div className="bg-blue-50/50 inline-block p-6 rounded-full mb-4">
               <Iconify icon="solar:box-minimalistic-outline" height={48} className="text-blue-300" />
             </div>
@@ -224,13 +226,14 @@ const VendorOrderDetail: React.FC = () => {
             <p className="text-gray-400 mt-2">{t('orders.empty.msg')}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
             {clientOrders.map((order) => {
               const productImg = resolveProductImage(order);
               return (
                 <div
                   key={order.id}
-                  className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-white rounded-2xl shadow-sm p-4 border border-indigo-50"
+                  className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-white rounded-2xl shadow-sm p-4 border-b
+                    bg-gray-300 border-gray-900 dark:bg-gray-700 dark:border-gray-300"
                 >
                   {/* Imagen - Tamaño fijo para que no baile */}
                   <div className="shrink-0">
@@ -238,7 +241,7 @@ const VendorOrderDetail: React.FC = () => {
                       <img
                         src={productImg}
                         alt={order.product_name}
-                        className="w-20 h-20 rounded-xl object-cover border border-gray-100 shadow-sm"
+                        className="w-20 h-20 rounded-xl object-cover border border-primary dark:border-gray-300 shadow-sm"
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
                     ) : (
@@ -250,7 +253,7 @@ const VendorOrderDetail: React.FC = () => {
 
                   {/* Contenido - min-w-0 es vital para que el truncate funcione */}
                   <div className="flex-1 min-w-0 w-full">
-                    <p className="font-black text-gray-900 truncate text-lg uppercase tracking-tight">
+                    <p className="font-black text-gray-900 dark:text-gray-200 truncate text-lg uppercase tracking-tight">
                       {order.product_name || 'Producto eliminado'}
                     </p>
 
@@ -258,7 +261,7 @@ const VendorOrderDetail: React.FC = () => {
                       {getStatusBadge(order.status)}
                       {!productImg && (
                         <Badge color="failure" className="rounded-lg font-black text-[10px] uppercase">
-                          Fuera de catálogo
+                          {t('orders.not_found')}
                         </Badge>
                       )}
                       {order.status === 'RESERVED' && order.payment_notified && (

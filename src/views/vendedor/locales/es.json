@@ -61,6 +61,9 @@
     "mark": "Marcar PAGADO",
     "cancel": "Cancelar",
     "refresh": "Refrescar",
+    "back":"Volver",
+    "pedido":"pedido",
+    "not_found":"NO ENCONTRADO",
     "empty": {
       "title": "Sin pedidos activos",
       "msg": "Explora y gestiona tu catálogo para atraer ventas."
