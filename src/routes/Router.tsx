@@ -15,7 +15,6 @@ const Register = lazy(() => import('../views/auth/register/Register'));
 const ForgotPassword = lazy(() => import('../views/auth/login/ForgotPassword'));
 const ResetPassword = lazy(() => import('../views/auth/login/ResetPassword'));
 const Error = lazy(() => import('../views/auth/error/Error'));
-const TerminosCondiciones = lazy(() => import('../pages/TerminosCondiciones'));
 
 // Shared / Product Views
 const ProductDetail = lazy(() => import('../components/products/ProductDetail'));
@@ -30,8 +29,10 @@ const VendedorDashboard = lazy(() => import('../views/vendedor/Dashboard.tsx'));
 const ManageProducts = lazy(() => import('../views/vendedor/ManageProducts.tsx'));
 const AdminDashboard = lazy(() => import('../views/admin/AdminDashboard.tsx'));
 const VendorOrders = lazy(() => import('../views/vendedor/VendorOrders.tsx'));
+const VendorOrderDetail = lazy(() => import('../views/vendedor/VendorOrderDetail.tsx'));
 const AIRecommendationsHistory = lazy(() => import('../views/vendedor/AIRecommendationsHistory.tsx'));
 const Security = lazy(() => import('../views/shared/Security.tsx'));
+const MyProfile = lazy(() => import("../views/profile/MyProfile"));
 
 // UI / Sample Views
 const Typography = lazy(() => import("../views/typography/Typography"));
@@ -41,8 +42,6 @@ const Shadow = lazy(() => import("../views/shadows/Shadow"));
 const Alert = lazy(() => import("../views/alerts/Alerts"));
 const Solar = lazy(() => import("../views/icons/Solar"));
 const SamplePage = lazy(() => import('../views/sample-page/SamplePage'));
-const Reviews = lazy(() => import('src/components/reviews/Reviews.tsx'));
-const MyProfile = lazy(() => import("../views/profile/MyProfile"));
 
 const Router = [
   // 1. PUBLIC ROUTES (Landing & Auth)
@@ -62,7 +61,6 @@ const Router = [
           { path: '404', element: <Error /> },
         ]
       },
-      { path: 'terminos', element: <TerminosCondiciones /> },
     ],
   },
 
@@ -98,8 +96,9 @@ const Router = [
           { path: 'productos', element: <ManageProducts /> },
           { path: 'mapa', element: <RoleBasedMap /> },
           { path: 'pedidos', element: <VendorOrders /> },
+          { path: 'pedidos/:clientName', element: <VendorOrderDetail /> },
           { path: 'auditoria-ia', element: <AIRecommendationsHistory /> },
-          { path: 'reseñas', element: <Reviews /> },
+          { path: 'reseñas', element: <SamplePage /> },
         ]
       }
     ]
@@ -124,7 +123,7 @@ const Router = [
       }
     ]
   },
-  
+
   // 5. COMMON PROTECTED ROUTES (For all logged in users)
   {
     path: '/usuario',
@@ -134,13 +133,13 @@ const Router = [
         path: '',
         element: <FullLayout />,
         children: [
-          { path: 'seguridad', element: <Security /> },
           { path: 'mi-perfil', element: <MyProfile /> },
+          { path: 'seguridad', element: <Security /> },
         ]
       }
     ]
   },
-  
+
   // 6. COMMON / UI ROUTES
   {
     path: '/app',
@@ -159,7 +158,7 @@ const Router = [
     ],
   },
 
-  // 6. CATCH-ALL
+  // 7. CATCH-ALL
   {
     path: '*',
     element: <Navigate to="/auth/404" replace />,
