@@ -18,13 +18,26 @@ interface Order {
   payment_notified: boolean;
   client_avatar?: string | null;
   product_image?: string | null;
-  // Por si el backend devuelve el objeto producto anidado:
   product?: {
     id?: number | string;
     name?: string;
     images?: Array<{ url_image: string; is_main?: boolean }>;
   };
 }
+
+// 🆕 Helper: intenta extraer la URL de la foto de perfil desde varios formatos.
+const extractAvatarUrl = (u: any): string | null => {
+  if (!u) return null;
+  return (
+    u?.profile_picture?.image_url ||
+    u?.profile_picture_url ||
+    u?.profile_picture ||
+    u?.avatar_url ||
+    u?.avatar ||
+    u?.image_url ||
+    null
+  );
+};
 
 const VendorOrderDetail: React.FC = () => {
   const { t } = useTranslation('vendedor');
@@ -42,7 +55,7 @@ const VendorOrderDetail: React.FC = () => {
     try {
       setLoading(true);
 
-      // 🆕 Traemos en paralelo: pedidos + usuarios (avatares) + productos (imágenes).
+      // Pedidos + lista usuarios + productos en paralelo.
       const [ordersRes, usersRes, productsRes] = await Promise.all([
         api.get('orders/'),
         api.get('users/list/').catch(() => ({ data: [] })),
@@ -52,19 +65,56 @@ const VendorOrderDetail: React.FC = () => {
       const ordersData = ordersRes.data.results ? ordersRes.data.results : ordersRes.data;
       setOrders(ordersData);
 
-      // Mapa username -> foto real
       const usersData = usersRes.data?.results ? usersRes.data.results : usersRes.data;
+      console.log('🧩 users/list/ →', usersData);
+
+      // Mapa username -> id  y  username -> avatar (primer intento desde list).
+      const usernameToId: Record<string, string> = {};
       const aMap: Record<string, string> = {};
       if (Array.isArray(usersData)) {
         usersData.forEach((u: any) => {
-          const url =
-            u?.profile_picture?.image_url ||
-            u?.profile_picture_url ||
-            u?.avatar_url ||
-            null;
+          if (u?.username && u?.id) usernameToId[u.username] = String(u.id);
+          const url = extractAvatarUrl(u);
           if (url && u?.username) aMap[u.username] = url;
         });
       }
+
+      // Para los que aún no tienen foto, pedir el detalle por id.
+      const clientNamesInOrders: string[] = Array.from(
+        new Set(
+          (Array.isArray(ordersData) ? ordersData : [])
+            .map((o: any) => o?.client_name)
+            .filter(Boolean),
+        ),
+      );
+      const missing = clientNamesInOrders.filter((name) => !aMap[name] && usernameToId[name]);
+
+      console.log('🧩 clientes en pedidos:', clientNamesInOrders);
+      console.log('🧩 faltan foto y tienen id:', missing);
+
+      const detailResponses = await Promise.all(
+        missing.map((name) =>
+          api
+            .get(`users/listusers/${usernameToId[name]}/`)
+            .then((r) => ({ name, data: r.data }))
+            .catch((err) => {
+              console.warn(`⚠️ users/listusers/${usernameToId[name]}/ falló:`, err?.response?.status);
+              return null;
+            }),
+        ),
+      );
+
+      detailResponses.forEach((res) => {
+        if (!res) return;
+        const u = res.data?.results
+          ? Array.isArray(res.data.results) ? res.data.results[0] : res.data.results
+          : res.data;
+        const url = extractAvatarUrl(u);
+        console.log(`🧩 detalle de ${res.name}:`, u, '→ url:', url);
+        if (url) aMap[res.name] = url;
+      });
+
+      console.log('🧩 avatarMap final:', aMap);
       setAvatarMap(aMap);
 
       // Mapa product_name -> imagen principal
@@ -119,7 +169,6 @@ const VendorOrderDetail: React.FC = () => {
     }
   };
 
-  // Resolver imagen de producto: 1) backend la mande 2) producto anidado 3) mapa productos 4) null.
   const resolveProductImage = (order: Order): string | null => {
     if (order.product_image) return order.product_image;
     const nestedMain =
@@ -205,7 +254,6 @@ const VendorOrderDetail: React.FC = () => {
                       alt={order.product_name}
                       className="w-20 h-20 rounded-xl object-cover border border-gray-100"
                       onError={(e) => {
-                        // Si la imagen falla, ocultarla y dejar el placeholder.
                         (e.currentTarget as HTMLImageElement).style.display = 'none';
                       }}
                     />

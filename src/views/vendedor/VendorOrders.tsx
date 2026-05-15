@@ -18,6 +18,20 @@ interface Order {
   product_image?: string | null;
 }
 
+// 🆕 Helper: intenta extraer la URL de la foto de perfil desde varios formatos.
+const extractAvatarUrl = (u: any): string | null => {
+  if (!u) return null;
+  return (
+    u?.profile_picture?.image_url ||
+    u?.profile_picture_url ||
+    u?.profile_picture ||
+    u?.avatar_url ||
+    u?.avatar ||
+    u?.image_url ||
+    null
+  );
+};
+
 const VendorOrders: React.FC = () => {
   const { t } = useTranslation('vendedor');
   const navigate = useNavigate();
@@ -29,30 +43,65 @@ const VendorOrders: React.FC = () => {
     try {
       setLoading(true);
 
-      // 🆕 Fetch en paralelo: pedidos + usuarios (para obtener avatares reales).
+      // 1) Pedidos + lista de usuarios (id, username) en paralelo.
       const [ordersRes, usersRes] = await Promise.all([
         api.get('orders/'),
-        api.get('users/list/').catch(() => ({ data: [] })), // si falla, no rompe nada
+        api.get('users/list/').catch(() => ({ data: [] })),
       ]);
 
       const ordersData = ordersRes.data.results ? ordersRes.data.results : ordersRes.data;
       setOrders(ordersData);
 
-      // Construir mapa username -> foto real (si tienen).
       const usersData = usersRes.data?.results ? usersRes.data.results : usersRes.data;
+      console.log('🧩 users/list/ →', usersData);
+
+      // 2) Mapa username -> id  y  primer intento de mapa username -> avatar (por si list ya trae foto).
+      const usernameToId: Record<string, string> = {};
       const map: Record<string, string> = {};
       if (Array.isArray(usersData)) {
         usersData.forEach((u: any) => {
-          const url =
-            u?.profile_picture?.image_url ||
-            u?.profile_picture_url ||
-            u?.avatar_url ||
-            null;
-          if (url && u?.username) {
-            map[u.username] = url;
-          }
+          if (u?.username && u?.id) usernameToId[u.username] = String(u.id);
+          const url = extractAvatarUrl(u);
+          if (url && u?.username) map[u.username] = url;
         });
       }
+
+      // 3) Para los clientes que aparecen en pedidos y aún NO tienen foto, pedir el detalle por id.
+      const clientNamesInOrders: string[] = Array.from(
+        new Set(
+          (Array.isArray(ordersData) ? ordersData : [])
+            .map((o: any) => o?.client_name)
+            .filter(Boolean),
+        ),
+      );
+      const missing = clientNamesInOrders.filter((name) => !map[name] && usernameToId[name]);
+
+      console.log('🧩 clientes en pedidos:', clientNamesInOrders);
+      console.log('🧩 faltan foto y tienen id:', missing);
+
+      const detailResponses = await Promise.all(
+        missing.map((name) =>
+          api
+            .get(`users/listusers/${usernameToId[name]}/`)
+            .then((r) => ({ name, data: r.data }))
+            .catch((err) => {
+              console.warn(`⚠️ users/listusers/${usernameToId[name]}/ falló:`, err?.response?.status);
+              return null;
+            }),
+        ),
+      );
+
+      detailResponses.forEach((res) => {
+        if (!res) return;
+        const u = res.data?.results
+          ? Array.isArray(res.data.results) ? res.data.results[0] : res.data.results
+          : res.data;
+        const url = extractAvatarUrl(u);
+        console.log(`🧩 detalle de ${res.name}:`, u, '→ url:', url);
+        if (url) map[res.name] = url;
+      });
+
+      console.log('🧩 avatarMap final:', map);
       setAvatarMap(map);
     } catch (err) {
       console.error('Error cargando pedidos:', err);
@@ -111,7 +160,7 @@ const VendorOrders: React.FC = () => {
             {clientNames.map((clientName) => {
               const clientOrders = groupedByClient[clientName];
 
-              // Prioridad: 1) foto del endpoint orders/ (si llegara) 2) foto de users/list/ 3) dicebear.
+              // Prioridad: 1) foto del endpoint orders/ (si llegara) 2) foto de users/ 3) dicebear.
               const realAvatar =
                 clientOrders.find((o) => o.client_avatar)?.client_avatar ||
                 avatarMap[clientName];
@@ -130,7 +179,6 @@ const VendorOrders: React.FC = () => {
                         alt={clientName}
                         className="w-12 h-12 rounded-full object-cover border-2 border-indigo-100 shadow-sm bg-white"
                         onError={(e) => {
-                          // Si la URL falla, caer al dicebear sin romper el render.
                           (e.currentTarget as HTMLImageElement).src = getUserAvatar(clientName);
                         }}
                       />
