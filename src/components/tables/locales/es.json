@@ -67,6 +67,7 @@
     "price": "Precio",
     "stock": "Stock",
     "category": "Categoría",
+    "categories": "Todas las categorías",
     "category.selectPlaceholder": "Seleccionar categoría",
     "cancel": "Cancelar",
     "save": "Guardar Producto",
