@@ -30,7 +30,7 @@ const ProfileFieldRow = ({
     "w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition disabled:opacity-60 disabled:cursor-not-allowed";
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-6 items-start sm:items-center py-4 border-b border-primary/10 dark:border-gray-800 last:border-b-0">
+    <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-6 items-start sm:items-center py-4 border-b border-gray-400 dark:border-gray-800 last:border-b-0">
       <label className="text-sm font-semibold text-gray-900 dark:text-white sm:text-right flex items-center sm:justify-end gap-1.5">
         {label}
         {isChanged && (
