@@ -12,7 +12,8 @@ interface Product {
   name: string;
   description: string;
   price: number;
-  category_name: string;
+  categories: Array<{ id: number; name: string }>;
+  category_names: string[];
   images: any[];
   stock: number;
 }
@@ -120,9 +121,11 @@ const VendorCatalogModal: React.FC<VendorCatalogModalProps> = ({ vendorId, isOpe
                           className="w-full h-full object-cover" 
                         />
                         <div className="absolute top-2 left-2">
-                            <Badge color="info" className="rounded-lg font-bold shadow-sm">
-                                {product.category_name}
-                            </Badge>
+<Badge color="info" className="rounded-lg font-bold shadow-sm text-[10px]">
+                                 {product.category_names?.length > 0
+                                   ? product.category_names.join(', ')
+                                   : 'Sin categoría'}
+                             </Badge>
                         </div>
                     </div>
                     <div className="w-full md:w-2/3 flex flex-col justify-between py-2">

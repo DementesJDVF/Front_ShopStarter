@@ -27,7 +27,8 @@ type ApiProduct = {
   status: string;
   vendor: string | number;
   vendor_name: string;
-  category_name: string;
+  categories: Array<{ id: number; name: string }>;
+  category_names: string[];
   is_featured: boolean;
   images: ApiProductImage[];
   created_at: string;
@@ -39,7 +40,7 @@ type ApiProduct = {
 export function ProductCatalog() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [categories, setCategories] = useState<{ id: number, name: string }[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -48,11 +49,9 @@ export function ProductCatalog() {
   const { userLocation, radius, setRadius } = useMap();
   const confirm = useConfirm();
 
-
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
   const [previewTitle, setPreviewTitle] = useState('');
-
 
   const openPreview = (url: string, title: string) => {
     setPreviewUrl(url);
@@ -103,14 +102,26 @@ export function ProductCatalog() {
     loadData(userLocation?.lat, userLocation?.lng, radius);
   }, [userLocation, radius]);
 
-  // Filtrado reactivo optimizado
+  // Filtrado reactivo optimizado — soporta múltiples categorías
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
-      const categoryMatch = !selectedCategory || p.category_name === selectedCategory;
+      const categoryMatch =
+        selectedCategories.length === 0 ||
+        p.categories?.some((c: any) => selectedCategories.includes(c.id));
       const distanceMatch = radius === 0 || (p.distance !== undefined && p.distance <= radius);
       return categoryMatch && distanceMatch;
     });
-  }, [products, selectedCategory, radius]);
+  }, [products, selectedCategories, radius]);
+
+  const toggleCategory = (catId: number) => {
+    setSelectedCategories(prev =>
+      prev.includes(catId) ? prev.filter(id => id !== catId) : [...prev, catId]
+    );
+  };
+
+  const clearCategories = () => {
+    setSelectedCategories([]);
+  };
 
   if (loading) return (
     <div className="flex justify-center p-20 font-[var(--main-font)]">
@@ -149,11 +160,11 @@ export function ProductCatalog() {
           </div>
         </div>
 
-        {/* Filtros de Categoría */}
-        <div className="flex gap-2 mt-8 overflow-x-auto pb-2 scrollbar-hide">
+        {/* Filtros de Categoría — multi-select con chips */}
+        <div className="flex gap-2 mt-8 overflow-x-auto pb-2 scrollbar-hide flex-wrap items-center">
           <button
-            onClick={() => setSelectedCategory(null)}
-            className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === null
+            onClick={clearCategories}
+            className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategories.length === 0
                 ? 'bg-primary text-white border-b border-white shadow-lg shadow-black/50 scale-105'
                 : 'bg-gray-50 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-600'
               }`}
@@ -163,8 +174,8 @@ export function ProductCatalog() {
           {categories.map(cat => (
             <button
               key={cat.id}
-              onClick={() => setSelectedCategory(cat.name)}
-              className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === cat.name
+              onClick={() => toggleCategory(cat.id)}
+              className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategories.includes(cat.id)
                   ? 'bg-primary text-white border-b border-white shadow-lg shadow-black/50 scale-105'
                   : 'bg-gray-50 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-600'
                 }`}
@@ -172,6 +183,15 @@ export function ProductCatalog() {
               {cat.name}
             </button>
           ))}
+          {selectedCategories.length > 0 && (
+            <button
+              onClick={clearCategories}
+              className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-bold bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 transition-all ml-2"
+            >
+              <Icon icon="solar:trash-bin-minimalistic-linear" height={18} />
+              {t("clear", "Quitar categorías")}
+            </button>
+          )}
         </div>
       </div>
 
@@ -185,9 +205,6 @@ export function ProductCatalog() {
             const rawImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
             const mainImage = getAbsoluteImageUrl(rawImage);
             const isOutOfStock = !p.stock;
-            // Un producto es comprable si el vendedor lo tiene activo (stock)
-            // y no está en un estado crítico (REJECTED/INACTIVE). 
-            // AVAILABLE, RESERVED y SOLD ahora son permitidos para compra múltiple si el switch está ON.
             const isNotAvailable = !p.status || !['AVAILABLE', 'RESERVED', 'SOLD'].includes(p.status.toUpperCase());
             const canPurchase = !isOutOfStock && !isNotAvailable;
 
@@ -209,35 +226,31 @@ export function ProductCatalog() {
                   )}
 
                   <div className="absolute top-3 left-3 flex flex-col gap-2 z-20">
-                    {p.category_name && (
-                      <div className="bg-info text-white backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm">
-                        {p.category_name}
+                    {/* Multi-category badges on product card */}
+                    {p.categories && p.categories.length > 0 ? (
+                      <div className="flex gap-1 flex-wrap max-w-[60%]">
+                        {p.categories.map((cat: any) => (
+                          <span key={cat.id} className="bg-info text-white backdrop-blur px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-primary shadow-sm truncate">
+                            {cat.name}
+                          </span>
+                        ))}
                       </div>
+                    ) : (
+                      <span className="bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">
+                        {t("uncategorized", "Sin categoría")}
+                      </span>
                     )}
-                    {isOutOfStock ? (
+                    {isOutOfStock && (
                       <div className="bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-red-500/30">
                         {t("outOfStock")}
                       </div>
-                    ) : (
-                      <>
-                        {p.status === 'RESERVED' && (
-                          <div className="bg-amber-500 text-black px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-amber-500/30">
-                            {t("reserved")}
-                          </div>
-                        )}
-                        {p.status === 'SOLD' && (
-                          <div className="bg-indigo-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-indigo-500/30">
-                            {t("sold", "Vendido")}
-                          </div>
-                        )}
-                      </>
                     )}
                   </div>
 
                   {p.distance !== undefined && (
-                    <div className="absolute top-3 right-3 bg-gray-100 dark:bg-gray-900 backdrop-blur px-3 py-1 rounded-full 
+                    <div className="absolute top-3 right-3 bg-gray-100 dark:bg-gray-900 backdrop-blur px-3 py-1 rounded-full
                       text-[10px] font-bold text-black dark:text-white shadow-sm flex items-center gap-1 z-20">
-                      <Icon icon="solar:map-point-linear" className="text-black dark:text-white"/>
+                      <Icon icon="solar:map-point-linear" className="text-black dark:text-white" />
                       {p.distance} km
                     </div>
                   )}
@@ -259,8 +272,8 @@ export function ProductCatalog() {
 
                     <div className="flex gap-2 flex-shrink-0">
                       <button
-                        className="bg-gray-50 dark:bg-darkgray text-gray-900 dark:text-gray-50 p-2.5 rounded-xl 
-                          hover:bg-gray-300 dark:hover:bg-gray-800 transition-all duration-300 border border-gray-400 
+                        className="bg-gray-50 dark:bg-darkgray text-gray-900 dark:text-gray-50 p-2.5 rounded-xl
+                          hover:bg-gray-300 dark:hover:bg-gray-800 transition-all duration-300 border border-gray-400
                           dark:border-gray-700 shadow-sm"
                         title={t("viewDetail")}
                         onClick={() => navigate(`/app/products/${p.id}`)}

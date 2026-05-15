@@ -25,7 +25,7 @@ type ProductDetailData = {
   status: string;
   vendor: string | number;
   vendor_name: string;
-  category_name: string;
+  categories: Array<{ id: number; name: string }>;
   is_featured: boolean;
   images: ProductImage[];
   created_at: string;
@@ -185,16 +185,24 @@ export default function ProductDetail() {
 
         {/* Información */}
         <div className="flex flex-col gap-6">
-          <div className="flex gap-2 flex-wrap">
-            <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
-              {product.category_name}
-            </span>
-            {product.is_featured && (
-              <span className="text-xs bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider flex items-center">
-                <Icon icon="solar:star-bold" className="mr-1" /> {t("featuredProduct")}
-              </span>
-            )}
-            <span>{getStatusBadge(product.status)}
+<div className="flex gap-2 flex-wrap">
+             {product.categories?.length > 0 ? (
+               product.categories.map((cat) => (
+                 <span key={cat.id} className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+                   {cat.name}
+                 </span>
+               ))
+             ) : (
+               <span className="text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+                 {t("uncategorized")}
+               </span>
+             )}
+             {product.is_featured && (
+               <span className="text-xs bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider flex items-center">
+                 <Icon icon="solar:star-bold" className="mr-1" /> {t("featuredProduct")}
+               </span>
+             )}
+             <span>{getStatusBadge(product.status)}
             </span>
           </div>
 

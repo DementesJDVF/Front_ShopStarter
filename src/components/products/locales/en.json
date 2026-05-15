@@ -7,8 +7,10 @@
   "loadingVendors": "Loading vendors...",
   "selectVendor": "Select a vendor",
   "category": "Category",
+  "categories": "Categories",
   "loadingCategories": "Loading categories...",
   "selectCategory": "Select a category",
+  "selectCategories": "Select categories",
   "name": "Name",
   "namePlaceholder": "Product name",
   "description": "Description",
@@ -34,6 +36,7 @@
   "lessThan20": "Less than 20 km",
   "all": "All",
   "retry": "Retry",
+  "clear": "Clear Categories",
   "noProducts": "No products found with these filters.",
   "noImage": "No image",
   "outOfStock": "Out of stock",
@@ -70,5 +73,6 @@
   "reserveConfirmExact": "Do you want to reserve \"{{name}}\"? The product will be removed from the public catalog so you can go pick it up.",
   "reserveSuccessDetail": "Reservation successful! Check the 'My Reservations' section for more details.",
   "reserveErrorDetail": "There was an error processing your reservation. Please try again.",
-  "loadError": "Could not load product."
+  "loadError": "Could not load product.",
+  "uncategorized": "Uncategorized"
 }
