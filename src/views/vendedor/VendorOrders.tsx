@@ -22,16 +22,40 @@ const VendorOrders: React.FC = () => {
   const { t } = useTranslation('vendedor');
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [avatarMap, setAvatarMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await api.get('orders/');
-      const data = res.data.results ? res.data.results : res.data;
-      setOrders(data);
+
+      // 🆕 Fetch en paralelo: pedidos + usuarios (para obtener avatares reales).
+      const [ordersRes, usersRes] = await Promise.all([
+        api.get('orders/'),
+        api.get('users/list/').catch(() => ({ data: [] })), // si falla, no rompe nada
+      ]);
+
+      const ordersData = ordersRes.data.results ? ordersRes.data.results : ordersRes.data;
+      setOrders(ordersData);
+
+      // Construir mapa username -> foto real (si tienen).
+      const usersData = usersRes.data?.results ? usersRes.data.results : usersRes.data;
+      const map: Record<string, string> = {};
+      if (Array.isArray(usersData)) {
+        usersData.forEach((u: any) => {
+          const url =
+            u?.profile_picture?.image_url ||
+            u?.profile_picture_url ||
+            u?.avatar_url ||
+            null;
+          if (url && u?.username) {
+            map[u.username] = url;
+          }
+        });
+      }
+      setAvatarMap(map);
     } catch (err) {
-      console.error("Error cargando pedidos:", err);
+      console.error('Error cargando pedidos:', err);
     } finally {
       setLoading(false);
     }
@@ -86,8 +110,11 @@ const VendorOrders: React.FC = () => {
           <ul className="divide-y divide-gray-100">
             {clientNames.map((clientName) => {
               const clientOrders = groupedByClient[clientName];
-              // Foto real si el backend la mandara; si no, identicon DiceBear (igual que Profile.tsx).
-              const realAvatar = clientOrders.find((o) => o.client_avatar)?.client_avatar;
+
+              // Prioridad: 1) foto del endpoint orders/ (si llegara) 2) foto de users/list/ 3) dicebear.
+              const realAvatar =
+                clientOrders.find((o) => o.client_avatar)?.client_avatar ||
+                avatarMap[clientName];
               const avatarUrl = realAvatar || getUserAvatar(clientName);
 
               return (
@@ -102,6 +129,10 @@ const VendorOrders: React.FC = () => {
                         src={avatarUrl}
                         alt={clientName}
                         className="w-12 h-12 rounded-full object-cover border-2 border-indigo-100 shadow-sm bg-white"
+                        onError={(e) => {
+                          // Si la URL falla, caer al dicebear sin romper el render.
+                          (e.currentTarget as HTMLImageElement).src = getUserAvatar(clientName);
+                        }}
                       />
                       <div>
                         <p className="font-black text-gray-900 dark:text-gray-100">{clientName}</p>

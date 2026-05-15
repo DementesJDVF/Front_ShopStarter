@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getUserAvatar } from '../../utils/avatar';
+import { getAbsoluteImageUrl } from '../../utils/urlHelper';
 
 interface Order {
   id: string;
@@ -17,6 +18,12 @@ interface Order {
   payment_notified: boolean;
   client_avatar?: string | null;
   product_image?: string | null;
+  // Por si el backend devuelve el objeto producto anidado:
+  product?: {
+    id?: number | string;
+    name?: string;
+    images?: Array<{ url_image: string; is_main?: boolean }>;
+  };
 }
 
 const VendorOrderDetail: React.FC = () => {
@@ -26,15 +33,52 @@ const VendorOrderDetail: React.FC = () => {
   const clientName = decodeURIComponent(clientNameParam || '');
 
   const [orders, setOrders] = useState<Order[]>([]);
+  const [avatarMap, setAvatarMap] = useState<Record<string, string>>({});
+  const [productImageMap, setProductImageMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await api.get('orders/');
-      const data = res.data.results ? res.data.results : res.data;
-      setOrders(data);
+
+      // 🆕 Traemos en paralelo: pedidos + usuarios (avatares) + productos (imágenes).
+      const [ordersRes, usersRes, productsRes] = await Promise.all([
+        api.get('orders/'),
+        api.get('users/list/').catch(() => ({ data: [] })),
+        api.get('products/create/').catch(() => ({ data: [] })),
+      ]);
+
+      const ordersData = ordersRes.data.results ? ordersRes.data.results : ordersRes.data;
+      setOrders(ordersData);
+
+      // Mapa username -> foto real
+      const usersData = usersRes.data?.results ? usersRes.data.results : usersRes.data;
+      const aMap: Record<string, string> = {};
+      if (Array.isArray(usersData)) {
+        usersData.forEach((u: any) => {
+          const url =
+            u?.profile_picture?.image_url ||
+            u?.profile_picture_url ||
+            u?.avatar_url ||
+            null;
+          if (url && u?.username) aMap[u.username] = url;
+        });
+      }
+      setAvatarMap(aMap);
+
+      // Mapa product_name -> imagen principal
+      const productsData = productsRes.data?.results ? productsRes.data.results : productsRes.data;
+      const pMap: Record<string, string> = {};
+      if (Array.isArray(productsData)) {
+        productsData.forEach((p: any) => {
+          const main = p?.images?.find((i: any) => i?.is_main) || p?.images?.[0];
+          if (main?.url_image && p?.name) {
+            pMap[p.name] = getAbsoluteImageUrl(main.url_image);
+          }
+        });
+      }
+      setProductImageMap(pMap);
     } catch (err) {
       console.error('Error cargando pedidos:', err);
     } finally {
@@ -75,10 +119,23 @@ const VendorOrderDetail: React.FC = () => {
     }
   };
 
+  // Resolver imagen de producto: 1) backend la mande 2) producto anidado 3) mapa productos 4) null.
+  const resolveProductImage = (order: Order): string | null => {
+    if (order.product_image) return order.product_image;
+    const nestedMain =
+      order.product?.images?.find((i) => i?.is_main) || order.product?.images?.[0];
+    if (nestedMain?.url_image) return getAbsoluteImageUrl(nestedMain.url_image);
+    if (order.product_name && productImageMap[order.product_name]) {
+      return productImageMap[order.product_name];
+    }
+    return null;
+  };
+
   const clientOrders = orders.filter(
     (o) => (o.client_name || t('orders.anonymous')) === clientName,
   );
-  const realAvatar = clientOrders.find((o) => o.client_avatar)?.client_avatar;
+  const realAvatar =
+    clientOrders.find((o) => o.client_avatar)?.client_avatar || avatarMap[clientName];
   const avatarUrl = realAvatar || getUserAvatar(clientName);
 
   return (
@@ -98,6 +155,9 @@ const VendorOrderDetail: React.FC = () => {
             src={avatarUrl}
             alt={clientName}
             className="w-14 h-14 rounded-full object-cover border-2 border-indigo-100 shadow-sm bg-white"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = getUserAvatar(clientName);
+            }}
           />
 
           <div>
@@ -132,72 +192,79 @@ const VendorOrderDetail: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {clientOrders.map((order) => (
-              <div
-                key={order.id}
-                className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white rounded-2xl shadow-sm p-4 border border-indigo-50"
-              >
-                {order.product_image ? (
-                  <img
-                    src={order.product_image}
-                    alt={order.product_name}
-                    className="w-20 h-20 rounded-xl object-cover border border-gray-100"
-                  />
-                ) : (
-                  <div className="w-20 h-20 rounded-xl bg-gray-100 flex items-center justify-center">
-                    <Iconify icon="solar:box-minimalistic-bold-duotone" height={36} className="text-gray-400" />
+            {clientOrders.map((order) => {
+              const productImg = resolveProductImage(order);
+              return (
+                <div
+                  key={order.id}
+                  className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white rounded-2xl shadow-sm p-4 border border-indigo-50"
+                >
+                  {productImg ? (
+                    <img
+                      src={productImg}
+                      alt={order.product_name}
+                      className="w-20 h-20 rounded-xl object-cover border border-gray-100"
+                      onError={(e) => {
+                        // Si la imagen falla, ocultarla y dejar el placeholder.
+                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-xl bg-gray-100 flex items-center justify-center">
+                      <Iconify icon="solar:box-minimalistic-bold-duotone" height={36} className="text-gray-400" />
+                    </div>
+                  )}
+
+                  <div className="flex-1 min-w-0">
+                    <p className="font-black text-gray-900 truncate">{order.product_name}</p>
+
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {getStatusBadge(order.status)}
+                      {order.status === 'RESERVED' && order.payment_notified && (
+                        <Badge color="info" className="animate-pulse rounded-lg font-black text-[10px]">
+                          {t('orders.rep_pay')}
+                        </Badge>
+                      )}
+                    </div>
+
+                    <p className="mt-1 font-bold text-indigo-900 dark:text-indigo-400">
+                      ${Number(order.total).toLocaleString()}
+                    </p>
                   </div>
-                )}
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-black text-gray-900 truncate">{order.product_name}</p>
-
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {getStatusBadge(order.status)}
-                    {order.status === 'RESERVED' && order.payment_notified && (
-                      <Badge color="info" className="animate-pulse rounded-lg font-black text-[10px]">
-                        {t('orders.rep_pay')}
-                      </Badge>
+                  <div className="flex flex-wrap gap-2 sm:justify-end">
+                    {order.status === 'RESERVED' && (
+                      <>
+                        <Button
+                          size="xs"
+                          color="success"
+                          className="rounded-lg shadow-sm font-bold"
+                          onClick={() => handleAction(order.id, 'mark-as-paid')}
+                          disabled={actionLoading === order.id}
+                        >
+                          {actionLoading === order.id ? <Spinner size="xs" /> : ''}
+                          {t('orders.mark')}
+                        </Button>
+                        <Button
+                          size="xs"
+                          color="failure"
+                          className="rounded-lg shadow-sm font-bold"
+                          onClick={() => handleAction(order.id, 'cancel')}
+                          disabled={actionLoading === order.id}
+                        >
+                          {t('orders.cancel')}
+                        </Button>
+                      </>
+                    )}
+                    {order.status === 'PAID' && (
+                      <span className="text-xs text-green-500 font-bold flex items-center gap-1">
+                        <Iconify icon="solar:check-read-linear" /> {t('orders.finished')}
+                      </span>
                     )}
                   </div>
-
-                  <p className="mt-1 font-bold text-indigo-900 dark:text-indigo-400">
-                    ${Number(order.total).toLocaleString()}
-                  </p>
                 </div>
-
-                <div className="flex flex-wrap gap-2 sm:justify-end">
-                  {order.status === 'RESERVED' && (
-                    <>
-                      <Button
-                        size="xs"
-                        color="success"
-                        className="rounded-lg shadow-sm font-bold"
-                        onClick={() => handleAction(order.id, 'mark-as-paid')}
-                        disabled={actionLoading === order.id}
-                      >
-                        {actionLoading === order.id ? <Spinner size="xs" /> : ''}
-                        {t('orders.mark')}
-                      </Button>
-                      <Button
-                        size="xs"
-                        color="failure"
-                        className="rounded-lg shadow-sm font-bold"
-                        onClick={() => handleAction(order.id, 'cancel')}
-                        disabled={actionLoading === order.id}
-                      >
-                        {t('orders.cancel')}
-                      </Button>
-                    </>
-                  )}
-                  {order.status === 'PAID' && (
-                    <span className="text-xs text-green-500 font-bold flex items-center gap-1">
-                      <Iconify icon="solar:check-read-linear" /> {t('orders.finished')}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Card>
