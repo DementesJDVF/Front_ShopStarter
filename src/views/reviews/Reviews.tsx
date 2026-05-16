@@ -192,7 +192,7 @@ const Reviews: React.FC = () => {
                 <h2 className="text-xl font-bold text-gray-800 dark:text-white">
                   {t('header.title')}
                 </h2>
-                <p className="text-gray-500 text-sm">{t('header.subtitle')}</p>
+                <p className="text-gray-800 dark:text-gray-200 text-sm">{t('header.subtitle')}</p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
