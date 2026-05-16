@@ -69,7 +69,8 @@
     "cancel": "Cancel",
     "save": "Save Product",
     "imageRequired": "Image is required.",
-    "selectImageFirst": "Please select an image first."
+    "selectImageFirst": "Please select an image first.",
+    "categoriesRequired": "You must select at least one category."
   },
   "ai": {
     "processing": "Analyzing...",

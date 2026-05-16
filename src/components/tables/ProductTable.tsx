@@ -331,10 +331,16 @@ const [newProduct, setNewProduct] = useState({
     }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
+const handleCreate = async (e: React.FormEvent) => {
+     e.preventDefault();
+     
+     if (newProduct.categories.length === 0) {
+       showWarningAlert(t('form.categoriesRequired'));
+       return;
+     }
+     
+     setSubmitting(true);
+     try {
 const data: any = {
          name: newProduct.name,
          description: newProduct.description,

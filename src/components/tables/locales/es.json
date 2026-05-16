@@ -72,7 +72,8 @@
     "cancel": "Cancelar",
     "save": "Guardar Producto",
     "imageRequired": "La imagen es obligatoria.",
-    "selectImageFirst": "Por favor, selecciona una imagen primero."
+    "selectImageFirst": "Por favor, selecciona una imagen primero.",
+    "categoriesRequired": "Debes seleccionar al menos una categoría."
   },
   "ai": {
     "processing": "Analizando...",
