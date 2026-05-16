@@ -93,7 +93,7 @@ const SidebarContent: MenuItem[] = [
     heading: "ADMIN",
     children: [
       {
-        name: "Resumen",
+        name: "Dashboard",
         icon: "solar:widget-add-line-duotone",
         id: uniqueId(),
         url: "/admin",
