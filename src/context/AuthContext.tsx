@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../utils/axios';
 
+declare global {
+  interface Window {
+    __isLoggingOut?: boolean;
+  }
+}
 
 interface User {
   id: string;
@@ -68,31 +73,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = (userData: User, dummyToken?: string) => {
+    window.__isLoggingOut = false;
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
     // NUNCA guardamos el Token en LocalStorage para evitar XSS.
     // El servidor lo ha guardado en una Cookie HttpOnly de este origen.
   };
 
-  const logout = async () => {
-    // 1. LIMPIEZA LOCAL INMEDIATA (Principio de Optimismo/Seguridad)
-    // Esto evita que la UI permita acciones mientras se procesa el logout en red
-    setUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    sessionStorage.clear();
+   const logout = async () => {
+      window.__isLoggingOut = true;
+      // 1. LIMPIEZA LOCAL INMEDIATA (Principio de Optimismo/Seguridad)
+      // Esto evita que la UI permita acciones mientras se procesa el logout en red
+      setUser(null);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      sessionStorage.clear();
 
-    try {
-        // 2. Notificar al backend de forma secundaria
-        // Usamos axios directo si queremos evitar interceptores, o api sabiendo que puede fallar
-        await api.post('auth/logout/').catch(() => {}); 
-    } catch (error) {
-        // Ignoramos errores de red en logout, la prioridad es la limpieza local
-    } finally {
-        // 3. REDIRECCIÓN FORZADA PARA RESETEAR ESTADO GLOBAL
-        window.location.href = '/';
-    }
-  };
+      try {
+          // 2. Notificar al backend de forma secundaria
+          // Usamos axios directo si queremos evitar interceptores, o api sabiendo que puede fallar
+          await api.post('auth/logout/').catch(() => {}); 
+      } catch (error) {
+          // Ignoramos errores de red en logout, la prioridad es la limpieza local
+      } finally {
+          // 3. REDIRECCIÓN ÚNICA: usamos replace() para no crear historial
+          window.location.replace('/');
+      }
+   };
 
   return (
     <AuthContext.Provider value={{ user, token: "secure_httponly_token", login, logout, isAuthenticated: !!user, loading }}>
