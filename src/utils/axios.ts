@@ -25,6 +25,18 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
+// Variable para prevenir múltiples redirecciones durante logout
+let isRedirecting = false;
+export let isLoggingOut = false;
+
+// Función para sincronizar con AuthContext
+export const setLoggingOut = (value: boolean) => {
+  isLoggingOut = value;
+  if (typeof window !== 'undefined') {
+    window.__isLoggingOut = value;
+  }
+};
+
 // Variable en memoria para persistir el token CSRF obtenido vía JSON
 let memoizedCsrfToken: string | null = null;
 
@@ -33,6 +45,11 @@ let memoizedCsrfToken: string | null = null;
 // si estamos en un entorno Cross-Origin (Vercel -> Railway) donde JS no puede leer cookies.
 api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    // Sincronizar estado de logout
+    if (typeof window !== 'undefined') {
+      isLoggingOut = window.__isLoggingOut || false;
+    }
+    
     const isMutation = ['post', 'put', 'patch', 'delete'].includes(config.method || '');
     
     if (isMutation) {
@@ -106,13 +123,15 @@ api.interceptors.response.use(
       memoizedCsrfToken = null; // Limpiar token CSRF memorizado
       if (isInvalidToken) {
         // Si el token es basura/inválido, no intentamos refrescar, cerramos sesión de una.
-        localStorage.removeItem('user');
-        toast.error('Tu sesión es inválida. Inicia sesión de nuevo.');
-        window.location.href = '/';
+        if (!isLoggingOut) {
+          localStorage.removeItem('user');
+          toast.error('Tu sesión es inválida. Inicia sesión de nuevo.');
+          window.location.replace('/');
+        }
         return Promise.reject(error);
       }
 
-      if (!originalRequest._retry && !originalRequest.url?.includes('auth/') && !originalRequest.url?.includes('token/refresh/')) {
+      if (!isLoggingOut && !originalRequest._retry && !originalRequest.url?.includes('auth/') && !originalRequest.url?.includes('token/refresh/')) {
         if (isRefreshing) {
           return new Promise(function(resolve, reject) {
             failedQueue.push({resolve, reject})
@@ -136,9 +155,9 @@ api.interceptors.response.use(
           localStorage.removeItem('user');
           
           const isPublicPath = window.location.pathname === '/' || window.location.pathname.startsWith('/auth');
-          if (!isPublicPath) {
+          if (!isLoggingOut && !isPublicPath) {
             toast.error('Tu sesión ha finalizado por seguridad. Inicia de nuevo.');
-            window.location.href = '/';
+            window.location.replace('/');
           }
           return Promise.reject(err);
         } finally {
