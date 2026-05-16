@@ -120,7 +120,7 @@ const Reviews: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [user, authLoading, t]);
+  }, [user, authLoading]);
 
   const distribution = useMemo(() => {
     const buckets = [0, 0, 0, 0, 0]; // 1..5
