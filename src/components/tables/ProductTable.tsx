@@ -23,8 +23,8 @@ interface Product {
   price: number;
   status: string;
   stock: boolean;
-  category?: string | number;
-  category_name: string;
+  categories: Array<{ id: number; name: string }>;
+  category_names: string[];
   images: Array<{ url_image: string; is_main: boolean }>;
   is_deleted?: boolean;
 }
@@ -61,11 +61,17 @@ const MemoizedTableBody = memo(({ products, t, openPreview, handleDelete, handle
               </div>
             </div>
           </Table.Cell>
-          <Table.Cell>
-            <Badge color="info" className="capitalize">
-              {product.category_name || t('table.category.none')}
-            </Badge>
-          </Table.Cell>
+<Table.Cell>
+             <div className="flex gap-1 flex-wrap">
+               {product.category_names && product.category_names.length > 0 ? (
+                 product.category_names.map((cn: string, i: number) => (
+                   <Badge key={i} color="info" className="capitalize text-[10px]">{cn}</Badge>
+                 ))
+               ) : (
+                 <Badge color="gray">{t('table.category.none')}</Badge>
+               )}
+             </div>
+           </Table.Cell>
           <Table.Cell>
             <h5 className="text-base font-bold text-wrap">
               ${parseFloat(product.price.toString()).toLocaleString()}
@@ -159,15 +165,15 @@ const ProductTable = () => {
     setIsPreviewOpen(true);
   };
 
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    description: '',
-    price: '',
-    stock: true as boolean,
-    category: '',
-    image_file: null as File | null,
-    preview_url: ''
-  });
+const [newProduct, setNewProduct] = useState({
+     name: '',
+     description: '',
+     price: '',
+     stock: true as boolean,
+     categories: [] as number[],
+     image_file: null as File | null,
+     preview_url: ''
+   });
 
   const [generatingAI, setGeneratingAI] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -269,21 +275,19 @@ const ProductTable = () => {
     }
   };
 
-  const handleEdit = (product: Product) => {
-    // Buscamos el ID coherente con el nombre de la categoría que viene del backend
-    const categoryMatch = categories.find(c => c.name === product.category_name);
-    setEditingId(product.id);
-    setNewProduct({
-      name: product.name,
-      description: product.description || '',
-      price: product.price.toString(),
-      stock: product.stock,
-      category: categoryMatch ? categoryMatch.id.toString() : (product.category?.toString() || ''), 
-      image_file: null,
-      preview_url: product.images?.[0]?.url_image || ''
-    });
-    setShowModal(true);
-  };
+   const handleEdit = (product: Product) => {
+     setEditingId(product.id);
+     setNewProduct({
+       name: product.name,
+       description: product.description || '',
+       price: product.price.toString(),
+       stock: product.stock,
+       categories: product.categories?.map(c => c.id) || [],
+       image_file: null,
+       preview_url: product.images?.[0]?.url_image || ''
+     });
+     setShowModal(true);
+   };
 
   const handleSuggestAI = async () => {
     const hasImage = newProduct.image_file || newProduct.preview_url;
@@ -327,17 +331,23 @@ const ProductTable = () => {
     }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      const data: any = {
-        name: newProduct.name,
-        description: newProduct.description,
-        price: parseFloat(newProduct.price),
-        stock: newProduct.stock,
-        category: parseInt(newProduct.category),
-      };
+const handleCreate = async (e: React.FormEvent) => {
+     e.preventDefault();
+     
+     if (newProduct.categories.length === 0) {
+       showWarningAlert(t('form.categoriesRequired'));
+       return;
+     }
+     
+     setSubmitting(true);
+     try {
+const data: any = {
+         name: newProduct.name,
+         description: newProduct.description,
+         price: parseFloat(newProduct.price),
+         stock: newProduct.stock,
+         categories: newProduct.categories,
+       };
 
       if (newProduct.image_file) {
         const base64 = await toBase64(newProduct.image_file);
@@ -356,16 +366,16 @@ const ProductTable = () => {
 
       setShowModal(false);
       setEditingId(null);
-      setNewProduct({
-        name: '',
-        description: '',
-        price: '',
-        stock: true,
-        category: '',
-        image_file: null,
-        preview_url: ''
-      });
-      showSuccessAlert(editingId ? "Producto actualizado correctamente" : "Producto creado correctamente");
+setNewProduct({
+         name: '',
+         description: '',
+         price: '',
+         stock: true,
+         categories: [],
+         image_file: null,
+         preview_url: ''
+       });
+       showSuccessAlert(editingId ? "Producto actualizado correctamente" : "Producto creado correctamente");
       fetchProducts();
     } catch (error: any) {
       const backendError = error.response?.data;
@@ -416,15 +426,15 @@ const ProductTable = () => {
             <div className="flex gap-2">
               <Button color="primary" onClick={() => {
                 setEditingId(null);
-                setNewProduct({
-                  name: '',
-                  description: '',
-                  price: '',
-                  stock: true,
-                  category: '',
-                  image_file: null,
-                  preview_url: ''
-                });
+                 setNewProduct({
+                   name: '',
+                   description: '',
+                   price: '',
+                   stock: true,
+                   categories: [],
+                   image_file: null,
+                   preview_url: ''
+                 });
                 setShowModal(true);
               }}>
                 <div className="flex items-center gap-2">
@@ -590,21 +600,28 @@ const ProductTable = () => {
               </div>
             </div>
 
-            {/* 6. Categoría */}
-            <div>
-              <Label htmlFor="category" value={t('form.category')} />
-              <Select
-                id="category"
-                required
-                value={newProduct.category}
-                onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-              >
-                <option value="">{t('form.category.selectPlaceholder')}</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </Select>
-            </div>
+{/* 6. Categorías */}
+             <div>
+               <Label htmlFor="categories" value={t('form.categories')} />
+               <div className="flex flex-wrap gap-2 mt-1">
+                 {categories.map((cat) => (
+                   <label key={cat.id} className="flex items-center gap-1 cursor-pointer">
+                     <input
+                       type="checkbox"
+                       checked={newProduct.categories.includes(Number(cat.id))}
+                       onChange={(e) => {
+                         const updated = e.target.checked
+                           ? [...newProduct.categories, Number(cat.id)]
+                           : newProduct.categories.filter(id => id !== Number(cat.id));
+                         setNewProduct({ ...newProduct, categories: updated });
+                       }}
+                       className="rounded"
+                     />
+                     <span className="text-sm">{cat.name}</span>
+                   </label>
+                 ))}
+               </div>
+             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button color="gray" onClick={() => setShowModal(false)}>{t('form.cancel')}</Button>
               <Button color="primary" type="submit" disabled={submitting}>
