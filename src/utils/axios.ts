@@ -121,6 +121,12 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 || isInvalidToken) {
       memoizedCsrfToken = null; // Limpiar token CSRF memorizado
+      
+      // No procesar logout para auth/me - ya se maneja en AuthContext
+      if (originalRequest.url?.includes('auth/me')) {
+        return Promise.reject(error);
+      }
+      
       if (isInvalidToken) {
         // Si el token es basura/inválido, no intentamos refrescar, cerramos sesión de una.
         if (!isLoggingOut) {
