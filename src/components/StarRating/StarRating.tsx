@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import { useAuth } from '../../context/AuthContext';
 import { getVendorReviews, submitReview, updateReview, Review } from '../../services/reviewsService';
+import { getUserAvatar } from '../../utils/avatar';
+import { ProfileService } from '../../services/ProfileService';
 import './StarRating.css';
 
 interface StarRatingProps {
@@ -20,6 +22,10 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 🆕 Foto real del usuario logueado (solo se usa para SU propia reseña).
+  // Para el resto de clientes se genera un identicon DiceBear único por username.
+  const [myPictureUrl, setMyPictureUrl] = useState<string | null>(null);
 
   // Determinar si el usuario tiene permiso para interactuar (Los Admins son neutros)
   const canInteract = interactive && user?.role !== 'ADMIN';
@@ -62,6 +68,34 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
 
     loadReviews();
   }, [vendorId, username]);
+
+  // 🆕 Cargar la foto real del usuario logueado (si la tiene).
+  // No bloquea ni afecta nada más: si falla, simplemente se usa el identicon.
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        if (!user) return;
+        const pic = await ProfileService.getMyProfilePicture();
+        if (mounted && pic?.image_url) {
+          setMyPictureUrl(pic.image_url);
+        }
+      } catch {
+        // si falla, mantenemos el fallback (identicon)
+      }
+    })();
+    return () => { mounted = false; };
+  }, [user?.id]);
+
+  // 🆕 Resuelve qué imagen mostrar para cada autor de reseña.
+  // - Si es el usuario logueado y tiene foto real -> su foto real.
+  // - En cualquier otro caso -> identicon DiceBear único por username.
+  const getAvatarFor = (clientName: string): string => {
+    if (username && clientName === username && myPictureUrl) {
+      return myPictureUrl;
+    }
+    return getUserAvatar(clientName || 'guest');
+  };
 
   // Enviar nueva reseña
   const handleSubmitReview = async () => {
@@ -229,8 +263,29 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
       {userReview && !showNewReviewForm && (
         <div className="user-review-card">
           <div className="review-header">
-            <div className="user-avatar">
-              {userReview.client[0].toUpperCase()}
+            <div
+              className="user-avatar"
+              style={{ overflow: 'hidden', padding: 0 }}
+            >
+              <img
+                src={getAvatarFor(userReview.client)}
+                alt={userReview.client}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: '50%',
+                  display: 'block',
+                }}
+                onError={(e) => {
+                  // Fallback: si la imagen falla, mostramos la inicial como antes.
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.style.display = 'none';
+                  if (target.parentElement) {
+                    target.parentElement.textContent = (userReview.client?.[0] || '?').toUpperCase();
+                  }
+                }}
+              />
             </div>
             <div className="review-info">
               <h4 className="username">{userReview.client}</h4>
@@ -376,8 +431,29 @@ const StarRating: React.FC<StarRatingProps> = ({ vendorId, interactive, token, u
             .map((review) => (
               <div key={review.id} className="review-card">
                 <div className="review-header">
-                  <div className="user-avatar">
-                    {review.client[0].toUpperCase()}
+                  <div
+                    className="user-avatar"
+                    style={{ overflow: 'hidden', padding: 0 }}
+                  >
+                    <img
+                      src={getAvatarFor(review.client)}
+                      alt={review.client}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '50%',
+                        display: 'block',
+                      }}
+                      onError={(e) => {
+                        // Fallback: si la imagen falla, mostramos la inicial como antes.
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.style.display = 'none';
+                        if (target.parentElement) {
+                          target.parentElement.textContent = (review.client?.[0] || '?').toUpperCase();
+                        }
+                      }}
+                    />
                   </div>
                   <div className="review-info">
                     <h5 className="username">{review.client}</h5>

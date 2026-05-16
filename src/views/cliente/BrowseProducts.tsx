@@ -9,7 +9,7 @@ const BrowseProducts = () => {
     <div className="p-6">
       <div className="mb-6 px-4">
         <h1 className="text-2xl font-bold text-dark dark:text-white font-[Outfit]">{t('browse.title')}</h1>
-        <p className="text-gray-500 dark:text-gray-400">{t('browse.desc')}</p>
+        <p className="text-black dark:text-white mt-2 text-lg font-bold">{t('browse.desc')}</p>
       </div>
       <ProductCatalog />
     </div>

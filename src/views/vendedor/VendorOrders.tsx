@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Table, Badge, Button, Spinner } from 'flowbite-react';
+import { Card, Button, Spinner } from 'flowbite-react';
 import { Icon as Iconify } from '@iconify/react';
 import api from '../../utils/axios';
 import { useTranslation } from 'react-i18next';
-import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { getUserAvatar } from '../../utils/avatar';
 
 interface Order {
   id: string;
@@ -13,22 +14,49 @@ interface Order {
   total: number;
   created_at: string;
   payment_notified: boolean;
+  client_avatar?: string | null;
+  product_image?: string | null;
 }
 
 const VendorOrders: React.FC = () => {
   const { t } = useTranslation('vendedor');
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [avatarMap, setAvatarMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await api.get('orders/');
-      const data = res.data.results ? res.data.results : res.data;
-      setOrders(data);
+      // 1. Primero obtenemos las órdenes
+      const ordersRes = await api.get('orders/');
+      const ordersData = ordersRes.data.results || ordersRes.data;
+      setOrders(ordersData);
+      // 2. Extraer IDs de clientes únicos (evitamos duplicados)
+      // Asumo que el campo es order.client o order.user_id
+      const clientIds = Array.from(new Set(
+        ordersData.map((o: any) => o.client).filter((id: any) => id !== undefined)
+      )) as number[];
+      // 3. Consultar los detalles de esos usuarios específicos en paralelo
+      const userRequests = clientIds.map(id => 
+        api.get(`users/listusers/${id}/`).catch(() => null)
+      );
+      const usersResponses = await Promise.all(userRequests);
+      // 4. Construir el mapa de avatares (usando el nombre del cliente como clave para tu lógica actual)
+      const map: Record<string, string> = {};
+      usersResponses.forEach((res) => {
+        if (res && res.data) {
+          const u = res.data;
+          const url = u.profile_picture?.image_url || u.avatar_url;
+          // Usamos el nombre del cliente como clave para que coincida con tu agrupador
+          if (url && u.username) {
+            map[u.username] = url;
+          }
+        }
+      });
+      setAvatarMap(map);
     } catch (err) {
-      console.error("Error cargando pedidos:", err);
+      console.error('Error cargando pedidos:', err);
     } finally {
       setLoading(false);
     }
@@ -38,43 +66,28 @@ const VendorOrders: React.FC = () => {
     fetchOrders();
   }, []);
 
-  const handleAction = async (orderId: string, actionUrl: 'mark-as-paid' | 'cancel') => {
-    try {
-      setActionLoading(orderId);
-      await api.post(`orders/${orderId}/${actionUrl}/`);
-      toast.success(actionUrl === 'mark-as-paid' ? "¡Venta completada con éxito!" : "Reserva cancelada");
-      await fetchOrders();
-    } catch (err) {
-      console.error(`Error al ejecutar ${actionUrl}`, err);
-      toast.error("No se pudo completar la acción. Intenta de nuevo.");
-    } finally {
-      setActionLoading(null);
-    }
-  };
+  // Agrupar pedidos por cliente.
+  const groupedByClient = orders.reduce<Record<string, Order[]>>((acc, order) => {
+    const key = order.client_name || t('orders.anonymous');
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(order);
+    return acc;
+  }, {});
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PAID':
-        return <Badge color="success" className="rounded-lg px-3 py-1 font-bold">VENDIDO</Badge>;
-      case 'RESERVED':
-        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold">RESERVADO</Badge>;
-      case 'CANCELLED':
-        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">CANCELADO</Badge>;
-      case 'PENDING':
-        return <Badge color="indigo" className="rounded-lg px-3 py-1 font-bold">PENDIENTE</Badge>;
-      default:
-        return <Badge color="gray">{status}</Badge>;
-    }
+  const clientNames = Object.keys(groupedByClient);
+
+  const goToClient = (clientName: string) => {
+    navigate(`/vendedor/pedidos/${encodeURIComponent(clientName)}`);
   };
 
   return (
     <div className="p-6 max-w-6xl mx-auto animate-fade-in font-[var(--main-font)]">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-black text-indigo-900 tracking-tighter uppercase mb-1">
+          <h1 className="text-3xl font-black text-indigo-900 dark:text-white tracking-tighter uppercase mb-1 italic">
             {t('orders.title')}
           </h1>
-          <p className="text-gray-500 font-medium">{t('orders.subtitle')}</p>
+          <p className="text-black dark:text-white font-bold">{t('orders.subtitle')}</p>
         </div>
         <Button color="light" onClick={fetchOrders} disabled={loading} className="rounded-xl shadow-sm">
           <Iconify icon="solar:refresh-circle-bold-duotone" className="mr-2" height={20} /> {t('orders.refresh')}
@@ -82,77 +95,68 @@ const VendorOrders: React.FC = () => {
       </div>
 
       <Card className="border-none shadow-xl rounded-3xl overflow-hidden p-2">
-        <div className="overflow-x-auto">
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <Spinner size="xl" color="info" />
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <Spinner size="xl" color="info" />
+          </div>
+        ) : clientNames.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="bg-blue-50/50 inline-block p-6 rounded-full mb-4">
+              <Iconify icon="solar:box-minimalistic-outline" height={48} className="text-blue-300" />
             </div>
-          ) : orders.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="bg-blue-50/50 inline-block p-6 rounded-full mb-4">
-                <Iconify icon="solar:box-minimalistic-outline" height={48} className="text-blue-300" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-700">{t('orders.empty.title')}</h3>
-              <p className="text-gray-400 mt-2">{t('orders.empty.msg')}</p>
-            </div>
-          ) : (
-            <Table hoverable>
-              <Table.Head className="bg-gray-50/50 border-b border-gray-100">
-                <Table.HeadCell className="py-4">Producto</Table.HeadCell>
-                <Table.HeadCell>Cliente</Table.HeadCell>
-                <Table.HeadCell>Estado</Table.HeadCell>
-                <Table.HeadCell>Total</Table.HeadCell>
-                <Table.HeadCell className="text-center">Acciones Reales</Table.HeadCell>
-              </Table.Head>
-              <Table.Body className="divide-y divide-gray-100">
-                {orders.map((order) => (
-                  <Table.Row key={order.id} className="bg-white hover:bg-indigo-50/30 transition-colors">
-                    <Table.Cell className="font-black text-gray-900 py-5">{order.product_name}</Table.Cell>
-                    <Table.Cell className="font-medium text-gray-500">{order.client_name}</Table.Cell>
-                    <Table.Cell>
-                        <div className="flex flex-col gap-1">
-                            {getStatusBadge(order.status)}
-                            {order.status === 'RESERVED' && order.payment_notified && (
-                                <Badge color="info" className="animate-pulse rounded-lg font-black text-[10px]">PAGO REPORTADO</Badge>
-                            )}
-                        </div>
-                    </Table.Cell>
-                    <Table.Cell className="font-bold text-indigo-600">${Number(order.total).toLocaleString()}</Table.Cell>
-                    <Table.Cell className="flex justify-center gap-2">
-                      {order.status === 'RESERVED' && (
-                        <>
-                          <Button 
-                            size="xs" 
-                            color="success" 
-                            className="rounded-lg shadow-sm font-bold"
-                            onClick={() => handleAction(order.id, 'mark-as-paid')}
-                            disabled={actionLoading === order.id}
-                          >
-                            {actionLoading === order.id ? <Spinner size="xs" /> : "Marcar PAGADO"}
-                          </Button>
-                          <Button 
-                            size="xs" 
-                            color="failure" 
-                            className="rounded-lg shadow-sm font-bold"
-                            onClick={() => handleAction(order.id, 'cancel')}
-                            disabled={actionLoading === order.id}
-                          >
-                            Cancelar
-                          </Button>
-                        </>
-                      )}
-                      {order.status === 'PAID' && (
-                        <span className="text-xs text-green-500 font-bold flex items-center gap-1">
-                          <Iconify icon="solar:check-read-linear" /> Venta Finalizada
-                        </span>
-                      )}
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-            </Table>
-          )}
-        </div>
+            <h3 className="text-lg font-bold text-gray-700">{t('orders.empty.title')}</h3>
+            <p className="text-gray-400 mt-2">{t('orders.empty.msg')}</p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-gray-800 dark:divide-gray-200
+            bg-gradient-to-br from-gray-50 via-gray-200 to-primary/5
+            dark:from-dark dark:via-darkgray dark:to-dark">
+            {clientNames.map((clientName) => {
+              const clientOrders = groupedByClient[clientName];
+
+              // Prioridad: 1) foto del endpoint orders/ (si llegara) 2) foto de users/list/ 3) dicebear.
+              const realAvatar =
+                clientOrders.find((o) => o.client_avatar)?.client_avatar ||
+                avatarMap[clientName];
+              const avatarUrl = realAvatar || getUserAvatar(clientName);
+
+              return (
+                <li key={clientName}>
+                  <button
+                    type="button"
+                    onClick={() => goToClient(clientName)}
+                    className="w-full flex items-center justify-between gap-4 px-4 py-4 hover:bg-gray-300
+                      dark:hover:bg-indigo-50/40 transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={avatarUrl}
+                        alt={clientName}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-primary dark:border-gray-300 shadow-sm bg-white"
+                        onError={(e) => {
+                          // Si la URL falla, caer al dicebear sin romper el render.
+                          (e.currentTarget as HTMLImageElement).src = getUserAvatar(clientName);
+                        }}
+                      />
+                      <div>
+                        <p className="font-black text-gray-900 dark:text-gray-100">{clientName}</p>
+                        <p className="text-xs text-gray-500">
+                          {clientOrders.length}{' '}
+                          {clientOrders.length === 1 ? 'pedido' : 'pedidos'}
+                        </p>
+                      </div>
+                    </div>
+                    <Iconify
+                      icon="solar:alt-arrow-right-bold-duotone"
+                      height={24}
+                      className="text-indigo-500 dark:text-amber-400"
+                    />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </Card>
     </div>
   );

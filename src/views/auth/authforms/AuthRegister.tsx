@@ -29,7 +29,7 @@ const AuthRegister = () => {
         document_number: '',
         birth_date: '',
         is_human: false,
-        accepted_terms: false,
+        terms_accepted: false,
         honeypot: '',
     });
 
@@ -96,7 +96,7 @@ const AuthRegister = () => {
         e.preventDefault();
         if (step < 3) { nextStep(); return; }
         if (!validateStep()) return;
-        if (!formData.accepted_terms) { setError(t("errors.termsRequired")); return; }
+        if (!formData.terms_accepted) { setError(t("errors.termsRequired")); return; }
 
         setLoading(true);
         setError(null);
@@ -291,7 +291,7 @@ const AuthRegister = () => {
                             )}
 
                             <div className="flex items-start gap-4 p-5 bg-[#3A17E4]/5 rounded-3xl border border-[#3A17E4]/20 mt-2 hover:bg-[#3A17E4]/10 transition-all shadow-sm group">
-                                <Checkbox id="accepted_terms" checked={formData.accepted_terms} onChange={handleChange} required className="text-[#3A17E4] focus:ring-[#3A17E4] h-5 w-5 mt-1 cursor-pointer rounded-lg" />
+                                <Checkbox id="terms_accepted" checked={formData.terms_accepted} onChange={handleChange} required className="text-[#3A17E4] focus:ring-[#3A17E4] h-5 w-5 mt-1 cursor-pointer rounded-lg" />
                                 <div className="text-xs font-bold text-[#0A014A] leading-relaxed">
                                     {t("form.termsText")} <button type="button" onClick={() => setShowTerms(true)} className="text-[#3A17E4] font-black hover:underline outline-none">{t("form.termsLink")}</button> {t("form.termsText2")}
                                 </div>
@@ -347,10 +347,10 @@ const AuthRegister = () => {
                     <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-500 rounded-2xl">
                       <p className="text-xs font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-tight mb-1 flex items-center gap-2">
                         <Icon icon="solar:shield-user-bold-duotone" />
-                        ¿Por qué pedimos tu aceptación?
+                        TÉRMINOS Y CONDICIONES DE USO — SHOPSTARTER
                       </p>
                       <p className="text-xs text-indigo-800 dark:text-indigo-200 font-medium leading-relaxed">
-                        Aceptar los Términos y Condiciones es un requisito legal que nos permite informarte sobre cómo usamos tu información, qué derechos tienes como usuario y cuáles son las reglas de uso de la plataforma. Sin esta aceptación no podemos crear tu cuenta, ya que la ley colombiana (Ley 1581 de 2012 — Habeas Data) exige tu consentimiento explícito antes de procesar cualquier dato personal.
+                        Versión 1.0 — 29 de abril de 2026 · Popayán, Colombia
                       </p>
                     </div>
 
@@ -365,6 +365,15 @@ const AuthRegister = () => {
                       <p className="flex gap-3"><span className="font-black text-[#3A17E4]">1.</span> <span><strong>{t("terms.item1Label")}</strong> {t("terms.item1Text")}</span></p>
                       <p className="flex gap-3"><span className="font-black text-[#3A17E4]">2.</span> <span><strong>{t("terms.item2Label")}</strong> {t("terms.item2Text")}</span></p>
                       <p className="flex gap-3"><span className="font-black text-[#3A17E4]">3.</span> <span><strong>{t("terms.item3Label")}</strong> {t("terms.item3Text")}</span></p>
+                      <p className="flex gap-3"><span className="font-black text-[#3A17E4]">4.</span> <span><strong>{t("terms.item4Label")}</strong> {t("terms.item4Text")}</span></p>
+                      <p className="flex gap-3"><span className="font-black text-[#3A17E4]">5.</span> <span><strong>{t("terms.item5Label")}</strong> {t("terms.item5Text")}</span></p>
+                      <p className="flex gap-3"><span className="font-black text-[#3A17E4]">6.</span> <span><strong>{t("terms.item6Label")}</strong> Conforme a <a href="https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=49981" target="_blank" rel="noopener noreferrer" className="text-inherit">Ley 1581 de 2012</a> de Colombia. Contacto: shopstartersoporte@gmail.com</span></p>
+                      <p className="flex gap-3"><span className="font-black text-[#3A17E4]">7.</span> <span><strong>{t("terms.item7Label")}</strong> {t("terms.item7Text")}</span></p>
+                      <p className="flex gap-3"><span className="font-black text-[#3A17E4]">8.</span> <span><strong>{t("terms.item8Label")}</strong> {t("terms.item8Text")}</span></p>
+                      <p className="flex gap-3"><span className="font-black text-[#3A17E4]">9.</span> <span><strong>{t("terms.item9Label")}</strong> {t("terms.item9Text")}</span></p>
+                      <p className="flex gap-3"><span className="font-black text-[#3A17E4]">10.</span> <span><strong>{t("terms.item10Label")}</strong> {t("terms.item10Text")}</span></p>
+                      <p className="flex gap-3"><span className="font-black text-[#3A17E4]">11.</span> <span><strong>{t("terms.item11Label")}</strong> Leyes de Colombia, <a href="https://www.ramajudicial.gov.co" target="_blank" rel="noopener noreferrer" className="text-inherit">jurisdicción de los jueces de Popayán, Colombia</a>.</span></p>
+                      <p className="flex gap-3"><span className="font-black text-[#3A17E4]">12.</span> <span><strong>{t("terms.item12Label")}</strong> {t("terms.item12Text")}</span></p>
                     </div>
 
                   </div>

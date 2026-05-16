@@ -12,8 +12,16 @@
       "none": "No category"
     },
     "stock": "Stock: {{count}} units",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "availability": "Availability",
     "status": {
-      "noStatus": "NO STATUS"
+      "PENDING": "PENDING",
+      "AVAILABLE": "AVAILABLE",
+      "INACTIVE": "INACTIVE",
+      "REJECTED": "REJECTED",
+      "RESERVED": "RESERVED",
+      "SOLD": "SOLD"
     },
     "action": {
       "view": "View Details",
@@ -56,11 +64,13 @@
     "price": "Price",
     "stock": "Stock",
     "category": "Category",
+    "categories": "All Categories",
     "category.selectPlaceholder": "Select category",
     "cancel": "Cancel",
     "save": "Save Product",
     "imageRequired": "Image is required.",
-    "selectImageFirst": "Please select an image first."
+    "selectImageFirst": "Please select an image first.",
+    "categoriesRequired": "You must select at least one category."
   },
   "ai": {
     "processing": "Analyzing...",

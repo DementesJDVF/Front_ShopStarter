@@ -1,195 +1,428 @@
-import { Card, Badge, Table, Button, Modal, Spinner } from "flowbite-react";
-import { HiOutlineCube, HiOutlineShoppingBag, HiOutlineTrendingUp, HiOutlineExternalLink, HiOutlineLocationMarker } from 'react-icons/hi';
-import { Icon } from '@iconify/react';
+import { Card, Badge, Button, Modal, Spinner } from "flowbite-react";
+import { HiOutlineCube, HiOutlineLocationMarker } from "react-icons/hi";
+import { Icon } from "@iconify/react";
 import { useState, useEffect } from "react";
-import api from "../../utils/axios";
 import LocationPicker from "../../components/geo/LocationPicker";
-import { useTranslation } from 'react-i18next';
+import { CartesianGrid } from "recharts";
+
+import {
+  LineChart, Line, RadialBarChart, RadialBar, Legend,
+  BarChart, Bar,
+  AreaChart, Area,
+  PieChart, Pie, Cell,
+  XAxis, YAxis,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
 
 const Dashboard = () => {
-  const { t } = useTranslation('vendedor');
-  const [vendorLocation, setVendorLocation] = useState<{lat: number, lng: number, description?: string} | null>(null);
+
+  // 🔹 LOCATION STATE
+  const [vendorLocation, setVendorLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [savingLocation, setSavingLocation] = useState(false);
-  const [loadingLocation, setLoadingLocation] = useState(true);
+  const [loadingLocation, setLoadingLocation] = useState(false);
+
+  // 🔹 DASHBOARD SIMULATED DATA
+  const [data, setData] = useState([
+    { time: "Mañana", ventas: 20, pedidos: 5, usuarios: 10, ingresos: 100 },
+    { time: "Tarde", ventas: 35, pedidos: 8, usuarios: 15, ingresos: 180 },
+    { time: "Noche", ventas: 50, pedidos: 12, usuarios: 22, ingresos: 250 },
+  ]);
+
+  const [dataPedidos, setDataPedidos] = useState([
+  { dia: "Lun", pedidos: 10 },
+  { dia: "Mar", pedidos: 20 },
+  { dia: "Mié", pedidos: 15 },
+  { dia: "Jue", pedidos: 25 },
+  { dia: "Vie", pedidos: 30 },
+]);
+
+const [dataUsuarios, setDataUsuarios] = useState([
+  { mes: "Ene", usuarios: 50 },
+  { mes: "Feb", usuarios: 70 },
+  { mes: "Mar", usuarios: 65 },
+  { mes: "Abr", usuarios: 90 },
+  { mes: "May", usuarios: 120 },
+  { mes: "Jun", usuarios: 140 },
+  { mes: "Jul", usuarios: 130 },
+  { mes: "Ago", usuarios: 150 },
+  { mes: "Sep", usuarios: 160 },
+  { mes: "Oct", usuarios: 170 },
+  { mes: "Nov", usuarios: 180 },
+  { mes: "Dic", usuarios: 200 },
+]);
+
+ const [dataEstado, setDataEstado] = useState([
+  { estado: "Pendiente", pedidos: 10,  fill: "#f59e0b" },
+  { estado: "Enviado", pedidos: 7, fill: "#0ba7f5" },
+  { estado: "Entregado", pedidos: 20, fill: "#0bf53e" },
+]);
+
+{/* DATA VENTAS */}
+  const ventasPie = [
+  { name: "Mañana", value: data[0]?.ventas || 0 },
+  { name: "Tarde", value: data[1]?.ventas || 0 },
+  { name: "Noche", value: data[2]?.ventas || 0 },
+];
+
+  // 🔥 REALTIME SIMULATION EFFECT
+useEffect(() => {
+  const interval = setInterval(() => {
+    setData([
+      {
+        time: "Mañana",
+        ventas: Math.floor(Math.random() * 100),
+        pedidos: Math.floor(Math.random() * 50),
+        usuarios: Math.floor(Math.random() * 80),
+        ingresos: Math.floor(Math.random() * 500),
+      },
+      {
+        time: "Tarde",
+        ventas: Math.floor(Math.random() * 100),
+        pedidos: Math.floor(Math.random() * 50),
+        usuarios: Math.floor(Math.random() * 80),
+        ingresos: Math.floor(Math.random() * 500),
+      },
+      {
+        time: "Noche",
+        ventas: Math.floor(Math.random() * 100),
+        pedidos: Math.floor(Math.random() * 50),
+        usuarios: Math.floor(Math.random() * 80),
+        ingresos: Math.floor(Math.random() * 500),
+      },
+    ]);
+     // 🔄 Pedidos (SEMANA)
+    setDataPedidos(prev =>
+      prev.map(item => ({
+        ...item,
+        pedidos: Math.floor(Math.random() * 50),
+      }))
+    );
+
+    // 🔄 Usuarios (MESES)
+    setDataUsuarios(prev =>
+      prev.map(item => ({
+        ...item,
+        usuarios: Math.floor(Math.random() * 200),
+      }))
+    );
+     // 🔄 ESTADOS DE PEDIDOS
+    setDataEstado(prev =>
+      prev.map(item => ({
+        ...item,
+        pedidos: Math.floor(Math.random() * 30),
+      }))
+    );
+  }, 3000);
+
+  return () => clearInterval(interval);
+}, []);
 
 
-  const fetchLocation = async () => {
-    try {
-      setLoadingLocation(true);
-      const res = await api.get('geo/locations/');
-      const data = res.data.results || res.data;
-      const loc = Array.isArray(data) ? data[0] : data;
-      
-      if (loc) {
-        setVendorLocation({
-          lat: parseFloat(loc.latitude),
-          lng: parseFloat(loc.longitude),
-          description: loc.description
-        });
-
-      }
-    } catch (err) {
-      console.error("Error al cargar ubicación:", err);
-    } finally {
-      setLoadingLocation(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchLocation();
-  }, []);
-
+  // 🔹 LOCATION HANDLER (SIMULADO)
   const handleUpdateLocation = async (lat: number, lng: number) => {
     try {
       setSavingLocation(true);
-      await api.post('geo/locations/', {
-        latitude: parseFloat(lat.toFixed(6)),
-        longitude: parseFloat(lng.toFixed(6)),
-        description: "Mi tienda"
-      });
+
       setVendorLocation({ lat, lng });
       setShowLocationModal(false);
-      alert(t('dashboard.alert.locationUpdated'));
-    } catch (err: any) {
+
+      alert("Ubicación guardada");
+    } catch (err) {
       console.error(err);
-      if (err.response && err.response.data) {
-        alert(t('dashboard.alert.backendError') + " " + JSON.stringify(err.response.data));
-      } else {
-        alert(t('dashboard.alert.networkError') + " " + (err.message || ''));
-      }
     } finally {
       setSavingLocation(false);
     }
   };
 
-
-
   return (
-    <div className="p-6">
-      <div className="bg-gradient-to-r from-[#CFFEFF] to-[#BBADFF] dark:bg-none dark:bg-transparent p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{t('dashboard.title')}</h1>
-          <p className="text-slate-600 dark:text-gray-400 mt-1 italic font-medium">{t('dashboard.subtitle')}</p>
-        </div>
-        <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
-
-            <Button size="sm" color="light" outline onClick={() => setShowLocationModal(true)} className="rounded-xl">
-              <HiOutlineLocationMarker className="mr-2 h-4 w-4" />
-              {vendorLocation ? t('dashboard.updateLocation') : t('dashboard.setLocation')}
-            </Button>
-        </div>
-      </div>
       
-      {/* Metrics Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 mb-8">
-        <Card className="panel-card !bg-white/60 dark:!bg-gray-800/60 backdrop-blur-xl border-none shadow-xl hover:-translate-y-1 transition-all duration-500">
-          <div className="flex items-center gap-5 p-2">
-            <div className="p-4 bg-primary/10 text-primary rounded-2xl">
-              <HiOutlineCube size={28} />
-            </div>
-            <div>
-              <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('dashboard.productsActive')}</p>
-              <p className="text-3xl font-black text-gray-900 dark:text-white">12</p>
-            </div>
-          </div>
-        </Card>
+    <div className="scale-80 origin-top">
 
-        {/* Info card de ubicación actual */}
-        <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border border-gray-100 dark:border-gray-700 shadow-sm rounded-3xl sm:col-span-2 xl:col-span-2">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-2">
-            <div className="flex items-center gap-5">
-              <div className="p-4 bg-orange-100 text-orange-600 rounded-2xl">
-                <HiOutlineLocationMarker size={28} />
-              </div>
-              <div className="flex flex-col">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{t('dashboard.locationTitle')}</p>
-                {loadingLocation ? (
-                  <Spinner size="sm" />
-                ) : vendorLocation ? (
-                  <p className="text-sm font-bold text-gray-900 dark:text-white break-all">
-                    {vendorLocation.lat.toFixed(5)}, {vendorLocation.lng.toFixed(5)}
-                  </p>
-                ) : (
-                  <p className="text-xs text-red-500 font-bold">{t('dashboard.noLocation')}</p>
-                )}
-              </div>
-            </div>
-            {vendorLocation && (
-              <a 
-                href={`https://www.google.com/maps?q=${vendorLocation.lat},${vendorLocation.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-xl text-xs font-black hover:bg-primary/20 transition"
-              >
-                {t('dashboard.viewInMaps')}
-                <HiOutlineExternalLink />
-              </a>
-            )}
-          </div>
-        </Card>
+      {/* HEADER */}
+      <Card  className=" mt-[10px] !bg-gray-100 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
+         <h1 className="font-black text-3xl tracking-tight text-blue-400 dark:text-blue-400 flex items-center gap-3">
+          Panel de Gestión - Vendedor
+          <Button className="ml-[770px] bg-green-400 hover:bg-green-600 text-white" onClick={() => setShowLocationModal(true)}>
+          <HiOutlineLocationMarker className="mr-4" />
+          Mi Ubicación
+        </Button>
+        </h1>
+      </Card>
+
+     <Card className=" mt-[25px] !bg-gray-100 dark:!bg-gray-400 p-9 shadow-md rounded-xl">
+        <Card className="!bg-gray-700 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
+      <div className="flex justify-between mb-8">
+    
+        <h1 className="mt-4 font-black text-3xl tracking-tight text-blue-400 flex items-center gap-3">
+          <Icon icon="solar:chart-square-bold-duotone" width="32" className="text-blue-300" />
+          ULTIMOS REGISTROS
+        </h1>
+
       </div>
 
-      {/* Dashboard Placeholder - Próximamente por Papayo */}
-      <div className="relative group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-indigo-500 rounded-[2.5rem] blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
-        <Card className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-none shadow-2xl p-6 md:p-12 text-center rounded-[2.5rem] overflow-hidden">
-          <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-            <Icon icon="solar:chart-square-bold-duotone" width={200} />
-          </div>
-          
-          <div className="relative z-10 flex flex-col items-center gap-8">
-            <div className="p-6 bg-gradient-to-br from-primary to-indigo-600 rounded-[2rem] shadow-xl transform hover:scale-110 transition duration-500">
-              <Icon icon="solar:widget-bold-duotone" className="text-white" height={48} />
-            </div>
-            <div className="max-w-xl">
-              <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic leading-none break-words">
-                {t('dashboard.heading.line1')} <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2CD4D9] to-[#3A17E4] dark:from-primary dark:to-indigo-500">{t('dashboard.heading.line2')}</span>
-              </h2>
-              <p className="text-gray-500 dark:text-gray-400 mt-6 text-base md:text-lg font-medium leading-relaxed">
-                {t('dashboard.description')}
+      {/* METRICS */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-9 mb-5">
+       
+        { /*ventas */}
+        <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
+          <div className="flex gap-3 items-center">
+             <Card className="w-[40px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
+             <Icon icon="solar:box-bold" width="30" color="#7963b0" />
+            </Card>
+            <div>
+              <p className="font-black text-black text-2xl ">Ventas</p>
+              <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].ventas}
               </p>
             </div>
-            <div className="flex flex-wrap justify-center gap-3">
-               <Badge color="info" className="px-4 py-2 rounded-full font-black uppercase text-[10px]">{t('dashboard.badge.analytics')}</Badge>
-               <Badge color="indigo" className="px-4 py-2 rounded-full font-black uppercase text-[10px]">{t('dashboard.badge.inventory')}</Badge>
-               <Badge color="purple" className="px-4 py-2 rounded-full font-black uppercase text-[10px]">{t('dashboard.badge.reports')}</Badge>
+          </div>
+        </Card>
+      
+       { /* pedidos */}
+        <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
+          <div className="flex gap-3 items-center">
+             <Card className="w-[40px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
+            <Icon icon="solar:cart-bold" width="30" color="#da701f" />
+             </Card>
+             <div>
+              <p className="font-black text-black text-2xl ">Pedidos</p>
+              <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].pedidos}</p>
+            </div>
+          </div>
+        </Card>
+
+       { /* usuarios */}
+       <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
+          <div className="flex gap-3 items-center">
+            <Card className="w-[40px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
+            <Icon icon="solar:users-group-rounded-bold" width="30" color="#b3177f" />
+            </Card>
+             <div>
+              <p className="font-black text-black text-2xl ">Usuarios</p>
+              <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].usuarios}</p>
+            </div>
+          </div>
+        </Card>
+
+       { /* estados de pedidos */}
+       <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
+          <div className="flex gap-3 items-center">
+             <Card className="w-[50px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
+            <Icon icon="solar:chart-bold" width="30" color="#ce1a1a"/> </Card>
+             <div>
+              <p className="font-black text-black text-2xl ">Estados cancelados</p>
+              <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].ingresos}</p>
             </div>
           </div>
         </Card>
       </div>
+    </Card>
+  </Card>
 
-      {/* Modal para elegir ubicación */}
-      <Modal show={showLocationModal} onClose={() => setShowLocationModal(false)} size="lg">
-        <Modal.Header>{t('dashboard.modal.title')}</Modal.Header>
-        <Modal.Body>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-500">
-              {t('dashboard.modal.description')}
-            </p>
-            <LocationPicker 
-              initialLat={vendorLocation?.lat} 
-              initialLng={vendorLocation?.lng}
-              onLocationSelected={(lat, lng) => {
-                 // Guardamos temporalmente si queremos, o simplemente permitimos al botón de acción llamar el update
-                 // Para simplicidad, pasamos la posición al botón de "Guardar"
-                 setVendorLocation({ lat, lng });
-              }}
-            />
+      {/* 🔥 4 GRÁFICAS */}
+
+      <div className=" mt-[20px] grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {/* VENTAS */}
+        <Card className="!bg-gray-100 dark:!bg-gray-400 p-9 shadow-md rounded-xl">
+            
+         <Card className="!bg-gray-700 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
+          <h1 className="mb-2 font-black text-white text-2xl">Ventas</h1>
+          <div className="my-1 h-[4px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+
+          <ResponsiveContainer width="100%" height={250}>
+            
+            <PieChart>
+              <Pie
+                data={ventasPie}   
+                dataKey="value"
+                nameKey="name"
+                innerRadius={60} 
+                outerRadius={90}
+                paddingAngle={5} // 🔥 separa las partes
+                label={({ name, percent }: any) =>
+                `${name} ${(percent * 100).toFixed(0)}%`
+              }
+              >
+                <Cell fill="#7ca8ef" />
+                <Cell fill="#f59e0b" />
+                <Cell fill="#21c03e" />
+              </Pie>
+
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+          </Card>
+        </Card>
+
+        {/* PEDIDOS */}
+        <Card className="!bg-gray-100 dark:!bg-gray-800 p-9 shadow-md rounded-xl">
+         <h2 className="mb-2 font-black dark:text-white text-black text-2xl">
+            Pedidos
+          </h2>
+
+          <ResponsiveContainer className="mt-[15px]" width="100%" height={250}>
+            <BarChart data={dataPedidos}>
+
+              {/*  GRADIENTE */}
+              <defs>
+                <linearGradient id="colorPedidos" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#dc740d" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#ffffff" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+
+              {/*  EJE X */}
+              <XAxis
+                dataKey="dia"
+                axisLine={{ stroke: "#423e3e", strokeWidth: 2 }}
+                tick={{ fill: "#696464", fontWeight: "bold" }}
+              />
+
+              {/* EJE Y */}
+              <YAxis
+                axisLine={{ stroke: "#696464", strokeWidth: 2 }}
+                tick={{
+                  fill: "#696464",
+                  fontWeight: "bold",
+                  fontSize: 15
+                }}
+              />
+
+              <Tooltip />
+
+              {/*  BARRA */}
+              <Bar
+                dataKey="pedidos"
+                fill="url(#colorPedidos)"
+                stroke="#ee7818"
+                strokeWidth={2}
+                barSize={90}
+              />
+
+
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+
+        {/* USUARIOS */}
+        <Card className="!bg-gray-100 dark:!bg-gray-800 p-9 shadow-md rounded-xl">
+          <h2 className="mb-2 font-black dark:text-white text-black text-2xl ">Usuarios</h2>
+
+          <ResponsiveContainer className="mt-[15px]" width="100%" height={250}>
+            <AreaChart data={dataUsuarios}>
+
+              <defs>
+                <linearGradient id="colorUsuarios" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#dd0fb796" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#dd0fb796" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+
+              <XAxis 
+                dataKey="mes"
+                axisLine={{ stroke: "#dd0fb796", strokeWidth: 2 }}
+                tick={{ fill: "#696464", fontWeight: "bold" }}
+              />
+
+              <YAxis 
+                axisLine={{ stroke: "#696464", strokeWidth: 2}}
+                 tick={{
+                  fill: "#696464",
+                  fontWeight: "bold",
+                  fontSize: 14
+                }}
+              />
+
+              <Tooltip 
+                contentStyle={{ borderRadius: "10px", border: "none" }}
+              />
+
+              <Area 
+                type="monotone"
+                dataKey="usuarios" 
+                stroke="#a21caf"
+                fill="url(#colorUsuarios)"
+                strokeWidth={3}
+              />
+
+            </AreaChart>
+          </ResponsiveContainer>
+        </Card>
+
+        {/* ESTADOS DE PEDIDOS */}
+     <Card className="!bg-gray-100 dark:!bg-gray-400 p-9 shadow-md rounded-xl">     
+      <Card className="!bg-gray-700 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
+        <h2 className="mb-2 font-black text-white text-2xl">
+          Estado de Pedidos
+        </h2>
+        <div className="my-3 h-[3px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+          <div className="flex justify-between w-full">
+            <h2 className="mb-1 font-black text-green-400 text-left">Pendientes</h2>
+            <h2 className="mb-1 font-black text-blue-400 text-center">Enviados</h2>
+            <h2 className="mb-1 font-black text-yellow-400 text-right">Entregados</h2>
           </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <RadialBarChart
+                cx="50%"
+                cy="50%"
+                innerRadius="20%"
+                outerRadius="90%"
+                barSize={15}
+                data={dataEstado}
+              >
+
+                <RadialBar
+                  dataKey="pedidos"
+                  label={{ fill: "#ffffff", position: "insideStart" }}
+                />
+
+                <Legend />
+
+                <Tooltip />
+          
+
+              </RadialBarChart>
+            </ResponsiveContainer>
+            </Card>
+          </Card>
+          </div>
+
+      {/* MODAL UBICACIÓN */}
+      <Modal
+        show={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+      >
+        <Modal.Header>Ubicación</Modal.Header>
+
+        <Modal.Body >
+          <LocationPicker 
+            onLocationSelected={(lat, lng) =>
+              setVendorLocation({ lat, lng })
+            }
+          />
         </Modal.Body>
-        <Modal.Footer className="flex justify-end p-2 px-6">
-           <Button color="gray" onClick={() => setShowLocationModal(false)}>{t('dashboard.modal.close')}</Button>
-           <Button 
-              color="primary" 
-              onClick={() => handleUpdateLocation(vendorLocation?.lat || 2.4419, vendorLocation?.lng || -76.6062)}
-              disabled={savingLocation}
-            >
-              {savingLocation ? <Spinner size="sm" /> : t('dashboard.modal.save')}
-           </Button>
+
+        <Modal.Footer >
+          <Button className="bg-green-500 hover:bg-green-700 text-white"
+            onClick={() =>
+              handleUpdateLocation(
+                vendorLocation?.lat || 0,
+                vendorLocation?.lng || 0
+              )
+            }
+            disabled={savingLocation}
+          >
+            {savingLocation ? <Spinner size="sm" /> : "Guardar"}
+          </Button>
         </Modal.Footer>
       </Modal>
+
     </div>
   );
 };

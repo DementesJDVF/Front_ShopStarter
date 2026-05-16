@@ -8,9 +8,9 @@ import { Icon } from "@iconify/react";
 import "./ProductCatalog.css";
 import api from "../../utils/axios";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
-import { useCart } from "../../context/CartContext";
 import { useMap } from "../../context/MapContext";
-import { toast } from "react-hot-toast";
+import { useConfirm } from "../../context/ConfirmContext";
+import { showSuccessAlert, showErrorAlert } from "../../utils/Alerts";
 
 type ApiProductImage = {
   id: number;
@@ -23,11 +23,12 @@ type ApiProduct = {
   name: string;
   description: string;
   price: string;
-  stock: number;
+  stock: boolean;
   status: string;
   vendor: string | number;
   vendor_name: string;
-  category_name: string;
+  categories: Array<{ id: number; name: string }>;
+  category_names: string[];
   is_featured: boolean;
   images: ApiProductImage[];
   created_at: string;
@@ -38,22 +39,20 @@ type ApiProduct = {
 
 export function ProductCatalog() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
-  const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [categories, setCategories] = useState<{ id: number, name: string }[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { t } = useTranslation("product");
 
-  const { addToCart } = useCart();
   const { userLocation, radius, setRadius } = useMap();
+  const confirm = useConfirm();
 
- 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
   const [previewTitle, setPreviewTitle] = useState('');
 
-  
   const openPreview = (url: string, title: string) => {
     setPreviewUrl(url);
     setPreviewTitle(title);
@@ -61,40 +60,18 @@ export function ProductCatalog() {
   };
 
   const handleReserve = async (productId: number) => {
-    if (!window.confirm(t("reserveConfirm"))) return;
+    const confirmed = await confirm(t("reserveConfirm"));
+    if (!confirmed) return;
     try {
       await api.post('orders/', { product: productId });
-      toast.success(t("reserveSuccess"));
+      showSuccessAlert(t("reserveSuccess"));
       loadData(userLocation?.lat, userLocation?.lng, radius);
     } catch (e: any) {
-      toast.error(e.response?.data?.error || t("reserveError"));
+      showErrorAlert(e.response?.data?.error || t("reserveError"));
     }
   };
 
-  /**
-   * Gestiona la adición de un producto al carrito local.
-   */
-  const handleAddToCart = (p: ApiProduct) => {
-    const rawImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
-    const mainImage = getAbsoluteImageUrl(rawImage);
-    addToCart({
-      id: p.id.toString(),
-      name: p.name,
-      price: parseFloat(p.price),
-      quantity: 1,
-      image: mainImage,
-      vendorId: p.vendor.toString(),
-      vendorName: p.vendor_name
-    });
-    toast.success(t("addedToCart", { name: p.name }), {
-      icon: '🛒',
-      style: {
-        borderRadius: '10px',
-        background: '#333',
-        color: '#fff',
-      },
-    });
-  };
+
 
 
   async function loadData(lat?: number, lng?: number, currentRadius?: number) {
@@ -125,21 +102,33 @@ export function ProductCatalog() {
     loadData(userLocation?.lat, userLocation?.lng, radius);
   }, [userLocation, radius]);
 
-  // Filtrado reactivo optimizado
+  // Filtrado reactivo optimizado — soporta múltiples categorías
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
-      const categoryMatch = !selectedCategory || p.category_name === selectedCategory;
+      const categoryMatch =
+        selectedCategories.length === 0 ||
+        p.categories?.some((c: any) => selectedCategories.includes(c.id));
       const distanceMatch = radius === 0 || (p.distance !== undefined && p.distance <= radius);
       return categoryMatch && distanceMatch;
     });
-  }, [products, selectedCategory, radius]);
+  }, [products, selectedCategories, radius]);
+
+  const toggleCategory = (catId: number) => {
+    setSelectedCategories(prev =>
+      prev.includes(catId) ? prev.filter(id => id !== catId) : [...prev, catId]
+    );
+  };
+
+  const clearCategories = () => {
+    setSelectedCategories([]);
+  };
 
   if (loading) return (
     <div className="flex justify-center p-20 font-[var(--main-font)]">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
     </div>
   );
-  
+
   if (error) return (
     <div className="text-center p-20 text-red-500 font-[var(--main-font)]">
       <p>Error: {error}</p>
@@ -149,17 +138,17 @@ export function ProductCatalog() {
 
   return (
     <section className="catalog font-[var(--main-font)]">
-      <div className="mb-8 border-b border-gray-100 pb-6">
+      <div className="mb-8 border-b border-primary dark:border-gray-300 pb-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="text-4xl font-black text-gray-900 tracking-tight">{t("catalogTitle")}</h2>
-            <p className="text-gray-500 mt-2 text-lg">{t("catalogSub")}</p>
+            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">{t("catalogTitle")}</h2>
+            <p className="text-black dark:text-white mt-2 text-lg font-bold">{t("catalogSub")}</p>
           </div>
-          
+
           <div className="flex flex-col gap-2 w-full md:w-auto">
             {userLocation && (
               <div className="flex items-center gap-2 mt-2">
-                <Label htmlFor="radius" value={t("filterByDistance")} className="text-xs whitespace-nowrap"/>
+                <Label htmlFor="radius" value={t("filterByDistance")} className="text-xs whitespace-nowrap" />
                 <Select id="radius" sizing="sm" value={radius} onChange={(e) => setRadius(parseInt(e.target.value))}>
                   <option value={0}>{t("anyDistance")}</option>
                   <option value={5}>{t("lessThan5")}</option>
@@ -170,32 +159,39 @@ export function ProductCatalog() {
             )}
           </div>
         </div>
-        
-        {/* Filtros de Categoría */}
-        <div className="flex gap-2 mt-8 overflow-x-auto pb-2 scrollbar-hide">
+
+        {/* Filtros de Categoría — multi-select con chips */}
+        <div className="flex gap-2 mt-8 overflow-x-auto pb-2 scrollbar-hide flex-wrap items-center">
           <button
-            onClick={() => setSelectedCategory(null)}
-            className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
-              selectedCategory === null 
-              ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105' 
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
+            onClick={clearCategories}
+            className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategories.length === 0
+                ? 'bg-primary text-white border-b border-white shadow-lg shadow-black/50 scale-105'
+                : 'bg-gray-50 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-600'
+              }`}
           >
             {t("all")}
           </button>
           {categories.map(cat => (
             <button
               key={cat.id}
-              onClick={() => setSelectedCategory(cat.name)}
-              className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
-                selectedCategory === cat.name 
-                ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              onClick={() => toggleCategory(cat.id)}
+              className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategories.includes(cat.id)
+                  ? 'bg-primary text-white border-b border-white shadow-lg shadow-black/50 scale-105'
+                  : 'bg-gray-50 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-600'
+                }`}
             >
               {cat.name}
             </button>
           ))}
+          {selectedCategories.length > 0 && (
+            <button
+              onClick={clearCategories}
+              className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-bold bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 transition-all ml-2"
+            >
+              <Icon icon="solar:trash-bin-minimalistic-linear" height={18} />
+              {t("clear", "Quitar categorías")}
+            </button>
+          )}
         </div>
       </div>
 
@@ -208,12 +204,12 @@ export function ProductCatalog() {
           filteredProducts.map((p) => {
             const rawImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
             const mainImage = getAbsoluteImageUrl(rawImage);
-            const isOutOfStock = p.stock <= 0;
-            const isNotAvailable = !p.status || !p.status.toString().toUpperCase().includes('AVAILABLE');
+            const isOutOfStock = !p.stock;
+            const isNotAvailable = !p.status || p.status.toUpperCase() !== 'AVAILABLE';
             const canPurchase = !isOutOfStock && !isNotAvailable;
-            
+
             return (
-              <article key={p.id} className={`product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100 bg-white ${!canPurchase ? 'opacity-60' : ''}`}>
+              <article key={p.id} className={`product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100 ${!canPurchase ? 'opacity-60' : ''}`}>
                 <div className="relative aspect-square overflow-hidden bg-gray-50">
                   {mainImage ? (
                     <img
@@ -228,68 +224,85 @@ export function ProductCatalog() {
                       {t("noImage")}
                     </div>
                   )}
-                  
+
                   <div className="absolute top-3 left-3 flex flex-col gap-2 z-20">
-                    {p.category_name && (
-                      <div className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm">
-                        {p.category_name}
+                    {/* Multi-category badges on product card */}
+                    {p.categories && p.categories.length > 0 ? (
+                      <div className="flex gap-1 flex-wrap max-w-[60%]">
+                        {p.categories.map((cat: any) => (
+                          <span key={cat.id} className="bg-info text-white backdrop-blur px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-primary shadow-sm truncate">
+                            {cat.name}
+                          </span>
+                        ))}
                       </div>
+                    ) : (
+                      <span className="bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">
+                        {t("uncategorized", "Sin categoría")}
+                      </span>
                     )}
-                    {isOutOfStock ? (
+                    {isOutOfStock && (
                       <div className="bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-red-500/30">
                         {t("outOfStock")}
                       </div>
-                    ) : isNotAvailable ? (
-                      <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-amber-500/30">
+                    )}
+                    {p.status?.toUpperCase() === 'RESERVED' && (
+                      <div className="bg-yellow-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-yellow-500/30">
                         {t("reserved")}
                       </div>
-                    ) : null}
+                    )}
+                    {p.status?.toUpperCase() === 'SOLD' && (
+                      <div className="bg-green-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-green-600/30">
+                        {t("sold")}
+                      </div>
+                    )}
                   </div>
-                  
+
                   {p.distance !== undefined && (
-                    <div className="absolute top-3 right-3 bg-primary/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-white shadow-sm flex items-center gap-1 z-20">
-                      <Icon icon="solar:map-point-linear" />
+                    <div className="absolute top-3 right-3 bg-gray-100 dark:bg-gray-900 backdrop-blur px-3 py-1 rounded-full
+                      text-[10px] font-bold text-black dark:text-white shadow-sm flex items-center gap-1 z-20">
+                      <Icon icon="solar:map-point-linear" className="text-black dark:text-white" />
                       {p.distance} km
                     </div>
                   )}
                 </div>
-                
+
                 <div className="p-5 flex flex-col gap-2">
                   <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-bold text-gray-800 line-clamp-1 flex-1">{p.name}</h3>
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white line-clamp-1 flex-1">{p.name}</h3>
                   </div>
-                  
-                  <p className="text-gray-500 text-sm line-clamp-2 min-h-[40px]">
+
+                  <p className="text-black dark:text-white text-sm line-clamp-2 min-h-[40px] font-medium">
                     {p.description}
                   </p>
-                
-                 <div className="text-xl font-black text-primary min-w-0 truncate">
-                      ${parseFloat(p.price).toLocaleString()}
-                    </div>
-                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
-                    
+
+                  <div className="text-xl font-black text-primary dark:text-gray-100 min-w-0 truncate">
+                    ${parseFloat(p.price).toLocaleString()}
+                  </div>
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-900 dark:border-gray-50">
+
                     <div className="flex gap-2 flex-shrink-0">
-                        <button
-                          className="bg-gray-50 text-gray-400 p-2.5 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300 border border-gray-100 shadow-sm"
-                          title={t("viewDetail")}
-                          onClick={() => navigate(`/app/products/${p.id}`)}
-                        >
-                          <Icon icon="solar:eye-linear" height={22}/>
-                        </button>
-                        
-                        <button
-                          disabled={!canPurchase}
-                          className={`p-2.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-xs font-black flex-1 uppercase tracking-tight ${
-                            canPurchase 
-                            ? 'bg-primary text-white hover:bg-indigo-700 shadow-primary/20 cursor-pointer active:scale-95' 
+                      <button
+                        className="bg-gray-50 dark:bg-darkgray text-gray-900 dark:text-gray-50 p-2.5 rounded-xl
+                          hover:bg-gray-300 dark:hover:bg-gray-800 transition-all duration-300 border border-gray-400
+                          dark:border-gray-700 shadow-sm"
+                        title={t("viewDetail")}
+                        onClick={() => navigate(`/app/products/${p.id}`)}
+                      >
+                        <Icon icon="solar:eye-linear" height={22} />
+                      </button>
+
+                      <button
+                        disabled={!canPurchase}
+                        className={`p-2.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-xs font-black flex-1 uppercase tracking-tight ${canPurchase
+                            ? 'bg-primary text-white hover:bg-indigo-700 shadow-primary/20 cursor-pointer active:scale-95'
                             : 'bg-gray-100 text-gray-400 cursor-not-allowed grayscale'
                           }`}
-                          onClick={() => handleAddToCart(p)}
-                          title={!canPurchase ? t("notAvailableForPurchase") : t("addToCart")}
-                        >
-                          <Icon icon={canPurchase ? "solar:cart-plus-bold-duotone" : "solar:cart-cross-linear"} height={22}/>
-                          <span>{canPurchase ? t("add") : t("notAvailable")}</span>
-                        </button>
+                        onClick={() => handleReserve(p.id)}
+                        title={!canPurchase ? t("notAvailable") : t("res_now")}
+                      >
+                        <Icon icon={canPurchase ? "solar:calendar-mark-bold-duotone" : "solar:cart-cross-linear"} height={22} />
+                        <span>{canPurchase ? t("res_now") : t("notAvailable")}</span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -300,11 +313,11 @@ export function ProductCatalog() {
       </div>
 
       {/* Visor de Imágenes */}
-      <ImagePreviewModal 
-        isOpen={isPreviewOpen} 
-        onClose={() => setIsPreviewOpen(false)} 
-        imageUrl={previewUrl} 
-        title={previewTitle} 
+      <ImagePreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        imageUrl={previewUrl}
+        title={previewTitle}
       />
     </section>
   );

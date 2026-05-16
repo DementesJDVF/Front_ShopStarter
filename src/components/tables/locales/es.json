@@ -12,15 +12,16 @@
       "none": "Sin categoría"
     },
     "stock": "Stock: {{count}} unidades",
+    "inStock": "No Agotado",
+    "outOfStock": "Agotado",
+    "availability": "Disponibilidad",
     "status": {
-      "noStatus": "SIN ESTADO",
-      "AVAILABLE": "DISPONIBLE",
       "PENDING": "PENDIENTE",
-      "RESERVED": "RESERVADO",
-      "SOLD": "VENDIDO",
+      "AVAILABLE": "DISPONIBLE",
       "INACTIVE": "INACTIVO",
       "REJECTED": "RECHAZADO",
-      "ARCHIVED": "ARCHIVADO"
+      "RESERVED": "RESERVADO",
+      "SOLD": "VENDIDO"
     },
     "action": {
       "view": "Ver Detalle",
@@ -66,11 +67,13 @@
     "price": "Precio",
     "stock": "Stock",
     "category": "Categoría",
+    "categories": "Todas las categorías",
     "category.selectPlaceholder": "Seleccionar categoría",
     "cancel": "Cancelar",
     "save": "Guardar Producto",
     "imageRequired": "La imagen es obligatoria.",
-    "selectImageFirst": "Por favor, selecciona una imagen primero."
+    "selectImageFirst": "Por favor, selecciona una imagen primero.",
+    "categoriesRequired": "Debes seleccionar al menos una categoría."
   },
   "ai": {
     "processing": "Analizando...",

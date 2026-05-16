@@ -29,8 +29,11 @@ const VendedorDashboard = lazy(() => import('../views/vendedor/Dashboard.tsx'));
 const ManageProducts = lazy(() => import('../views/vendedor/ManageProducts.tsx'));
 const AdminDashboard = lazy(() => import('../views/admin/AdminDashboard.tsx'));
 const VendorOrders = lazy(() => import('../views/vendedor/VendorOrders.tsx'));
+const VendorOrderDetail = lazy(() => import('../views/vendedor/VendorOrderDetail.tsx'));
 const AIRecommendationsHistory = lazy(() => import('../views/vendedor/AIRecommendationsHistory.tsx'));
 const Security = lazy(() => import('../views/shared/Security.tsx'));
+const MyProfile = lazy(() => import("../views/profile/MyProfile"));
+const Reviews = lazy(() => import('../views/reviews/Reviews.tsx'));
 
 // UI / Sample Views
 const Typography = lazy(() => import("../views/typography/Typography"));
@@ -94,8 +97,9 @@ const Router = [
           { path: 'productos', element: <ManageProducts /> },
           { path: 'mapa', element: <RoleBasedMap /> },
           { path: 'pedidos', element: <VendorOrders /> },
+          { path: 'pedidos/:clientName', element: <VendorOrderDetail /> },
           { path: 'auditoria-ia', element: <AIRecommendationsHistory /> },
-          { path: 'reseñas', element: <SamplePage /> },
+          { path: 'reseñas', element: <Reviews /> },
         ]
       }
     ]
@@ -120,7 +124,7 @@ const Router = [
       }
     ]
   },
-  
+
   // 5. COMMON PROTECTED ROUTES (For all logged in users)
   {
     path: '/usuario',
@@ -130,12 +134,13 @@ const Router = [
         path: '',
         element: <FullLayout />,
         children: [
+          { path: 'mi-perfil', element: <MyProfile /> },
           { path: 'seguridad', element: <Security /> },
         ]
       }
     ]
   },
-  
+
   // 6. COMMON / UI ROUTES
   {
     path: '/app',
@@ -154,7 +159,7 @@ const Router = [
     ],
   },
 
-  // 6. CATCH-ALL
+  // 7. CATCH-ALL
   {
     path: '*',
     element: <Navigate to="/auth/404" replace />,

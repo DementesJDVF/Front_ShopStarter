@@ -5,7 +5,6 @@ import api from "../../utils/axios";
 import { getAbsoluteImageUrl } from "../../utils/urlHelper";
 import { optimizeImageUrl } from "../../utils/imageOptimizer";
 import { useTranslation } from "react-i18next";
-import { useCart } from "../../context/CartContext";
 import { toast } from "react-hot-toast";
 
 // --- Types ---
@@ -20,7 +19,8 @@ type Product = {
   id: number;
   name: string;
   price: string;
-  category_name: string;
+  categories: Array<{ id: number; name: string }>;
+  category_names: string[];
   images: { url_image: string; is_main: boolean }[];
   vendor_name: string;
 };
@@ -28,25 +28,11 @@ type Product = {
 // --- ProductCard Component ---
 const ProductCard = ({ product }: { product: Product }) => {
   const { t } = useTranslation("product");
-  const { addToCart } = useCart();
   
   const rawImage = product.images?.find((img) => img.is_main)?.url_image || product.images?.[0]?.url_image;
   const imageUrl = getAbsoluteImageUrl(rawImage);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart({
-      id: product.id.toString(),
-      name: product.name,
-      price: parseFloat(product.price),
-      quantity: 1,
-      image: imageUrl,
-      vendorId: "0", // Fallback
-      vendorName: product.vendor_name
-    });
-    toast.success(t("addedToCart", { name: product.name }));
-  };
+
 
   return (
     <Link 
@@ -62,13 +48,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
         
-        {/* Quick Add Button */}
-        <button 
-          onClick={handleAddToCart}
-          className="absolute bottom-3 right-3 w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-lg hover:bg-indigo-700 active:scale-90"
-        >
-          <Icon icon="solar:cart-plus-bold" className="text-xl" />
-        </button>
+
       </div>
       <div className="p-4 flex flex-col flex-1">
         <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-1 group-hover:text-indigo-600 transition-colors">
@@ -92,7 +72,7 @@ const CategorySection = ({ category }: { category: Category }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await api.get(`products/catalog/?category=${category.id}&page_size=4`);
+        const res = await api.get(`products/catalog/?categories=${category.id}&page_size=4`);
         setProducts(res.data.results || res.data || []);
       } catch (err) {
         console.error(`Error fetching products for category ${category.name}`, err);
@@ -115,14 +95,14 @@ const CategorySection = ({ category }: { category: Category }) => {
               {category.name}
             </h3>
           </div>
-          <p className="text-slate-500 dark:text-slate-400 font-medium">
+          <p className="text-black dark:text-white font-bold">
             {category.description || `Explora lo mejor en ${category.name.toLowerCase()}`}
           </p>
         </div>
-        <Link 
-          to={`/app/products?category=${category.name}`}
-          className="group flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-widest text-xs hover:gap-3 transition-all"
-        >
+<Link
+           to={`/app/products?categories=${category.id}`}
+           className="group flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-widest text-xs hover:gap-3 transition-all"
+         >
           {t("visualCatalog.viewAll")}
           <Icon icon="solar:alt-arrow-right-bold" className="text-lg" />
         </Link>
@@ -171,7 +151,7 @@ const VisualCatalog = () => {
       {/* --- Section 1: Categories Grid --- */}
       <div className="mb-20" data-aos="fade-down">
         <div className="text-center mb-12">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-400 font-black tracking-[0.2em] uppercase text-xs mb-4 block">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#000351] to-[#280051] dark:from-[#7a9dff] dark:to-[#9e7aff] font-black tracking-[0.3em] uppercase text-sm md:text-base mb-4 block">
             {t("visualCatalog.tag")}
           </span>
           <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter">
@@ -186,9 +166,9 @@ const VisualCatalog = () => {
             ))
           ) : (
             categories.map((cat) => (
-              <Link
-                key={cat.id}
-                to={`/app/products?category=${cat.name}`}
+<Link
+                 key={cat.id}
+                 to={`/app/products?categories=${cat.id}`}
                 className="group relative flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:shadow-indigo-200/50 hover:-translate-y-2 transition-all duration-500 overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-700" />

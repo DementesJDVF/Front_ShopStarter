@@ -1,0 +1,71 @@
+{
+  "loading": "Cargando perfil...",
+  "header": {
+    "stats": {
+      "status": "estado",
+      "reputation": "reputación",
+      "account": "cuenta",
+      "active": "Activa",
+      "inactive": "Inactiva",
+      "noName": "Sin nombre"
+    },
+    "role":{
+      "ADMIN":"ADMINISTRADOR",
+      "VENDEDOR":"VENDEDOR",
+      "CLIENTE":"CLIENTE"
+    },
+    "status":{
+      "ACTIVE":"ACTIVO",
+      "INACTIVE":"INACTIVO",
+      "PENDING":"PENDIENTE",
+      "BLOCKED":"BLOQUEADO"
+    }
+  },
+  "edit": {
+    "title": "Editar perfil",
+    "subtitle": "Actualiza tu información personal y guarda todos los cambios al final.",
+    "pendingOne": "Tienes {{count}} cambio sin guardar.",
+    "pendingMany": "Tienes {{count}} cambios sin guardar.",
+    "noPending": "No hay cambios pendientes.",
+    "submit": "Subir cambios",
+    "saving": "Guardando...",
+    "savedOk": "Cambios guardados correctamente",
+    "saveError": "Error al guardar los cambios"
+  },
+  "fields": {
+    "username": "Nombre de usuario",
+    "email": "Correo electrónico",
+    "fullName": "Nombre completo",
+    "phone": "Teléfono",
+    "documentType": "Tipo de documento",
+    "documentNumber": "Número de documento",
+    "birthDate": "Fecha de nacimiento",
+    "role": "Rol",
+    "status": "Estado",
+    "accountStatus": "Estado de la cuenta",
+    "reputation": "Reputación",
+    "selectPlaceholder": "— Selecciona —",
+    "yourFieldPrefix": "Tu",
+    "unsavedTooltip": "Cambio sin guardar"
+  },
+  "documents": {
+    "CC": "Cédula de Ciudadanía",
+    "CE": "Cédula de Extranjería",
+    "TI": "Tarjeta de Identidad",
+    "PASS": "Pasaporte"
+  },
+  "avatar": {
+    "change": "Cambiar foto",
+    "deleteConfirm": "¿Eliminar tu foto de perfil?",
+    "deleted": "Foto eliminada",
+    "deleteError": "Error al eliminar la foto",
+    "updated": "Foto actualizada",
+    "uploadError": "Error al subir la foto",
+    "modalTitle": "Ajustar foto de perfil",
+    "modalHint": "Arrastra la imagen para encuadrar. Se guardará en {{size}}×{{size}} px.",
+    "cancel": "Cancelar",
+    "apply": "Aplicar",
+    "uploading": "Subiendo...",
+    "close": "Cerrar"
+  }
+}

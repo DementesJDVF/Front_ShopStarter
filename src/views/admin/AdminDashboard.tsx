@@ -36,7 +36,7 @@ const COLORS = [
 ];
 
 export default function AdminDashboard() {
-  const { t, i18n } = useTranslation();
+  const { t, } = useTranslation("admin");
 
   const [users, setUsers] = useState<User[]>([]);
   const [openCard, setOpenCard] = useState<string | null>(null);

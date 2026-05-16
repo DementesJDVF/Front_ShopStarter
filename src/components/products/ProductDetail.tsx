@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import api from "../../utils/axios";
-import { Button, Spinner } from "flowbite-react";
+import { Button, Spinner, Badge } from "flowbite-react";
 import { Icon } from "@iconify/react";
 import ImagePreviewModal from "../shared/ImagePreviewModal";
 import { getAbsoluteImageUrl } from "../../utils/urlHelper";
-import toast from 'react-hot-toast';
 import { useAuth } from "../../context/AuthContext";
+import { useConfirm } from "../../context/ConfirmContext";
+import { showSuccessAlert, showErrorAlert } from "../../utils/Alerts";
 
 type ProductImage = {
   id: number;
@@ -20,11 +21,11 @@ type ProductDetailData = {
   name: string;
   description: string;
   price: string;
-  stock: number;
+  stock: boolean;
   status: string;
   vendor: string | number;
   vendor_name: string;
-  category_name: string;
+  categories: Array<{ id: number; name: string }>;
   is_featured: boolean;
   images: ProductImage[];
   created_at: string;
@@ -35,6 +36,7 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const { t } = useTranslation("product");
   const { user } = useAuth();
+  const confirm = useConfirm();
 
   const [product, setProduct] = useState<ProductDetailData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,25 +82,44 @@ export default function ProductDetail() {
 
   const handleReserve = async () => {
     if (!product) return;
-    if (!window.confirm(t("reserveConfirmExact", { name: product.name }))) return;
+    const confirmed = await confirm(t("reserveConfirmExact", { name: product.name }));
+    if (!confirmed) return;
 
     try {
       setReserving(true);
-      // Validamos stock localmente antes de intentar
-      if (product.stock <= 0) {
-          toast.error("Lo sentimos, este producto se acaba de agotar.");
+      if (!product.stock) {
+          showErrorAlert("Lo sentimos, este producto se acaba de agotar.");
           return;
       }
       await api.post('orders/', { 
           product: product.id,
-          quantity: 1 // Reservar 1 unidad directa
+          quantity: 1
       });
-      toast.success("¡Reserva exitosa!");
+      showSuccessAlert("¡Reserva exitosa!");
       navigate('/cliente/reservas');
     } catch (e: any) {
-      alert(e.response?.data?.error || t("reserveError"));
+      showErrorAlert(e.response?.data?.error || t("reserveError"));
     } finally {
       setReserving(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold text-black">{t("status.PENDING")}</Badge>;
+      case 'AVAILABLE':
+        return <Badge color="success" className="rounded-lg px-3 py-1 font-bold">{t("status.AVAILABLE")}</Badge>;
+      case 'INACTIVE':
+        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">{t("status.INACTIVE")}</Badge>;
+      case 'REJECTED':
+        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">{t("status.REJECTED")}</Badge>;
+      case 'RESERVED':
+        return <Badge color="warning" className="rounded-lg px-3 py-1 font-bold text-black">{t("status.RESERVED")}</Badge>;
+      case 'SOLD':
+        return <Badge color="failure" className="rounded-lg px-3 py-1 font-bold">{t("status.SOLD")}</Badge>;
+      default:
+        return <Badge color="gray">{status}</Badge>;
     }
   };
 
@@ -115,7 +136,7 @@ export default function ProductDetail() {
     <div className="rounded-2xl shadow-xl bg-white dark:bg-darkgray p-8 max-w-5xl mx-auto font-[var(--main-font)]">
       <button
         onClick={() => navigate(-1)}
-        className="mb-6 flex items-center gap-2 text-sm text-primary hover:text-darkprimary transition-colors font-bold"
+        className="mb-6 flex items-center gap-2 text-sm text-primary hover:text-darkprimary transition-colors font-bold dark:text-gray-200"
       >
         <Icon icon="solar:alt-arrow-left-linear" /> {t("backCatalog")}
       </button>
@@ -164,17 +185,24 @@ export default function ProductDetail() {
 
         {/* Información */}
         <div className="flex flex-col gap-6">
-          <div className="flex gap-2 flex-wrap">
-            <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
-              {product.category_name}
-            </span>
-            {product.is_featured && (
-              <span className="text-xs bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider flex items-center">
-                <Icon icon="solar:star-bold" className="mr-1" /> {t("featuredProduct")}
-              </span>
-            )}
-            <span className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider ${product.status.toUpperCase().trim() === 'AVAILABLE' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
-              {t(`status.${product.status.toUpperCase().trim()}`, product.status)}
+<div className="flex gap-2 flex-wrap">
+             {product.categories?.length > 0 ? (
+               product.categories.map((cat) => (
+                 <span key={cat.id} className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+                   {cat.name}
+                 </span>
+               ))
+             ) : (
+               <span className="text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+                 {t("uncategorized")}
+               </span>
+             )}
+             {product.is_featured && (
+               <span className="text-xs bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full font-bold uppercase tracking-wider flex items-center">
+                 <Icon icon="solar:star-bold" className="mr-1" /> {t("featuredProduct")}
+               </span>
+             )}
+             <span>{getStatusBadge(product.status)}
             </span>
           </div>
 
@@ -183,13 +211,13 @@ export default function ProductDetail() {
           </h1>
 
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-primary">
+            <span className="text-4xl font-black dark:text-gray-300  text-primary">
               ${Number(product.price).toLocaleString()}
             </span>
-            <span className="text-gray-400 text-sm">{t("priceCurrency")}</span>
+            <span className="text-gray-900 dark:text-gray-300 text-sm">{t("priceCurrency")}</span>
           </div>
 
-          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed border-t pt-4">
+          <p className="text-lg text-gray-900 dark:text-gray-300 leading-relaxed border-t pt-4">
             {product.description}
           </p>
 
@@ -197,18 +225,18 @@ export default function ProductDetail() {
             <div className="bg-gray-50 dark:bg-dark p-4 rounded-2xl flex items-center gap-3">
               <Icon icon="solar:shop-2-linear" className="text-primary text-2xl" />
               <div>
-                <p className="text-gray-400 text-xs">{t("vendor")}</p>
+                <p className="text-black dark:text-gray-200 text-xs">{t("vendor")}</p>
                 <p className="font-bold text-dark dark:text-white uppercase tracking-tighter">{product.vendor_name}</p>
               </div>
             </div>
             <div className="bg-gray-50 dark:bg-dark p-4 rounded-2xl flex items-center gap-3">
               <Icon icon="solar:box-linear" className="text-primary text-2xl" />
               <div>
-                <p className="text-gray-400 text-xs">{t("stock")}</p>
-                <p className={`font-bold ${product.stock === 0 ? "text-red-500" : "text-green-600"}`}>
-                  {product.stock === 0
-                    ? t("status.OUT_OF_STOCK")
-                    : `${product.stock} ${t("units")}`}
+                <p className="text-black dark:text-gray-200 text-xs">{t("stock")}</p>
+                <p className={`font-bold ${!product.stock ? "text-red-500" : "text-green-600"}`}>
+                  {!product.stock
+                    ? t("outOfStock")
+                    : t("inStock")}
                 </p>
               </div>
             </div>
@@ -220,9 +248,9 @@ export default function ProductDetail() {
             {user && product.vendor?.toString() === user.id?.toString() ? (
               <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center gap-3 text-amber-700">
                 <Icon icon="solar:info-circle-bold" height={24} />
-                <p className="text-sm font-bold">Este es tu producto. Puedes gestionarlo desde tu panel de control.</p>
+                <p className="text-sm font-bold">{t("forbiden")}</p>
               </div>
-            ) : product.status && product.status.toString().toUpperCase().includes('AVAILABLE') && product.stock > 0 ? (
+            ) : product.status && ['AVAILABLE', 'RESERVED', 'SOLD'].includes(product.status.toString().toUpperCase()) && product.stock ? (
               <Button 
                 size="xl" 
                 className="w-full font-black text-xl rounded-2xl shadow-lg ring-offset-2 transition-transform active:scale-95"
@@ -231,18 +259,18 @@ export default function ProductDetail() {
                 disabled={reserving}
               >
                 {reserving ? <Spinner size="sm" className="mr-2" /> : <Icon icon="solar:calendar-mark-bold" className="mr-2 text-2xl" />}
-                RESERVAR AHORA
+                {t("res_now")}
               </Button>
-            ) : (product.status && product.status.toString().toUpperCase().includes('SOLD')) || product.stock <= 0 ? (
+            ) : (product.status && product.status.toString().toUpperCase().includes('SOLD')) || !product.stock ? (
               <Button size="xl" color="gray" disabled className="w-full rounded-2xl">
-                AGOTADO
+                {t("stockless")}
               </Button>
             ) : (
               <Button size="xl" color="gray" disabled className="w-full rounded-2xl">
                 {t("notAvailable")} (Estado detectado: {product.status})
               </Button>
             )}
-            <p className="text-center text-xs text-gray-400 mt-3 italic">
+            <p className="text-center text-xs text-black dark:text-gray-300 mt-3 italic">
               {t("reserveInfo")}
             </p>
           </div>

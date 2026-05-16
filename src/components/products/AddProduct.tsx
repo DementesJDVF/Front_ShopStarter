@@ -29,12 +29,12 @@ export default function AddProduct() {
 
     const [form, setForm] = useState({
         vendor: user?.id || "",
-        category: "",
+        categories: [] as number[],
         name: "",
         description: "",
         price: "",
-        stock: "",
-        status: "PENDING", // Los productos nuevos nacen pendientes de aprobación
+        stock: true as boolean,
+        status: "PENDING",
         is_featured: false,
         image1_url: "",
         image1_main: true,
@@ -86,7 +86,7 @@ export default function AddProduct() {
         setError(null);
 
         // Validación básica
-        if (!form.category) { setError("Debes seleccionar una categoría."); setLoading(false); return; }
+        if (form.categories.length === 0) { setError("Debes seleccionar al menos una categoría."); setLoading(false); return; }
         if (isAdmin && !form.vendor) { setError("Debes seleccionar un vendedor."); setLoading(false); return; }
 
         const images: { url_image: string; is_main: boolean }[] = [];
@@ -97,11 +97,11 @@ export default function AddProduct() {
 
         const body: Record<string, unknown> = {
             vendor: isAdmin ? form.vendor : user?.id,
-            category: Number(form.category),
+            categories: form.categories,
             name: form.name,
             description: form.description,
             price: form.price,
-            stock: form.stock ? Number(form.stock) : 0,
+            stock: form.stock,
             is_featured: form.is_featured,
             status: "PENDING",
         };
@@ -167,28 +167,33 @@ export default function AddProduct() {
                             </div>
                         )}
 
-                    <div className="add-product__field">
-                        <label className="add-product__label">
-                            {t("category")} <span className="add-product__required">*</span>
-                        </label>
-                        {loadingCats ? (
-                            <p className="add-product__loading-text">{t("loadingCategories")}</p>
-                        ) : (
-                            <select
-                                name="category"
-                                value={form.category}
-                                onChange={handleChange}
-                                required
-                                title={t("selectCategory")}
-                                className="add-product__input"
-                            >
-                                <option value="">{t("selectCategory")}</option>
-                                {categories.map((c) => (
-                                    <option key={c.id} value={c.id}>{c.name}</option>
-                                ))}
-                            </select>
-                        )}
-                    </div>
+<div className="add-product__field">
+                         <label className="add-product__label">
+                             {t("categories")} <span className="add-product__required">*</span>
+                         </label>
+                         {loadingCats ? (
+                             <p className="add-product__loading-text">{t("loadingCategories")}</p>
+                         ) : (
+                             <div className="add-product__category-grid">
+                                 {categories.map((c) => (
+                                     <label key={c.id} className="add-product__checkbox-label">
+                                         <input
+                                             type="checkbox"
+                                             checked={form.categories.includes(c.id)}
+                                             onChange={(e) => {
+                                                 const updated = e.target.checked
+                                                     ? [...form.categories, c.id]
+                                                     : form.categories.filter(id => id !== c.id);
+                                                 setForm(prev => ({ ...prev, categories: updated }));
+                                             }}
+                                             className="add-product__checkbox"
+                                         />
+                                         {c.name}
+                                     </label>
+                                 ))}
+                             </div>
+                         )}
+                     </div>
                 </div>
 
                 <div className="add-product__field">
@@ -239,16 +244,16 @@ export default function AddProduct() {
                         />
                     </div>
                     <div className="add-product__field">
-                        <label className="add-product__label">{t("stock")}</label>
-                        <input
-                            type="number"
-                            name="stock"
-                            value={form.stock}
-                            onChange={handleChange}
-                            min="0"
-                            placeholder="0"
-                            className="add-product__input"
-                        />
+                        <label className="add-product__checkbox-label">
+                            <input
+                                type="checkbox"
+                                name="stock"
+                                checked={form.stock as boolean}
+                                onChange={handleChange}
+                                className="add-product__checkbox"
+                            />
+                            {form.stock ? t("inStock") : t("outOfStock")}
+                        </label>
                     </div>
                 </div>
 

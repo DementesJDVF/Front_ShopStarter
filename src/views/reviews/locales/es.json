@@ -1,0 +1,25 @@
+{
+  "header": {
+    "title": "Reseñas de tu tienda",
+    "subtitle": "Opiniones reales de los clientes sobre tu negocio."
+  },
+  "errorState": {
+    "title": "Reseñas",
+    "subtitle": "No se pudieron cargar las reseñas.",
+    "onlyVendors": "Esta sección es solo para vendedores autenticados.",
+    "fetchError": "Error al obtener reseñas"
+  },
+  "summary": {
+    "totalOne": "{{count}} reseña en total",
+    "totalOther": "{{count}} reseñas en total",
+    "stars": "{{count}} ★"
+  },
+  "empty": {
+    "title": "Aún no tienes reseñas",
+    "subtitle": "Cuando tus clientes te califiquen, aparecerán aquí."
+  },
+  "review": {
+    "defaultClient": "Cliente",
+    "noComment": "(Sin comentario)"
+  }
+}

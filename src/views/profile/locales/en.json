@@ -1,0 +1,71 @@
+{
+  "loading": "Loading profile...",
+  "header": {
+    "stats": {
+      "status": "status",
+      "reputation": "reputation",
+      "account": "account",
+      "active": "Active",
+      "inactive": "Inactive",
+      "noName": "No name"
+    },
+    "role":{
+      "ADMIN":"ADMIN",
+      "VENDEDOR":"VENDOR",
+      "CLIENTE":"CLIENT"
+    },
+    "status":{
+      "ACTIVE":"ACTIVE",
+      "INACTIVE":"INACTIVE",
+      "PENDING":"PENDING",
+      "BLOCKED":"BLOCKED"
+    }
+  },
+  "edit": {
+    "title": "Edit profile",
+    "subtitle": "Update your personal information and save all the changes at the end.",
+    "pendingOne": "You have {{count}} unsaved change.",
+    "pendingMany": "You have {{count}} unsaved changes.",
+    "noPending": "No pending changes.",
+    "submit": "Submit changes",
+    "saving": "Saving...",
+    "savedOk": "Changes saved successfully",
+    "saveError": "Error saving changes"
+  },
+  "fields": {
+    "username": "Username",
+    "email": "Email",
+    "fullName": "Full name",
+    "phone": "Phone",
+    "documentType": "Document type",
+    "documentNumber": "Document number",
+    "birthDate": "Birth date",
+    "role": "Role",
+    "status": "Status",
+    "accountStatus": "Account status",
+    "reputation": "Reputation",
+    "selectPlaceholder": "— Select —",
+    "yourFieldPrefix": "Your",
+    "unsavedTooltip": "Unsaved change"
+  },
+  "documents": {
+    "CC": "Citizenship ID",
+    "CE": "Foreigner ID",
+    "TI": "Minor ID",
+    "PASS": "Passport"
+  },
+  "avatar": {
+    "change": "Change photo",
+    "deleteConfirm": "Delete your profile photo?",
+    "deleted": "Photo deleted",
+    "deleteError": "Error deleting photo",
+    "updated": "Photo updated",
+    "uploadError": "Error uploading photo",
+    "modalTitle": "Adjust profile photo",
+    "modalHint": "Drag the image to frame it. It will be saved as {{size}}×{{size}} px.",
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "uploading": "Uploading...",
+    "close": "Close"
+  }
+}

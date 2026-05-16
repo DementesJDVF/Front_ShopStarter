@@ -11,7 +11,7 @@
     "viewInMaps": "VER EN MAPS",
     "heading": {
       "line1": "Gestión Inteligente",
-      "line2": "Próximamente por Papayo"
+      "line2": "por ShopStarter"
     },
     "description": "Estamos construyendo el centro de mando más avanzado para tu negocio. Analiza tus ventas con IA, gestiona inventarios en segundos y escala como nunca antes.",
     "badge": {
@@ -52,7 +52,18 @@
   "orders": {
     "title": "Recepción de Pedidos",
     "subtitle": "Gestiona y marca las entregas con tus clientes.",
+    "product": "Producto",
+    "client": "Cliente",
+    "estado": "Estado",
+    "actions": "Acciones",
+    "finished": "Venta Finalizada",
+    "rep_pay": "PAGO REPORTADO",
+    "mark": "Marcar PAGADO",
+    "cancel": "Cancelar",
     "refresh": "Refrescar",
+    "back":"Volver",
+    "pedido":"pedido",
+    "not_found":"NO ENCONTRADO",
     "empty": {
       "title": "Sin pedidos activos",
       "msg": "Explora y gestiona tu catálogo para atraer ventas."
@@ -67,9 +78,10 @@
     },
     "anonymous": "Anónimo",
     "status": {
-      "pending": "⏳ PENDIENTE",
-      "completed": "✅ EFECTUADO",
-      "cancelled": "❌ CANCELADO"
+      "PAID": "PAGADO",
+      "RESERVED": "RESERVADO",
+      "CANCELLED": "CANCELADO",
+      "PENDING": "PENDIENTE"
     },
     "action": {
       "delivered": "Entregado",

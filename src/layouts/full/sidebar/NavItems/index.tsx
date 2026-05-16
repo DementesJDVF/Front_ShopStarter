@@ -21,8 +21,8 @@ const NavItems: React.FC<NavItemsProps> = ({ item, isCollapsed = false }) => {
       target={item?.isPro ? "blank" : "_self"}
       as={Link}
       className={`transition-all duration-300 w-full block ${item.url == pathname
-          ? "text-white bg-white/20 backdrop-blur-md shadow-xl rounded-xl border border-white/20"
-          : "text-white/90 font-bold bg-transparent group/link hover:bg-white/10 hover:text-white"
+        ? "text-white bg-white/20 backdrop-blur-md shadow-xl rounded-xl border border-white/20"
+        : "text-white/90 font-bold bg-transparent group/link hover:bg-white/10 hover:text-white"
         } ${isCollapsed ? 'px-2' : 'px-4 mb-1'}`}
     >
       <div className={`flex items-center gap-3 w-full transition-all duration-300`}>
@@ -38,9 +38,8 @@ const NavItems: React.FC<NavItemsProps> = ({ item, isCollapsed = false }) => {
             ></span>
           )}
         </div>
-        <span className={`transition-all duration-300 origin-left whitespace-nowrap ${
-          isCollapsed ? 'opacity-0 w-0 scale-95 overflow-hidden' : 'opacity-100 w-auto scale-100'
-        }`}>
+        <span className={`transition-all duration-300 origin-left whitespace-nowrap ${isCollapsed ? 'opacity-0 w-0 scale-95 overflow-hidden' : 'opacity-100 w-auto scale-100'
+          }`}>
           {t(item.name ?? "")}
           {item.isPro && (
             <span className="ml-2 py-0.5 px-2 text-[10px] bg-secondary/10 text-secondary rounded animate-pulse">{t("Pro")}</span>
