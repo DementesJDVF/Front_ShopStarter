@@ -205,7 +205,7 @@ export function ProductCatalog() {
             const rawImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
             const mainImage = getAbsoluteImageUrl(rawImage);
             const isOutOfStock = !p.stock;
-            const isNotAvailable = !p.status || !['AVAILABLE', 'RESERVED', 'SOLD'].includes(p.status.toUpperCase());
+            const isNotAvailable = !p.status || p.status.toUpperCase() !== 'AVAILABLE';
             const canPurchase = !isOutOfStock && !isNotAvailable;
 
             return (
@@ -243,6 +243,16 @@ export function ProductCatalog() {
                     {isOutOfStock && (
                       <div className="bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-red-500/30">
                         {t("outOfStock")}
+                      </div>
+                    )}
+                    {p.status?.toUpperCase() === 'RESERVED' && (
+                      <div className="bg-yellow-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-yellow-500/30">
+                        {t("reserved")}
+                      </div>
+                    )}
+                    {p.status?.toUpperCase() === 'SOLD' && (
+                      <div className="bg-green-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-green-600/30">
+                        {t("sold")}
                       </div>
                     )}
                   </div>
