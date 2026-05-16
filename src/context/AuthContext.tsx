@@ -87,22 +87,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       window.__isLoggingOut = true;
       
       // 1. LIMPIEZA LOCAL INMEDIATA (Principio de Optimismo/Seguridad)
-      // Esto evita que la UI permita acciones mientras se procesa el logout en red
       setUser(null);
       localStorage.removeItem('user');
       localStorage.removeItem('token');
 
-      try {
-          // 2. Notificar al backend de forma secundaria
-          // Usamos axios directo si queremos evitar interceptores, o api sabiendo que puede fallar
-          await api.post('auth/logout/').catch(() => {}); 
-      } catch (error) {
-          // Ignoramos errores de red en logout, la prioridad es la limpieza local
-      } finally {
-          // 3. REDIRECCIÓN ÚNICA: usamos replace() para no crear historial
-          // Limpiar flag después de la redirección
-          window.location.replace('/');
-      }
+      // 2. REDIRECCIÓN INMEDIATA - no esperar al backend
+      window.location.replace('/');
    };
 
   return (
