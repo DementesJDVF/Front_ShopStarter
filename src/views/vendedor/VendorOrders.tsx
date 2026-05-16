@@ -39,7 +39,7 @@ const VendorOrders: React.FC = () => {
       )) as number[];
       // 3. Consultar los detalles de esos usuarios específicos en paralelo
       const userRequests = clientIds.map(id => 
-        api.get(`users/listusers/${id}`).catch(() => null)
+        api.get(`users/listusers/${id}/`).catch(() => null)
       );
       const usersResponses = await Promise.all(userRequests);
       // 4. Construir el mapa de avatares (usando el nombre del cliente como clave para tu lógica actual)

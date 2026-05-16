@@ -61,10 +61,10 @@ const VendorOrderDetail: React.FC = () => {
       // ¡ESTA LÍNEA ES LA QUE FALTABA! -> Definir las constantes y esperar el resultado
       const [usersResponses, productsResponses] = await Promise.all([
         // A. Peticiones de usuarios
-        Promise.all(clientIds.map(id => api.get(`users/listusers/${id}`).catch(() => null))),
+        Promise.all(clientIds.map(id => api.get(`users/listusers/${id}/`).catch(() => null))),
         // B. Peticiones de productos con silenciador de 404
         Promise.all(productIds.map(id => 
-          api.get(`products/products/${id}`, {
+          api.get(`products/products/${id}/`, {
             validateStatus: (status) => (status >= 200 && status < 300) || status === 404 
           })
           .then((res) => {
