@@ -55,67 +55,65 @@ const Reviews: React.FC = () => {
       setError(t('errorState.onlyVendors'));
       return;
     }
-
     let cancelled = false;
-    const fetchReviews = async () => {
-    // Si usas un flag de cancelación, asegúrate de tener el "let cancelled = false" 
-    // en el cuerpo del useEffect, o usa una referencia.
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await getVendorReviews(user.id);
-      // Si manejas un flag externo (ej: del useEffect cleanup), asegúrate de que exista.
-      // Si no lo usas, puedes borrar los "if (cancelled) return;"
-      if (typeof cancelled !== 'undefined' && cancelled) return;
-      // Filtro defensivo: si el backend incluyera datos de otros vendedores,
-      // dejamos solo las reseñas que correspondan a este vendedor.
-      const safe: ReviewsData = {
-        average: Number(result?.average ?? 0),
-        total: Number(result?.total ?? (result?.reviews?.length ?? 0)),
-        reviews: Array.isArray(result?.reviews)
-          ? result.reviews.filter((r: any) =>
-              r?.vendor ? String(r.vendor) === String(user.id) : true
-            )
-          : [],
-      };
-      // 2. Extraer IDs de clientes únicos (CORREGIDO: Ahora usa safe.reviews)
-      // También asegúrate de si tu backend devuelve "client_id" o "client" o "user_id".
-      const clientIds = Array.from(new Set(
-        safe.reviews.map((r: any) => r.client_id || r.client).filter(Boolean)
-      )) as number[];
-      // 3. Consultar los detalles de esos usuarios específicos en paralelo
-      // Después (Optimizado)
-      const userRequests = clientIds.map(id => 
-        api.get(`users/listusers/${id}/`).catch(() => null) 
-      );
-      const usersResponses = await Promise.all(userRequests);
-      // 4. Construir el mapa de avatares
-      const map: Record<string, string> = {};
-      usersResponses.forEach((res) => {
-        if (res && res.data) {
-          const u = res.data;
-          const url = u.profile_picture?.image_url || u.avatar_url;
-          // Usamos el nombre del cliente como clave para que coincida con tu agrupador
-          if (url && u.username) {
-            map[u.username] = url;
+      const fetchReviews = async () => {
+      // Si usas un flag de cancelación, asegúrate de tener el "let cancelled = false" 
+      // en el cuerpo del useEffect, o usa una referencia.
+      try {
+        setLoading(true);
+        setError(null);
+        const result = await getVendorReviews(user.id);
+        // Si manejas un flag externo (ej: del useEffect cleanup), asegúrate de que exista.
+        // Si no lo usas, puedes borrar los "if (cancelled) return;"
+        if (typeof cancelled !== 'undefined' && cancelled) return;
+        // Filtro defensivo: si el backend incluyera datos de otros vendedores,
+        // dejamos solo las reseñas que correspondan a este vendedor.
+        const safe: ReviewsData = {
+          average: Number(result?.average ?? 0),
+          total: Number(result?.total ?? (result?.reviews?.length ?? 0)),
+          reviews: Array.isArray(result?.reviews)
+            ? result.reviews.filter((r: any) =>
+                r?.vendor ? String(r.vendor) === String(user.id) : true
+              )
+            : [],
+        };
+        // 2. Extraer IDs de clientes únicos (CORREGIDO: Ahora usa safe.reviews)
+        // También asegúrate de si tu backend devuelve "client_id" o "client" o "user_id".
+        const clientIds = Array.from(new Set(
+          safe.reviews.map((r: any) => r.client_id || r.client).filter(Boolean)
+        )) as number[];
+        // 3. Consultar los detalles de esos usuarios específicos en paralelo
+        // Después (Optimizado)
+        const userRequests = clientIds.map(id => 
+          api.get(`users/listusers/${id}/`).catch(() => null) 
+        );
+        const usersResponses = await Promise.all(userRequests);
+        // 4. Construir el mapa de avatares
+        const map: Record<string, string> = {};
+        usersResponses.forEach((res) => {
+          if (res && res.data) {
+            const u = res.data;
+            const url = u.profile_picture?.image_url || u.avatar_url;
+            // Usamos el nombre del cliente como clave para que coincida con tu agrupador
+            if (url && u.username) {
+              map[u.username] = url;
+            }
           }
+        });
+        // Validaciones finales de montaje
+        if (typeof cancelled !== 'undefined' && cancelled) return;
+        setAvatarMap(map);
+        setData(safe);
+      } catch (err: any) {
+        if (typeof cancelled === 'undefined' || !cancelled) {
+          setError(err?.message || t('errorState.fetchError'));
         }
-      });
-      // Validaciones finales de montaje
-      if (typeof cancelled !== 'undefined' && cancelled) return;
-      setAvatarMap(map);
-      setData(safe);
-    } catch (err: any) {
-      if (typeof cancelled === 'undefined' || !cancelled) {
-        setError(err?.message || t('errorState.fetchError'));
+      } finally {
+        if (typeof cancelled === 'undefined' || !cancelled) {
+          setLoading(false);
+        }
       }
-    } finally {
-      if (typeof cancelled === 'undefined' || !cancelled) {
-        setLoading(false);
-      }
-    }
-  };
-
+    };
     fetchReviews();
     return () => {
       cancelled = true;
