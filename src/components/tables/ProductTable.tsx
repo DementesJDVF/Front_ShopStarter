@@ -602,11 +602,11 @@ setNewProduct({
                    <label key={cat.id} className="flex items-center gap-1 cursor-pointer">
                      <input
                        type="checkbox"
-                       checked={newProduct.categories.includes(cat.id)}
+                       checked={newProduct.categories.includes(Number(cat.id))}
                        onChange={(e) => {
                          const updated = e.target.checked
-                           ? [...newProduct.categories, cat.id]
-                           : newProduct.categories.filter(id => id !== cat.id);
+                           ? [...newProduct.categories, Number(cat.id)]
+                           : newProduct.categories.filter(id => id !== Number(cat.id));
                          setNewProduct({ ...newProduct, categories: updated });
                        }}
                        className="rounded"
