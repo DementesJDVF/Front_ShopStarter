@@ -31,6 +31,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Si acabamos de hacer logout, no ejecutar auth/me
+    if (sessionStorage.getItem('__logging_out') === 'true') {
+      sessionStorage.removeItem('__logging_out');
+      setLoading(false);
+      return;
+    }
+    
     const savedUser = localStorage.getItem('user');
     
     if (savedUser) {
@@ -44,10 +51,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setUser(res.data);
             } else {
                 // El servidor dice que no estamos autenticados (200 OK pero con flag false)
-                logout();
+                // Solo hacer logout si no estamos ya en proceso de logout
+                if (!window.__isLoggingOut) {
+                  logout();
+                }
             }
         }).catch((err) => {
-          if (err.response?.status === 401 || err.response?.status === 403) {
+          if (!window.__isLoggingOut && (err.response?.status === 401 || err.response?.status === 403)) {
             logout();
           }
         }).finally(() => {
@@ -59,16 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
       }
     } else {
-        // Tratar de recuperar la sesión silente si navegamos y hay una Cookie válida
-        api.get('auth/me/').then(res => {
-            if (res.data.isAuthenticated) {
-                setUser(res.data);
-                localStorage.setItem('user', JSON.stringify(res.data));
-            }
-        }).catch(() => {})
-        .finally(() => {
-          setLoading(false);
-        });
+        setLoading(false);
     }
   }, []);
 
@@ -81,13 +82,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
    const logout = async () => {
+      // Marcar que estamos en logout para prevenir bucle
+      sessionStorage.setItem('__logging_out', 'true');
       window.__isLoggingOut = true;
+      
       // 1. LIMPIEZA LOCAL INMEDIATA (Principio de Optimismo/Seguridad)
       // Esto evita que la UI permita acciones mientras se procesa el logout en red
       setUser(null);
       localStorage.removeItem('user');
       localStorage.removeItem('token');
-      sessionStorage.clear();
 
       try {
           // 2. Notificar al backend de forma secundaria
@@ -97,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Ignoramos errores de red en logout, la prioridad es la limpieza local
       } finally {
           // 3. REDIRECCIÓN ÚNICA: usamos replace() para no crear historial
+          // Limpiar flag después de la redirección
           window.location.replace('/');
       }
    };
