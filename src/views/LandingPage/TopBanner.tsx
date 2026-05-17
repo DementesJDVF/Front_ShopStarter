@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { Icon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,30 @@ const TopBanner: React.FC<NavbarProps> = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t } = useTranslation("landingPage");
   const { mode, toggleMode } = useThemeMode();
+
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (
+        isMobileMenuOpen &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target as Node) &&
+        hamburgerRef.current &&
+        !hamburgerRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
 
   const navLinks = [
     { name: t('nav.features'), href: '#features' },
@@ -86,6 +110,7 @@ const TopBanner: React.FC<NavbarProps> = () => {
                   {t('nav.register')}
                 </Link>
                 <button
+                  ref={hamburgerRef}
                   onClick={() => setIsMobileMenuOpen(true)}
                   className="p-2 rounded-xl text-white hover:bg-white/20 transition-colors"
                   aria-label={t('nav.open_menu', 'Abrir menú')}
@@ -101,11 +126,14 @@ const TopBanner: React.FC<NavbarProps> = () => {
       {isMobileMenuOpen && (
         <>
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-45 md:hidden"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 md:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
 
-           <div className="fixed inset-y-0 right-0 z-50 w-64 sm:w-72 bg-gradient-to-r from-[#000351] to-[#280051] backdrop-blur-3xl shadow-[0_0_50px_rgba(10,1,74,0.3)] transform transition-transform duration-500 ease-in-out md:hidden border-l border-white/20 dark:border-slate-800">
+           <div
+             ref={sidebarRef}
+             className="fixed inset-y-0 right-0 z-[60] w-64 sm:w-72 bg-gradient-to-r from-[#000351] to-[#280051] backdrop-blur-3xl shadow-[0_0_50px_rgba(10,1,74,0.3)] transform transition-transform duration-500 ease-in-out md:hidden border-l border-white/20 dark:border-slate-800"
+           >
             <div className="p-4 sm:p-6 flex items-center justify-between border-b dark:border-slate-800">
               <div className="scale-75 origin-left">
                 <FullLogo variant="dark" />
