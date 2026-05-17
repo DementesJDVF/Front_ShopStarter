@@ -16,6 +16,14 @@ import {
 } from "recharts";
 
 const Dashboard = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // 🔹 LOCATION STATE
   const [vendorLocation, setVendorLocation] = useState<{
@@ -142,24 +150,24 @@ useEffect(() => {
 
   return (
       
-    <div className="scale-80 origin-top">
+    <div className={isMobile ? "w-full px-2" : "scale-80 origin-top"}>
 
       {/* HEADER */}
-      <Card  className=" mt-[10px] !bg-gray-100 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
-         <h1 className="font-black text-3xl tracking-tight text-blue-400 dark:text-blue-400 flex items-center gap-3">
-          Panel de Gestión - Vendedor
-          <Button className="ml-[770px] bg-green-400 hover:bg-green-600 text-white" onClick={() => setShowLocationModal(true)}>
-          <HiOutlineLocationMarker className="mr-4" />
-          Mi Ubicación
-        </Button>
+      <Card className="mt-[10px] !bg-gray-100 dark:!bg-gray-700 p-4 md:p-9 shadow-md rounded-xl">
+         <h1 className="font-black text-2xl md:text-3xl tracking-tight text-blue-400 dark:text-blue-400 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-3 w-full">
+          <span>Panel de Gestión - Vendedor</span>
+          <Button className="w-full md:w-auto bg-green-400 hover:bg-green-600 text-white font-bold" onClick={() => setShowLocationModal(true)}>
+            <HiOutlineLocationMarker className="mr-2 h-5 w-5" />
+            Mi Ubicación
+          </Button>
         </h1>
       </Card>
 
-     <Card className=" mt-[25px] !bg-gray-100 dark:!bg-gray-400 p-9 shadow-md rounded-xl">
-        <Card className="!bg-gray-700 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
-      <div className="flex justify-between mb-8">
+      <Card className="mt-[25px] !bg-gray-100 dark:!bg-gray-400 p-3 md:p-9 shadow-md rounded-xl">
+        <Card className="!bg-gray-700 dark:!bg-gray-700 p-4 md:p-9 shadow-md rounded-xl">
+      <div className="flex justify-between mb-4 md:mb-8">
     
-        <h1 className="mt-4 font-black text-3xl tracking-tight text-blue-400 flex items-center gap-3">
+        <h1 className="mt-2 md:mt-4 font-black text-xl md:text-3xl tracking-tight text-blue-400 flex items-center gap-3">
           <Icon icon="solar:chart-square-bold-duotone" width="32" className="text-blue-300" />
           ULTIMOS REGISTROS
         </h1>
@@ -167,56 +175,56 @@ useEffect(() => {
       </div>
 
       {/* METRICS */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-9 mb-5">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-9 mb-5">
        
         { /*ventas */}
-        <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
+        <Card className="!bg-gray-100 dark:!bg-gray-100 p-4 md:p-9 shadow-md rounded-xl">
           <div className="flex gap-3 items-center">
              <Card className="w-[40px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
              <Icon icon="solar:box-bold" width="30" color="#7963b0" />
             </Card>
             <div>
-              <p className="font-black text-black text-2xl ">Ventas</p>
-              <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].ventas}
+              <p className="font-black text-black text-lg md:text-2xl">Ventas</p>
+              <p className="font-black text-black text-lg md:text-2xl tracking-tight">{data[data.length - 1].ventas}
               </p>
             </div>
           </div>
         </Card>
       
        { /* pedidos */}
-        <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
+        <Card className="!bg-gray-100 dark:!bg-gray-100 p-4 md:p-9 shadow-md rounded-xl">
           <div className="flex gap-3 items-center">
              <Card className="w-[40px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
             <Icon icon="solar:cart-bold" width="30" color="#da701f" />
              </Card>
              <div>
-              <p className="font-black text-black text-2xl ">Pedidos</p>
-              <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].pedidos}</p>
+              <p className="font-black text-black text-lg md:text-2xl">Pedidos</p>
+              <p className="font-black text-black text-lg md:text-2xl tracking-tight">{data[data.length - 1].pedidos}</p>
             </div>
           </div>
         </Card>
 
        { /* usuarios */}
-       <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
+       <Card className="!bg-gray-100 dark:!bg-gray-100 p-4 md:p-9 shadow-md rounded-xl">
           <div className="flex gap-3 items-center">
             <Card className="w-[40px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
             <Icon icon="solar:users-group-rounded-bold" width="30" color="#b3177f" />
             </Card>
              <div>
-              <p className="font-black text-black text-2xl ">Usuarios</p>
-              <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].usuarios}</p>
+              <p className="font-black text-black text-lg md:text-2xl">Usuarios</p>
+              <p className="font-black text-black text-lg md:text-2xl tracking-tight">{data[data.length - 1].usuarios}</p>
             </div>
           </div>
         </Card>
 
        { /* estados de pedidos */}
-       <Card className="!bg-gray-100 dark:!bg-gray-100 p-9 shadow-md rounded-xl">
+       <Card className="!bg-gray-100 dark:!bg-gray-100 p-4 md:p-9 shadow-md rounded-xl">
           <div className="flex gap-3 items-center">
              <Card className="w-[50px] h-[40px] p-0 bg-black border-none flex items-center justify-center overflow-hidden">
             <Icon icon="solar:chart-bold" width="30" color="#ce1a1a"/> </Card>
              <div>
-              <p className="font-black text-black text-2xl ">Estados cancelados</p>
-              <p className="font-black text-black text-2xl tracking-tight">{data[data.length - 1].ingresos}</p>
+              <p className="font-black text-black text-lg md:text-2xl">Estados cancelados</p>
+              <p className="font-black text-black text-lg md:text-2xl tracking-tight">{data[data.length - 1].ingresos}</p>
             </div>
           </div>
         </Card>
@@ -229,10 +237,10 @@ useEffect(() => {
       <div className=" mt-[20px] grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {/* VENTAS */}
-        <Card className="!bg-gray-100 dark:!bg-gray-400 p-9 shadow-md rounded-xl">
+        <Card className="!bg-gray-100 dark:!bg-gray-400 p-3 md:p-9 shadow-md rounded-xl">
             
-         <Card className="!bg-gray-700 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
-          <h1 className="mb-2 font-black text-white text-2xl">Ventas</h1>
+         <Card className="!bg-gray-700 dark:!bg-gray-700 p-4 md:p-9 shadow-md rounded-xl">
+          <h1 className="mb-2 font-black text-white text-xl md:text-2xl">Ventas</h1>
           <div className="my-1 h-[4px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 
           <ResponsiveContainer width="100%" height={250}>
@@ -242,11 +250,11 @@ useEffect(() => {
                 data={ventasPie}   
                 dataKey="value"
                 nameKey="name"
-                innerRadius={60} 
-                outerRadius={90}
+                innerRadius={isMobile ? 40 : 60} 
+                outerRadius={isMobile ? 70 : 90}
                 paddingAngle={5} // 🔥 separa las partes
                 label={({ name, percent }: any) =>
-                `${name} ${(percent * 100).toFixed(0)}%`
+                isMobile ? `${name.substring(0, 3)} ${(percent * 100).toFixed(0)}%` : `${name} ${(percent * 100).toFixed(0)}%`
               }
               >
                 <Cell fill="#7ca8ef" />
@@ -261,8 +269,8 @@ useEffect(() => {
         </Card>
 
         {/* PEDIDOS */}
-        <Card className="!bg-gray-100 dark:!bg-gray-800 p-9 shadow-md rounded-xl">
-         <h2 className="mb-2 font-black dark:text-white text-black text-2xl">
+        <Card className="!bg-gray-100 dark:!bg-gray-800 p-4 md:p-9 shadow-md rounded-xl">
+         <h2 className="mb-2 font-black dark:text-white text-black text-xl md:text-2xl">
             Pedidos
           </h2>
 
@@ -290,7 +298,7 @@ useEffect(() => {
                 tick={{
                   fill: "#696464",
                   fontWeight: "bold",
-                  fontSize: 15
+                  fontSize: isMobile ? 11 : 15
                 }}
               />
 
@@ -302,7 +310,7 @@ useEffect(() => {
                 fill="url(#colorPedidos)"
                 stroke="#ee7818"
                 strokeWidth={2}
-                barSize={90}
+                barSize={isMobile ? 32 : 90}
               />
 
 
@@ -311,8 +319,8 @@ useEffect(() => {
         </Card>
 
         {/* USUARIOS */}
-        <Card className="!bg-gray-100 dark:!bg-gray-800 p-9 shadow-md rounded-xl">
-          <h2 className="mb-2 font-black dark:text-white text-black text-2xl ">Usuarios</h2>
+        <Card className="!bg-gray-100 dark:!bg-gray-800 p-4 md:p-9 shadow-md rounded-xl">
+          <h2 className="mb-2 font-black dark:text-white text-black text-xl md:text-2xl">Usuarios</h2>
 
           <ResponsiveContainer className="mt-[15px]" width="100%" height={250}>
             <AreaChart data={dataUsuarios}>
@@ -327,7 +335,7 @@ useEffect(() => {
               <XAxis 
                 dataKey="mes"
                 axisLine={{ stroke: "#dd0fb796", strokeWidth: 2 }}
-                tick={{ fill: "#696464", fontWeight: "bold" }}
+                tick={{ fill: "#696464", fontWeight: "bold", fontSize: isMobile ? 10 : 12 }}
               />
 
               <YAxis 
@@ -335,8 +343,8 @@ useEffect(() => {
                  tick={{
                   fill: "#696464",
                   fontWeight: "bold",
-                  fontSize: 14
-                }}
+                  fontSize: isMobile ? 10 : 14
+                 }}
               />
 
               <Tooltip 
@@ -356,16 +364,16 @@ useEffect(() => {
         </Card>
 
         {/* ESTADOS DE PEDIDOS */}
-     <Card className="!bg-gray-100 dark:!bg-gray-400 p-9 shadow-md rounded-xl">     
-      <Card className="!bg-gray-700 dark:!bg-gray-700 p-9 shadow-md rounded-xl">
-        <h2 className="mb-2 font-black text-white text-2xl">
+     <Card className="!bg-gray-100 dark:!bg-gray-400 p-3 md:p-9 shadow-md rounded-xl">     
+      <Card className="!bg-gray-700 dark:!bg-gray-700 p-4 md:p-9 shadow-md rounded-xl">
+        <h2 className="mb-2 font-black text-white text-xl md:text-2xl">
           Estado de Pedidos
         </h2>
         <div className="my-3 h-[3px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
           <div className="flex justify-between w-full">
-            <h2 className="mb-1 font-black text-green-400 text-left">Pendientes</h2>
-            <h2 className="mb-1 font-black text-blue-400 text-center">Enviados</h2>
-            <h2 className="mb-1 font-black text-yellow-400 text-right">Entregados</h2>
+            <h2 className="mb-1 font-black text-green-400 text-left text-xs md:text-base">Pendientes</h2>
+            <h2 className="mb-1 font-black text-blue-400 text-center text-xs md:text-base">Enviados</h2>
+            <h2 className="mb-1 font-black text-yellow-400 text-right text-xs md:text-base">Entregados</h2>
           </div>
             <ResponsiveContainer width="100%" height={200}>
               <RadialBarChart
