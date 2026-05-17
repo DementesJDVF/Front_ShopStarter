@@ -6,12 +6,14 @@ import RoleBasedMap from '../shared/RoleBasedMap';
 import { useNavigate } from 'react-router';
 import AOS from 'aos';
 import { useTranslation } from 'react-i18next';
+import { useMap } from '../../context/MapContext';
 
 const ClienteHome = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { t } = useTranslation('client');
+  const { userLocation, requestLocation, gettingLocation } = useMap();
 
   useEffect(() => {
     AOS.refresh();
@@ -46,20 +48,32 @@ const ClienteHome = () => {
           <Badge color="primary" className="mb-4 mx-auto w-fit uppercase tracking-widest font-black px-4 py-1.5 rounded-full border-2 border-primary/20 bg-primary/10">
             {t('home.welcome_badge')}
           </Badge>
-          <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-[0.9]">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-black text-white mb-6 tracking-tight md:tracking-tighter leading-tight md:leading-[0.9]">
             {t('home.hero_title_line1')} <br/>
             <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-[#7a9dff] to-[#9e7aff] italic">{t('home.hero_title_line2')}</span>
           </h1>
-          <p className="text-gray-300 text-lg md:text-xl font-medium mb-8 max-w-2xl mx-auto opacity-80">
+          <p className="text-gray-300 text-sm md:text-xl font-medium mb-8 max-w-2xl mx-auto opacity-80 px-2 md:px-0">
             {t('home.hero_desc')}
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="xl" className="rounded-2xl font-black px-8 py-2 bg-gradient-to-r from-[#7a9dff] to-[#9e7aff] hover:scale-105 transition-all shadow-xl shadow-indigo-500/20 border-0"
-              onClick={() => navigate('/cliente/productos')}
-            >
-              {t('home.go_catalog')}
-              <Icon icon="solar:arrow-right-bold-duotone" className="ml-2 h-5 w-5" />
-            </Button>
+            {/* Botón para PC */}
+            <div className="hidden md:block">
+              <Button size="xl" className="rounded-2xl font-black px-8 py-2 bg-gradient-to-r from-[#7a9dff] to-[#9e7aff] hover:scale-105 transition-all shadow-xl shadow-indigo-500/20 border-0"
+                onClick={() => navigate('/cliente/productos')}
+              >
+                {t('home.go_catalog')}
+                <Icon icon="solar:arrow-right-bold-duotone" className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+            {/* Botón para Móviles */}
+            <div className="block md:hidden w-full">
+              <Button size="lg" className="rounded-2xl font-black px-6 py-2 bg-gradient-to-r from-[#7a9dff] to-[#9e7aff] hover:scale-105 transition-all shadow-xl shadow-indigo-500/20 border-0 w-full"
+                onClick={() => navigate('/cliente/productos')}
+              >
+                {t('home.go_catalog')}
+                <Icon icon="solar:arrow-right-bold-duotone" className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -100,16 +114,16 @@ const ClienteHome = () => {
       </section>
 
       {/* 🗺️ Sección del Mapa Interactivo */}
-      <section className="px-6" data-aos="fade-up">
-        <div className="bg-white dark:bg-dark-light rounded-[40px] p-8 shadow-2xl border border-gray-50 dark:border-gray-800 flex flex-col lg:flex-row gap-10">
-          <div className="lg:w-1/3 flex flex-col justify-center">
+      <section className="px-4 lg:px-6" data-aos="fade-up">
+        <div className="bg-white dark:bg-dark-light rounded-[32px] lg:rounded-[40px] p-4 lg:p-8 shadow-2xl border border-gray-50 dark:border-gray-800 flex flex-col lg:flex-row gap-6 lg:gap-10">
+          <div className="lg:w-1/3 flex flex-col justify-center items-center text-center lg:items-start lg:text-left">
             <Badge color="warning" className="w-fit mb-4">{t('home.map_badge')}</Badge>
-            <h3 className="text-4xl font-black text-gray-800 dark:text-white leading-tight mb-4 uppercase"
+            <h3 className="text-3xl lg:text-4xl font-black text-gray-800 dark:text-white leading-tight mb-4 uppercase"
               dangerouslySetInnerHTML={{ __html: t('home.map_title') }} />
-            <p className="text-black dark:text-white font-bold mb-8 leading-relaxed">
+            <p className="text-black dark:text-white font-bold mb-6 lg:mb-8 leading-relaxed text-sm lg:text-base">
               {t('home.map_desc')}
             </p>
-            <ul className="space-y-4 mb-8">
+            <ul className="space-y-4 mb-8 hidden lg:block">
               <li className="flex items-center gap-3 text-sm font-bold text-gray-700 dark:text-gray-300">
                 <Icon icon="solar:check-circle-bold-duotone" className="text-emerald-500" height={22} />
                 {t('home.map_list1')}
@@ -123,14 +137,38 @@ const ClienteHome = () => {
                 {t('home.map_list3')}
               </li>
             </ul>
-            <Button color="dark" size="lg" className="rounded-2xl font-black"
-              onClick={() => navigate('/cliente/mapa')}
-            >
-              {t('home.open_map')}
-            </Button>
+            
+            <div className="flex flex-col gap-3 w-full lg:w-auto">
+              {/* Botón de Actualizar Ubicación (Solo visible en móviles) */}
+              <Button
+                color={userLocation ? "success" : "primary"}
+                size="lg"
+                onClick={requestLocation}
+                disabled={gettingLocation}
+                className="rounded-2xl font-black w-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 border-0 lg:hidden"
+              >
+                <div className="flex items-center gap-2 justify-center">
+                  {gettingLocation ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    <Icon icon="solar:map-point-wave-bold-duotone" height={22} className="text-white" />
+                  )}
+                  <span>
+                    {userLocation ? "ACTUALIZAR UBICACIÓN" : "OBTENER MI UBICACIÓN"}
+                  </span>
+                </div>
+              </Button>
+
+              {/* Botón de Abrir Mapa Completo */}
+              <Button color="dark" size="lg" className="rounded-2xl font-black w-full lg:w-auto"
+                onClick={() => navigate('/cliente/mapa')}
+              >
+                {t('home.open_map')}
+              </Button>
+            </div>
           </div>
-          <div className="lg:w-2/3 h-[500px] rounded-3xl overflow-hidden shadow-inner border border-gray-100 dark:border-gray-800">
-            <RoleBasedMap />
+          <div className="lg:w-2/3 h-[380px] md:h-[480px] lg:h-[500px] w-full rounded-2xl lg:rounded-3xl overflow-hidden shadow-inner border border-gray-100 dark:border-gray-800">
+            <RoleBasedMap hideLocationButton={true} />
           </div>
         </div>
       </section>

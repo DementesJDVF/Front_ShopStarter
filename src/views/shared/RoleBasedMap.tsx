@@ -8,7 +8,11 @@ import { toast } from 'react-hot-toast';
 import VendorCatalogModal from '../../components/geo/VendorCatalogModal';
 import { useTranslation } from 'react-i18next';
 
-const RoleBasedMap: React.FC = () => {
+interface RoleBasedMapProps {
+    hideLocationButton?: boolean;
+}
+
+const RoleBasedMap: React.FC<RoleBasedMapProps> = ({ hideLocationButton = false }) => {
     const { user } = useAuth();
     const { userLocation, requestLocation, gettingLocation } = useMap();
     const mapRef = useRef<HTMLDivElement>(null);
@@ -84,34 +88,34 @@ const RoleBasedMap: React.FC = () => {
             }
         };
 
-        navigator.geolocation.getCurrentPosition((pos) => {
-            const { latitude: lat, longitude: lng } = pos.coords;
+        if (!hideLocationButton) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const { latitude: lat, longitude: lng } = pos.coords;
 
-            // 1. Validamos que el mapa siga existiendo antes de hacer nada
-            if (!leafletMap.current) return;
+                // 1. Validamos que el mapa siga existiendo antes de hacer nada
+                if (!leafletMap.current) return;
 
-            // Usar un círculo sutil para la ubicación del usuario, no un PIN de tienda
-            const userMarker = (window as any).L.circleMarker([lat, lng], {
-                radius: 8,
-                fillColor: "#3b82f6",
-                color: "white",
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.8
+                // Usar un círculo sutil para la ubicación del usuario, no un PIN de tienda
+                const userMarker = (window as any).L.circleMarker([lat, lng], {
+                    radius: 8,
+                    fillColor: "#3b82f6",
+                    color: "white",
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+
+                // 2. Doble validación antes de añadir al mapa y mover la vista
+                if (leafletMap.current) {
+                    userMarker.addTo(leafletMap.current)
+                            .bindPopup("Tu ubicación actual");
+
+                    leafletMap.current.setView([lat, lng], 15);
+                }
+            }, (err) => {
+                console.warn("No se pudo obtener la ubicación:", err.message);
             });
-
-            // 2. Doble validación antes de añadir al mapa y mover la vista
-            if (leafletMap.current) {
-                userMarker.addTo(leafletMap.current)
-                        .bindPopup("Tu ubicación actual");
-
-                leafletMap.current.setView([lat, lng], 15);
-            }
-
-
-        }, (err) => {
-            console.warn("No se pudo obtener la ubicación:", err.message);
-        });
+        }
 
         const checkLeaflet = setInterval(() => {
             if ((window as any).L) {
@@ -128,6 +132,24 @@ const RoleBasedMap: React.FC = () => {
             delete (window as any).openVendorCatalog;
         };
     }, [user?.role]);
+
+    useEffect(() => {
+        if (userLocation && leafletMap.current) {
+            leafletMap.current.setView([userLocation.lat, userLocation.lng], 15);
+            
+            const L = (window as any).L;
+            if (L) {
+                L.circleMarker([userLocation.lat, userLocation.lng], {
+                    radius: 8,
+                    fillColor: "#3b82f6",
+                    color: "white",
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(leafletMap.current).bindPopup("Tu ubicación actual");
+            }
+        }
+    }, [userLocation]);
 
     useEffect(() => {
         if (user?.role === 'VENDEDOR') {
@@ -261,10 +283,23 @@ const RoleBasedMap: React.FC = () => {
                 markers.push(marker);
             });
 
-            if ((markers?.length || 0) > 0 && leafletMap.current) {
-                // Ajustar el zoom automáticamente para que todos los marcadores sean visibles
-                const group = L.featureGroup(markers);
-                leafletMap.current.fitBounds(group.getBounds().pad(0.2));
+            if (leafletMap.current) {
+                if (hideLocationButton) {
+                    if (userLocation) {
+                        leafletMap.current.setView([userLocation.lat, userLocation.lng], 15);
+                    } else {
+                        // Centrar directamente en Popayán, Colombia
+                        leafletMap.current.setView([2.4419, -76.6062], 13);
+                    }
+                } else {
+                    // Comportamiento original para el resto del proyecto: fitBounds
+                    if ((markers?.length || 0) > 0) {
+                        const group = L.featureGroup(markers);
+                        leafletMap.current.fitBounds(group.getBounds().pad(0.2));
+                    } else {
+                        leafletMap.current.setView([2.4419, -76.6062], 13);
+                    }
+                }
             }
         } catch (error) {
             console.error("Error al cargar marcadores en el mapa", error);
@@ -324,7 +359,7 @@ const RoleBasedMap: React.FC = () => {
 
             <Card className="flex-1 min-h-[500px] overflow-hidden p-0 relative border-0 shadow-2xl rounded-3xl">
                 {/* Controles flotantes dentro del mapa */}
-                <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2 items-end">
+                <div className={`absolute top-4 right-4 z-[1000] flex-col gap-2 items-end ${hideLocationButton ? 'hidden lg:flex' : 'flex'}`}>
                     <div className="flex gap-2">
                         {user?.role === 'VENDEDOR' ? (
                             <Button

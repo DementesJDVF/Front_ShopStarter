@@ -1,4 +1,4 @@
-import { Sidebar } from "flowbite-react";
+import { Sidebar, useThemeMode } from "flowbite-react";
 import SidebarContent from "./Sidebaritems";
 import NavItems from "./NavItems";
 // @ts-ignore
@@ -9,10 +9,14 @@ import 'simplebar-react/dist/simplebar.min.css';
 import Upgrade from "./Upgrade";
 import { useAuth } from "../../../context/AuthContext";
 import { useTranslation } from "react-i18next";
+import { Icon } from "@iconify/react";
+import LanguageSelector from "../../../components/LanguageSelector/LanguageSelector";
+import { A11yHeaderButton } from "../../../components/Accessibility/AccessibilityWidget";
 
 const MobileSidebar = () => {
   const { user } = useAuth();
   const { t } = useTranslation("sidebar");
+  const { mode, toggleMode } = useThemeMode();
 
 
   const resolveHeadingText = (heading?: string) => {
@@ -49,13 +53,16 @@ const MobileSidebar = () => {
     <>
       <div>
         <Sidebar
-          className="fixed menu-sidebar pt-0 bg-darkgray transition-all"
+          theme={{
+            root: {
+              base: "h-full bg-transparent transition-all",
+              inner: "h-full bg-transparent pt-0 px-0"
+            }
+          }}
+          className="fixed menu-sidebar pt-0 !bg-darkgray transition-all"
           aria-label="Sidebar with multi-level dropdown example"
         >
-          <div className="px-5 py-4 pb-7 flex items-center sidebarlogo">
-            <FullLogo />
-          </div>
-          <SimpleBar className="bg-darkgray h-[calc(100vh_-_242px)]">
+          <SimpleBar className="bg-darkgray h-[calc(100vh_-_20px)] pt-8">
             <Sidebar.Items className="px-5 mt-2">
               <Sidebar.ItemGroup className="sidebar-nav hide-menu">
                 {filteredContent &&
@@ -74,8 +81,36 @@ const MobileSidebar = () => {
                     </div>
                   ))}
               </Sidebar.ItemGroup>
+
+              {/* Selector de Idioma, Modo Oscuro y Accesibilidad en el Sidebar Móvil */}
+              <div className="pt-6 pb-4 border-t border-white/10 mt-6 bg-darkgray">
+                <div className="flex items-center gap-3">
+                  {/* Botón de Modo Oscuro */}
+                  <button
+                    onClick={toggleMode}
+                    className="p-2.5 rounded-xl hover:bg-white/10 text-white/80 hover:text-white transition-all flex-1 flex justify-center items-center bg-white/5 border border-white/10"
+                    aria-label="Toggle Dark Mode"
+                  >
+                    <Icon
+                      icon={mode === "dark" ? "solar:sun-2-line-duotone" : "solar:moon-line-duotone"}
+                      className="w-5 h-5 text-white"
+                    />
+                  </button>
+                  
+                  {/* Selector de Idioma */}
+                  <div className="flex-grow min-w-0">
+                    <LanguageSelector className="w-full" />
+                  </div>
+                  
+                  {/* Botón de Accesibilidad */}
+                  <div className="flex-1 flex justify-center">
+                    <A11yHeaderButton className="w-full flex justify-center text-white" />
+                  </div>
+                </div>
+              </div>
             </Sidebar.Items>
           </SimpleBar>
+
           <Upgrade/>
         </Sidebar>
       </div>
