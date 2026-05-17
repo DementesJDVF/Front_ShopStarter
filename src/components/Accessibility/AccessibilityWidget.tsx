@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useA11y, DaltonismType } from '../../context/A11yContext';
+import { Icon } from '@iconify/react';
 
 /* ────────────────────────────────────────────────
    Filtros SVG embebidos (invisibles, necesarios para filter: url())
@@ -265,13 +266,48 @@ export const A11yPanel = () => {
 /* ────────────────────────────────────────────────
    Botón compacto para el Header (inline, no flotante)
 ──────────────────────────────────────────────────*/
-export const A11yHeaderButton = () => {
+export const A11yHeaderButton = ({ 
+  className = '', 
+  variant = 'default' 
+}: { 
+  className?: string; 
+  variant?: 'default' | 'icon'; 
+}) => {
   const { prefs, isPanelOpen, setIsPanelOpen } = useA11y();
+
+  if (variant === 'icon') {
+    return (
+      <button
+        id="a11y-header-btn"
+        className={`p-2 rounded-xl text-white hover:bg-white/20 transition-all focus:ring-0 flex items-center justify-center relative ${className}`}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsPanelOpen(!isPanelOpen);
+        }}
+        aria-label="Accesibilidad para daltonismo"
+        aria-expanded={isPanelOpen}
+        aria-haspopup="dialog"
+        title="Accesibilidad visual"
+      >
+        <Icon icon="solar:accessibility-bold-duotone" className="w-5 h-5 text-white" />
+        {/* Punto verde indicador de modo activo */}
+        {prefs.isActive && (
+          <span style={{
+            position: 'absolute', top: '2px', right: '2px',
+            width: '8px', height: '8px', borderRadius: '50%',
+            backgroundColor: '#22c55e',
+            border: '1.5px solid #001E4C',
+          }} aria-hidden="true" />
+        )}
+      </button>
+    );
+  }
 
   return (
     <button
       id="a11y-header-btn"
-      className="a11y-header-btn"
+      className={`a11y-header-btn ${className}`}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -288,9 +324,7 @@ export const A11yHeaderButton = () => {
         border: prefs.isActive ? '2px solid rgba(255,255,255,0.4)' : '1px solid rgba(255,255,255,0.15)',
         backgroundColor: isPanelOpen
           ? 'rgba(255,255,255,0.22)'
-          : prefs.isActive
-            ? 'rgba(255,255,255,0.18)'
-            : 'rgba(255,255,255,0.1)',
+          : prefs.isActive ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.1)',
         color: '#fff',
         cursor: 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'center',

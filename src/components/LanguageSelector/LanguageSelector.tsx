@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import 'src/components/LanguageSelector/LenguajeSelector.css';
+import 'src/components/LanguageSelector/LanguageSelector.css';
 import LanguageIcon from 'src/assets/language-icon.svg';
+import { Icon } from '@iconify/react';
 
-const LanguageSelector: React.FC = () => {
+interface LanguageSelectorProps {
+  variant?: 'default' | 'icon';
+  className?: string;
+}
+
+const LanguageSelector: React.FC<LanguageSelectorProps> = ({ variant = 'default', className = '' }) => {
   const { i18n, t } = useTranslation('languageSelector');
   const [open, setOpen] = useState(false);
 
@@ -19,30 +25,44 @@ const LanguageSelector: React.FC = () => {
 
   const listId = 'language-selector-list';
 
-  return (
-    <div className="language-selector-root">
-      <button
-        className="language-selector-button"
-        onClick={() => setOpen((prev) => !prev)}
-        key={i18n.language}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={listId}
-        type="button"
-      >
-        {/* SVG icon (decorative) + emoji fallback kept */}
-        <img
-          src={LanguageIcon as unknown as string}
-          className="language-selector-icon"
-          alt=""
-          aria-hidden="true"
-        />
-        <span className="language-label">{t('language')}</span>
-      </button>
+   return (
+     <div className={`language-selector-root ${className}`}>
+      {variant === 'icon' ? (
+        <button
+          className="p-2 rounded-xl text-white hover:bg-white/20 transition-all focus:ring-0 flex items-center justify-center"
+          onClick={() => setOpen((prev) => !prev)}
+          key={i18n.language}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={listId}
+          type="button"
+        >
+          <Icon icon="solar:global-bold-duotone" className="w-5 h-5 text-white" />
+        </button>
+      ) : (
+        <button
+          className="language-selector-button"
+          onClick={() => setOpen((prev) => !prev)}
+          key={i18n.language}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={listId}
+          type="button"
+        >
+          {/* SVG icon (decorative) + emoji fallback kept */}
+          <img
+            src={LanguageIcon as unknown as string}
+            className="language-selector-icon"
+            alt=""
+            aria-hidden="true"
+          />
+          <span className="language-label">{t('language')}</span>
+        </button>
+      )}
 
       {open && (
         <ul
-          className="language-selector-list"
+          className={`language-selector-list ${variant === 'icon' ? 'right' : ''}`}
           id={listId}
           role="listbox"
           aria-label={t('language')}
