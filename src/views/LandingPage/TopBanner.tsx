@@ -134,16 +134,10 @@ const TopBanner: React.FC<NavbarProps> = () => {
              ref={sidebarRef}
              className="fixed inset-y-0 right-0 z-[60] w-64 sm:w-72 bg-gradient-to-r from-[#000351] to-[#280051] backdrop-blur-3xl shadow-[0_0_50px_rgba(10,1,74,0.3)] transform transition-transform duration-500 ease-in-out md:hidden border-l border-white/20 dark:border-slate-800"
            >
-            <div className="p-4 sm:p-6 flex items-center justify-between border-b dark:border-slate-800">
+            <div className="p-4 sm:p-6 flex items-center justify-start border-b dark:border-slate-800">
               <div className="scale-75 origin-left">
                 <FullLogo variant="dark" />
               </div>
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-1.5 text-white/80 hover:bg-white/10 hover:text-white rounded-xl transition-all"
-              >
-                <Icon icon="solar:close-circle-linear" className="w-7 h-7" />
-              </button>
             </div>
 
             <nav className="p-4 sm:p-6 space-y-2 sm:space-y-3">
