@@ -6,9 +6,10 @@ import { Icon } from '@iconify/react';
 
 interface LanguageSelectorProps {
   variant?: 'default' | 'icon';
+  className?: string;
 }
 
-const LanguageSelector: React.FC<LanguageSelectorProps> = ({ variant = 'default' }) => {
+const LanguageSelector: React.FC<LanguageSelectorProps> = ({ variant = 'default', className = '' }) => {
   const { i18n, t } = useTranslation('languageSelector');
   const [open, setOpen] = useState(false);
 
@@ -24,8 +25,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ variant = 'default'
 
   const listId = 'language-selector-list';
 
-  return (
-    <div className="language-selector-root">
+   return (
+     <div className={`language-selector-root ${className}`}>
       {variant === 'icon' ? (
         <button
           className="p-2 rounded-xl text-white hover:bg-white/20 transition-all focus:ring-0 flex items-center justify-center"
