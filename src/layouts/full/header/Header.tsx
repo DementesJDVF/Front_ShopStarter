@@ -49,7 +49,7 @@ const GreetingClock = ({ user }: { user: any }) => {
   });
 
   return (
-    <div className="flex bg-white/10 dark:bg-white/5 backdrop-blur-2xl border border-white/10 rounded-full px-6 py-2.5 items-center gap-6 shadow-2xl hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] hover:scale-[1.02] transition-all duration-500 animate-fade-in group relative overflow-hidden">
+    <div className="flex bg-white/10 dark:bg-white/5 backdrop-blur-2xl border border-white/10 rounded-full px-8 py-3 items-center justify-between w-full shadow-2xl hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] hover:scale-[1.01] transition-all duration-500 animate-fade-in group relative overflow-hidden">
       {/* ✨ Efecto de Aura Premium Pulsante */}
       <div className="absolute inset-0 opacity-40 pointer-events-none">
         <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-[#2CD4D9]/20 to-transparent animate-pulse shadow-[0_0_50px_rgba(44,212,217,0.2)]"></div>
@@ -65,7 +65,7 @@ const GreetingClock = ({ user }: { user: any }) => {
           <span className="text-lg transform transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110 origin-bottom-right">
             {emoji}
           </span>
-          <span className="text-sm font-bold text-white">
+          <span className="text-sm font-bold text-white whitespace-nowrap">
             {greeting},{" "}
             <span className="text-[#7a9dff] dark:text-[#9e7aff] font-black">
               {user?.first_name || user?.username || user?.role || t("friend")}
@@ -74,17 +74,14 @@ const GreetingClock = ({ user }: { user: any }) => {
         </div>
       </div>
 
-      {/* Separador */}
-      <div className="h-6 w-px bg-white/20 group-hover:opacity-50 transition-opacity relative z-10"></div>
-
       {/* Reloj Dinámico (Efecto Cristal Inverso) */}
-      <div className="flex items-center gap-2 text-[#7a9dff] dark:text-[#9e7aff] font-mono bg-white/10 dark:bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-full shadow-inner border border-white/10 relative z-10">
+      <div className="flex items-center gap-2 text-[#7a9dff] dark:text-[#9e7aff] font-mono bg-white/10 dark:bg-white/5 backdrop-blur-md px-4 py-2 rounded-full shadow-inner border border-white/10 relative z-10 flex-shrink-0">
         <Icon
           icon="solar:clock-circle-bold-duotone"
           className="text-xl animate-spin-slow"
           style={{ animationDuration: "8s" }}
         />
-        <span className="text-base font-black tracking-tight text-white">
+        <span className="text-base font-black tracking-tight text-white whitespace-nowrap">
           {timeString}
         </span>
       </div>
@@ -125,73 +122,58 @@ const Header = () => {
           <div className="flex items-center justify-between w-full h-12">
 
             {/* Sección Izquierda: Botón de menú móvil y Logo */}
-            <div className="flex items-center gap-4 flex-none min-w-[50px] xl:min-w-0">
+            <div className="flex items-center gap-2 sm:gap-3 flex-none">
               <button
                 onClick={() => setIsOpen(true)}
-                className="h-10 w-10 flex text-white xl:hidden hover:bg-white/10 rounded-xl justify-center items-center transition-all shadow-sm bg-white/10 backdrop-blur-md border border-white/10"
+                className="h-9 w-9 sm:h-10 sm:w-10 flex text-white xl:hidden hover:bg-white/10 rounded-xl justify-center items-center transition-all shadow-sm bg-white/10 backdrop-blur-md border border-white/10"
                 aria-label={t("openMenu")}
               >
                 <Icon
                   icon="solar:hamburger-menu-line-duotone"
-                  height={22}
+                  height={20}
                   className="text-[#2CD4D9]"
                 />
               </button>
 
               <div className="xl:hidden block">
-                <div className="scale-75 origin-left">
+                <div className="scale-75 sm:scale-90 origin-left">
                   <FullLogo />
                 </div>
               </div>
             </div>
 
-            {/* 🔥 Sección Central: Reloj Animado Premium (Oculto en móviles peq) */}
-            <div className="hidden lg:flex flex-1 justify-center px-4 overflow-hidden">
+            {/* 🔥 Sección Central: Reloj Animado Premium (Solo en pantallas medianas+ para evitar solapamiento) */}
+            <div className="hidden md:flex flex-1 justify-center px-4 overflow-hidden md:max-w-md lg:max-w-xl xl:max-w-2xl mx-4 w-full">
               <GreetingClock user={user} />
             </div>
 
             {/* Sección Derecha: Acciones */}
-            <div className="flex items-center justify-end gap-1.5 sm:gap-3 flex-none ml-auto">
-              {/* Selector de idioma - Con espacio preventivo */}
-              <div className="mr-1">
-                <LanguageSelector />
+            <div className="flex items-center justify-end gap-1.5 sm:gap-2 flex-none">
+              {/* Selector de idioma - Solo en PC */}
+              <div className="hidden md:block">
+                <LanguageSelector variant="icon" />
               </div>
 
-              {/* Botón de accesibilidad para daltonismo */}
-              <A11yHeaderButton />
-
-
-
-               <div className="flex items-center">
-                <Notification variant="light" />
+              {/* Botón de accesibilidad - Solo en PC */}
+              <div className="hidden md:flex">
+                <A11yHeaderButton variant="icon" />
               </div>
 
-              {/* Botón de cambio de tema */}
+              {/* Botón de cambio de tema - Solo en PC */}
               <button
                 onClick={toggleMode}
-                className="group h-9 w-9 sm:h-10 sm:w-10 flex text-white hover:bg-white/20 rounded-full justify-center items-center transition-all duration-500 active:scale-95 bg-white/10 shadow-sm border border-white/10 backdrop-blur-sm"
+                className="p-2 rounded-xl text-white hover:bg-white/20 transition-all focus:ring-0 hidden md:flex items-center justify-center"
                 title={mode === "dark" ? t("switchToLight") : t("switchToDark")}
               >
-                <div
-                  className={`transition-all duration-500 transform ${
-                    mode === "dark" ? "rotate-180" : "rotate-0"
-                  }`}
-                >
-                  {mode === "dark" ? (
-                    <Icon
-                      icon="solar:sun-2-line-duotone"
-                      height={20}
-                      className="text-yellow-500 group-hover:scale-110 transition-transform drop-shadow"
-                    />
-                  ) : (
-                    <Icon
-                      icon="solar:moon-line-duotone"
-                      height={18}
-                      className="text-[#7a9dff] group-hover:scale-110 transition-transform drop-shadow"
-                    />
-                  )}
-                </div>
+                <Icon
+                  icon={mode === "dark" ? "solar:sun-bold-duotone" : "solar:moon-stars-bold-duotone"}
+                  className="w-5 h-5 text-white"
+                />
               </button>
+
+              <div className="flex items-center">
+                <Notification variant="light" />
+              </div>
 
               <div className="h-8 w-[1px] bg-white/10 mx-1 hidden md:block"></div>
               <Profile variant="light" />
@@ -200,8 +182,8 @@ const Header = () => {
         </Navbar>
       </header>
 
-      <Drawer open={isOpen} onClose={handleClose} className="w-72 p-0">
-        <Drawer.Items className="h-full">
+      <Drawer open={isOpen} onClose={handleClose} className="w-64 p-0 bg-darkgray dark:bg-darkgray !z-[60]">
+        <Drawer.Items className="h-full bg-darkgray dark:bg-darkgray">
           <MobileSidebar />
         </Drawer.Items>
       </Drawer>

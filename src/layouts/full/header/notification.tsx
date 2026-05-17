@@ -68,21 +68,22 @@ const Notification = ({ variant = "dark" }: NotificationProps) => {
                 className="rounded-xl w-[320px] shadow-xl border-0 overflow-hidden" 
                 dismissOnClick={true} 
                 renderTrigger={() => (
-                <span
-                    className={`h-10 w-10 rounded-full flex justify-center items-center cursor-pointer relative transition ${
+                <button
+                    className={`p-2 rounded-xl transition-all focus:ring-0 flex items-center justify-center relative ${
                         isDark 
-                        ? "hover:text-primary hover:bg-lightprimary text-gray-600 dark:text-gray-300" 
-                        : "text-white hover:bg-white/10"
+                        ? "text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10" 
+                        : "text-white hover:bg-white/20"
                     }`}
                     aria-label={t('notification.ariaLabel')}
+                    type="button"
                 >
-                    <Icon icon="solar:bell-linear" height={22} />
+                    <Icon icon="solar:bell-bold-duotone" className="w-5 h-5 text-white" />
                     {unreadCount > 0 && (
-                        <Badge className="h-4 w-4 rounded-full absolute -end-1 -top-1 bg-red-500 text-white text-[10px] flex items-center justify-center p-0 border-2 border-white dark:border-dark">
+                        <span className="h-4 w-4 rounded-full absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black flex items-center justify-center p-0 border border-slate-900 z-20">
                             {unreadCount}
-                        </Badge>
+                        </span>
                     )}
-                </span>
+                </button>
             )}
             >
                 <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-darkgray">
