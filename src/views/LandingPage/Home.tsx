@@ -71,21 +71,45 @@ const MarqueeStrip = () => {
 // --- Slogan Block ---
 const SloganBlock = () => {
   const { t } = useTranslation("landingPage");
+  const [showOriginal, setShowOriginal] = useState(false);
+
   return (
-    <section className="relative py-24 sm:py-32 overflow-hidden bg-transparent">
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/grilled-noise.png')] opacity-5"></div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center">
-        <div className="inline-block p-4 sm:p-5 bg-indigo-100/50 dark:bg-slate-800/50 text-indigo-600 dark:text-indigo-300 rounded-[2rem] mb-8 transform -rotate-3 hover:rotate-0 transition-transform duration-300 shadow-sm border border-indigo-200 dark:border-slate-700">
-          <Icon icon="solar:heart-bold-duotone" className="text-5xl sm:text-6xl animate-pulse" />
+    <section 
+      className="relative py-24 sm:py-32 overflow-hidden bg-transparent cursor-pointer group select-none"
+      onClick={() => setShowOriginal(!showOriginal)}
+    >
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/grilled-noise.png')] opacity-5 pointer-events-none"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center transition-all duration-500">
+        <div className={`inline-block p-4 sm:p-5 bg-indigo-100/50 dark:bg-slate-800/50 text-indigo-600 dark:text-indigo-300 rounded-[2rem] mb-8 transform transition-transform duration-500 shadow-sm border border-indigo-200 dark:border-slate-700 ${showOriginal ? 'rotate-12 scale-110' : '-rotate-3 group-hover:rotate-0'}`}>
+          <Icon icon={showOriginal ? "solar:heart-bold" : "solar:shop-2-bold-duotone"} className="text-5xl sm:text-6xl animate-pulse" />
         </div>
-        <h2
-          className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-indigo-950 dark:text-white leading-[1.1] tracking-tighter drop-shadow-sm"
-          dangerouslySetInnerHTML={{ __html: t("slogan.main") }}
-        />
-        <p className="mt-8 sm:mt-10 text-xl sm:text-2xl text-black dark:text-white max-w-3xl mx-auto font-bold leading-relaxed">
+        
+        {showOriginal ? (
+          <div className="animate-[fadeIn_0.5s_ease-out]">
+            <h2
+              className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-indigo-950 dark:text-white leading-[1.1] tracking-tighter drop-shadow-sm"
+              dangerouslySetInnerHTML={{ __html: t("slogan.main") }}
+            />
+          </div>
+        ) : (
+          <div className="animate-[fadeIn_0.5s_ease-out]">
+            <h2 
+              className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#000351] to-[#280051] dark:from-[#7a9dff] dark:to-[#9e7aff] leading-[1.1] tracking-tighter drop-shadow-sm pb-2"
+              dangerouslySetInnerHTML={{ __html: t("slogan.secondary") }}
+            />
+          </div>
+        )}
+
+        <p className="mt-8 sm:mt-10 text-xl sm:text-2xl text-black dark:text-white max-w-3xl mx-auto font-bold leading-relaxed transition-all duration-500">
           {t("slogan.philosophy")}
         </p>
       </div>
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </section>
   );
 };
@@ -158,26 +182,26 @@ const FAQAccordion = () => {
   const faqs = t("faq.questions", { returnObjects: true }) as { q: string; a: string }[];
 
   return (
-    <section className="py-32 bg-transparent">
+    <section className="py-20 md:py-32 bg-transparent">
       <div className="max-w-3xl mx-auto px-4">
-        <div className="text-center mb-16" data-aos="fade-up">
-          <Icon icon="solar:question-circle-bold-duotone" className="text-7xl text-indigo-600 dark:text-indigo-400 mx-auto mb-6 drop-shadow-lg" />
-          <h2 className="text-4xl md:text-5xl font-black text-indigo-950 dark:text-white tracking-tighter">
+        <div className="text-center mb-12 md:mb-16" data-aos="fade-up">
+          <Icon icon="solar:question-circle-bold-duotone" className="text-6xl md:text-7xl text-indigo-600 dark:text-indigo-400 mx-auto mb-6 drop-shadow-lg" />
+          <h2 className="text-3xl md:text-5xl font-black text-indigo-950 dark:text-white tracking-tighter">
             {t("faq.title")}
           </h2>
 
         </div>
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {faqs.map((faq, i) => (
-            <div key={i} className={`border ${openIdx === i ? 'border-[#51009E] bg-white shadow-2xl scale-[1.02]' : 'border-white/10 bg-[#000351]/40'} rounded-[2.5rem] backdrop-blur-xl overflow-hidden transition-all duration-500`}>
-              <button onClick={() => setOpenIdx(openIdx === i ? null : i)} className={`w-full px-8 py-8 flex items-center justify-between text-left cursor-pointer transition-all ${openIdx === i ? 'bg-[#000351]' : 'hover:bg-white/10'}`}>
-                <span className="font-black text-xl text-white pr-4 leading-tight tracking-tight drop-shadow-sm">{faq.q}</span>
-                <div className={`w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl transition-all duration-500 ${openIdx === i ? 'rotate-180 bg-white text-[#000351] shadow-lg' : 'bg-white/10 text-white'}`}>
-                  <Icon icon="solar:alt-arrow-down-bold" className="text-2xl" />
+            <div key={i} className={`border ${openIdx === i ? 'border-indigo-600 dark:border-indigo-500 bg-white dark:bg-slate-800 shadow-xl md:shadow-2xl md:scale-[1.02]' : 'border-indigo-100 dark:border-white/10 bg-indigo-50/50 dark:bg-[#000351]/40'} rounded-[1.5rem] md:rounded-[2.5rem] backdrop-blur-sm overflow-hidden transition-all duration-500`}>
+              <button onClick={() => setOpenIdx(openIdx === i ? null : i)} className={`w-full px-5 py-5 md:px-8 md:py-8 flex items-center justify-between text-left cursor-pointer transition-all ${openIdx === i ? 'bg-indigo-50 dark:bg-slate-800/80' : 'hover:bg-indigo-100/50 dark:hover:bg-white/5'}`}>
+                <span className={`font-black text-base md:text-xl pr-4 leading-tight tracking-tight drop-shadow-sm ${openIdx === i ? 'text-indigo-950 dark:text-white' : 'text-slate-800 dark:text-white/90'}`}>{faq.q}</span>
+                <div className={`w-10 h-10 md:w-14 md:h-14 flex-shrink-0 flex items-center justify-center rounded-xl md:rounded-2xl transition-all duration-500 ${openIdx === i ? 'rotate-180 bg-indigo-600 text-white shadow-lg' : 'bg-indigo-200/50 dark:bg-white/10 text-indigo-900 dark:text-white'}`}>
+                  <Icon icon="solar:alt-arrow-down-bold" className="text-lg md:text-2xl" />
                 </div>
               </button>
-              <div className={`px-8 overflow-hidden transition-all duration-500 ease-in-out ${openIdx === i ? 'max-h-80 pb-8 opacity-100 bg-white' : 'max-h-0 py-0 opacity-0'}`}>
-                <p className="text-black font-bold text-lg leading-relaxed border-t border-slate-100 pt-6">{faq.a}</p>
+              <div className={`px-5 md:px-8 overflow-hidden transition-all duration-500 ease-in-out ${openIdx === i ? 'max-h-[500px] pb-5 md:pb-8 opacity-100' : 'max-h-0 py-0 opacity-0'}`}>
+                <p className={`font-bold text-sm md:text-lg leading-relaxed border-t pt-4 md:pt-6 ${openIdx === i ? 'border-indigo-100 dark:border-slate-700 text-slate-700 dark:text-slate-300' : 'border-transparent text-slate-700 dark:text-slate-300'}`}>{faq.a}</p>
               </div>
             </div>
           ))}

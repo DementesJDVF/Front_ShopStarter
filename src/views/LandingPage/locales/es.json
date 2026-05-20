@@ -19,6 +19,7 @@
   ],
   "slogan": {
     "main": "Con amor y esfuerzo <br />nos ganaremos el almuerzo.",
+    "secondary": "Conecta tu negocio local<br class=\"hidden sm:block\" /> con tu comunidad",
     "philosophy": "Nuestra filosofía es tu crecimiento. Entendemos el sudor de la calle y el sacrificio local. ShopStarter es tu aliado para darle orden y dignidad digital al fruto de tu trabajo."
   },
   "testimonials": {
