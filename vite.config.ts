@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import fs from 'fs/promises';
 import svgr from '@svgr/rollup';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -50,7 +51,42 @@ export default defineConfig({
     //   exportAsDefault: true
     // })],
 
-    plugins: [svgr(), react()],
+    plugins: [
+        svgr(),
+        react(),
+        VitePWA({
+            registerType: 'autoUpdate',
+            includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logoIcon.svg', 'vite.svg'],
+            manifest: {
+                name: 'ShopStarter | El futuro del comercio local',
+                short_name: 'ShopStarter',
+                description: 'La plataforma descentralizada y colaborativa que impulsa y conecta el comercio local.',
+                theme_color: '#5D87FF',
+                background_color: '#ffffff',
+                display: 'standalone',
+                orientation: 'portrait',
+                start_url: '/',
+                icons: [
+                    {
+                        src: 'pwa-192x192.png',
+                        sizes: '192x192',
+                        type: 'image/png'
+                    },
+                    {
+                        src: 'pwa-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png'
+                    },
+                    {
+                        src: 'pwa-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'any maskable'
+                    }
+                ]
+            }
+        })
+    ],
 
     // Configuración para silenciar el warning de tamaño de los chunks y separar dependencias grandes
     build: {
