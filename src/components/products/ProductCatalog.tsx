@@ -52,6 +52,7 @@ export function ProductCatalog() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
   const [previewTitle, setPreviewTitle] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const openPreview = (url: string, title: string) => {
     setPreviewUrl(url);
@@ -75,14 +76,19 @@ export function ProductCatalog() {
 
 
 
-  async function loadData(lat?: number, lng?: number, currentRadius?: number) {
+  async function loadData(lat?: number, lng?: number, currentRadius?: number, searchText: string = "") {
     try {
       setLoading(true);
       setError(null);
       let prodUrl = "products/catalog/";
-      if (lat && lng) {
+      // Si hay búsqueda pero NO hay coordenadas, usamos la url de catálogo normal pasándole el search
+      if (searchText && (!lat || !lng)) {
+        prodUrl = `products/catalog/?search=${encodeURIComponent(searchText)}`;
+      } 
+      // Si hay coordenadas, usamos la de cercanos e inyectamos el searchText real
+      else if (lat && lng) {
         const r = currentRadius && currentRadius > 0 ? currentRadius : 12742;
-        prodUrl = `products/nearby/?lat=${lat}&lng=${lng}&radius=${r}`;
+        prodUrl = `products/nearby/?lat=${lat}&lng=${lng}&radius=${r}&search=${encodeURIComponent(searchText)}`;
       }
       const [prodRes, catRes] = await Promise.all([
         api.get(prodUrl),
@@ -100,8 +106,13 @@ export function ProductCatalog() {
   }
 
   useEffect(() => {
-    loadData(userLocation?.lat, userLocation?.lng, radius);
-  }, [userLocation, radius]);
+    loadData(userLocation?.lat, userLocation?.lng, radius, searchTerm);
+  }, [userLocation?.lat, userLocation?.lng, radius]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault(); // Evita que la página se recargue si usamos un tag <form>
+    loadData(userLocation?.lat, userLocation?.lng, radius, searchTerm);
+  };
 
   // Filtrado reactivo optimizado — soporta múltiples categorías
   const filteredProducts = useMemo(() => {
@@ -144,6 +155,35 @@ export function ProductCatalog() {
           <div>
             <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">{t("catalogTitle")}</h2>
             <p className="text-black dark:text-white mt-2 text-lg font-bold">{t("catalogSub")}</p>
+            <form onSubmit={handleSearchSubmit} className="flex flex-col gap-2 w-full max-w-md">
+              {/* Label del buscador */}
+              <label htmlFor="search" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                {t("searchLabel") || "Buscar Productos"}
+              </label>
+              
+              {/* Contenedor del Input y el Botón alineados */}
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <input
+                    id="search"
+                    type="text"
+                    placeholder={t("searchPlaceholder") || "Ej. Zapatos, Camisas..."}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)} // Guarda el texto sin disparar la API
+                    className="w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-dark text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                  />
+                </div>
+
+                {/* Botón de acción */}
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-sm hover:shadow transition-all active:scale-95"
+                >
+                  <Icon icon="solar:magnifer-linear" width={20} />
+                  <span className="hidden sm:inline">{t("searchButton") || "Buscar"}</span>
+                </button>
+              </div>
+            </form>
           </div>
 
           <div className="flex flex-col gap-2 w-full md:w-auto">
