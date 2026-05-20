@@ -63,7 +63,7 @@ export function ProductCatalog() {
     const confirmed = await confirm(t("reserveConfirm"));
     if (!confirmed) return;
     try {
-      await api.post('orders/', { product: productId });
+      await api.post('orders/', { product: productId, quantity : 1 });
       showSuccessAlert(t("reserveSuccess"));
       loadData(userLocation?.lat, userLocation?.lng, radius);
     } catch (e: any) {
@@ -205,11 +205,8 @@ export function ProductCatalog() {
             const rawImage = p.images?.find((img) => img.is_main)?.url_image || p.images?.[0]?.url_image;
             const mainImage = getAbsoluteImageUrl(rawImage);
             const isOutOfStock = !p.stock;
-            const isNotAvailable = !p.status || p.status.toUpperCase() !== 'AVAILABLE';
-            const canPurchase = !isOutOfStock && !isNotAvailable;
-
             return (
-              <article key={p.id} className={`product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100 ${!canPurchase ? 'opacity-60' : ''}`}>
+              <article key={p.id} className={`product-card group hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden border border-gray-100`}>
                 <div className="relative aspect-square overflow-hidden bg-gray-50">
                   {mainImage ? (
                     <img
@@ -228,7 +225,7 @@ export function ProductCatalog() {
                   <div className="absolute top-3 left-3 flex flex-col gap-2 z-20">
                     {/* Multi-category badges on product card */}
                     {p.categories && p.categories.length > 0 ? (
-                      <div className="flex gap-1 flex-wrap max-w-[60%]">
+                      <div className="flex gap-1 flex-wrap max-w-[100%]">
                         {p.categories.map((cat: any) => (
                           <span key={cat.id} className="bg-info text-white backdrop-blur px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-primary shadow-sm truncate">
                             {cat.name}
@@ -292,16 +289,13 @@ export function ProductCatalog() {
                       </button>
 
                       <button
-                        disabled={!canPurchase}
-                        className={`p-2.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-xs font-black flex-1 uppercase tracking-tight ${canPurchase
-                            ? 'bg-primary text-white hover:bg-indigo-700 shadow-primary/20 cursor-pointer active:scale-95'
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed grayscale'
-                          }`}
+                        className={`p-2.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-xs font-black flex-1 uppercase tracking-tight
+                          bg-primary text-white hover:bg-indigo-700 shadow-primary/20 cursor-pointer active:scale-95`}
                         onClick={() => handleReserve(p.id)}
-                        title={!canPurchase ? t("notAvailable") : t("res_now")}
+                        title={t("res_now")}
                       >
-                        <Icon icon={canPurchase ? "solar:calendar-mark-bold-duotone" : "solar:cart-cross-linear"} height={22} />
-                        <span>{canPurchase ? t("res_now") : t("notAvailable")}</span>
+                        <Icon icon={"solar:calendar-mark-bold-duotone"} height={22} />
+                        <span>{t("res_now")}</span>
                       </button>
                     </div>
                   </div>
