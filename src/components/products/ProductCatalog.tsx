@@ -64,8 +64,9 @@ export function ProductCatalog() {
     if (!confirmed) return;
     try {
       await api.post('orders/', { product: productId, quantity : 1 });
-      showSuccessAlert(t("reserveSuccess"));
       loadData(userLocation?.lat, userLocation?.lng, radius);
+      showSuccessAlert(t("reserveSuccess"));
+      navigate('/cliente/reservas');
     } catch (e: any) {
       showErrorAlert(e.response?.data?.error || t("reserveError"));
     }
