@@ -170,16 +170,19 @@ const TopBanner: React.FC<NavbarProps> = () => {
                
                {/* Selector de Idioma, Modo Oscuro y Accesibilidad en Mobile */}
                <div className="pt-4 sm:pt-6 border-t border-white/10">
-                 <div className="flex items-center gap-2 px-4 sm:px-6">
+                 <div className="flex items-center justify-center gap-6 px-4 sm:px-6">
+                   {/* Botón de Modo Oscuro */}
                    <button
                      onClick={toggleMode}
-                     className="p-1.5 rounded-xl hover:bg-white/20 dark:hover:bg-slate-800 text-white transition-all focus:ring-0 flex-1"
+                     className="p-2 rounded-xl text-white hover:bg-white/20 transition-all focus:ring-0 flex items-center justify-center"
                      aria-label="Toggle Dark Mode"
                    >
-                     <Icon icon={mode === 'dark' ? "solar:sun-bold-duotone" : "solar:moon-stars-bold-duotone"} className="w-4 h-4" />
+                     <Icon icon={mode === 'dark' ? "solar:sun-bold-duotone" : "solar:moon-stars-bold-duotone"} className="w-5 h-5" />
                    </button>
-                   <LanguageSelector className="flex-1" />
-                   <A11yHeaderButton className="flex-1" />
+                   {/* Selector de Idioma */}
+                   <LanguageSelector variant="icon" />
+                   {/* Botón de Accesibilidad */}
+                   <A11yHeaderButton variant="icon" />
                  </div>
                </div>
             </nav>
