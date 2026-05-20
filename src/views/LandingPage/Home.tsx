@@ -154,17 +154,17 @@ const Testimonials = () => {
           {reviews.map((rev, i) => (
             <div
               key={i}
-              className="bg-white/70 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-xl border border-white/80 hover:shadow-indigo-200/50 hover:-translate-y-2 transition-all duration-500 relative group"
+              className="bg-white/90 dark:bg-slate-800 p-10 rounded-[2.5rem] shadow-xl border border-white/80 dark:border-slate-700 hover:shadow-indigo-200/50 dark:hover:shadow-indigo-900/50 hover:-translate-y-2 transition-all duration-500 relative group"
             >
               <Icon icon="solar:quote-right-bold" className="absolute top-8 right-8 text-7xl text-indigo-500/5 group-hover:scale-110 transition-transform" />
-              <p className="text-black text-lg relative z-10 mb-10 font-bold leading-relaxed">"{rev.text}"</p>
+              <p className="text-black dark:text-slate-300 text-lg relative z-10 mb-10 font-bold leading-relaxed">"{rev.text}"</p>
               <div className="flex items-center gap-4 relative z-10 mt-auto">
                 <div className={`w-14 h-14 flex items-center justify-center rounded-2xl ${cardMeta[i].bg} ${cardMeta[i].color} shadow-lg`}>
                   <Icon icon={cardMeta[i].icon} className="text-3xl" />
                 </div>
                 <div>
-                  <h4 className="font-black text-black text-lg tracking-tight">{rev.name}</h4>
-                  <span className="text-xs font-black text-black/60 uppercase tracking-widest">{rev.role}</span>
+                  <h4 className="font-black text-black dark:text-white text-lg tracking-tight">{rev.name}</h4>
+                  <span className="text-xs font-black text-black/60 dark:text-slate-400 uppercase tracking-widest">{rev.role}</span>
                 </div>
               </div>
             </div>
@@ -369,14 +369,14 @@ const Features = () => {
               key={index}
               data-aos="fade-up"
               data-aos-delay={index * 100}
-              className="group relative bg-white/60 backdrop-blur-2xl p-10 rounded-[2.5rem] border border-white/60 hover:border-indigo-300 shadow-xl shadow-indigo-100/50 hover:shadow-indigo-200/50 transition-all duration-500 transform hover:-translate-y-3 overflow-hidden"
+              className="group relative bg-white/90 dark:bg-slate-800 p-10 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 shadow-xl shadow-indigo-100/50 dark:shadow-none hover:shadow-indigo-200/50 transition-all duration-500 transform hover:-translate-y-3 overflow-hidden"
             >
               <div className={`absolute top-0 right-0 w-40 h-40 bg-gradient-to-br ${featureColors[index]} rounded-full blur-[100px] opacity-0 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none`}></div>
               <div className={`w-16 h-16 rounded-2xl mb-8 flex items-center justify-center bg-gradient-to-br ${featureColors[index]} shadow-2xl text-white transform group-hover:scale-110 group-hover:rotate-[12deg] transition-all duration-500`}>
                 <Icon icon={featureIcons[index]} className="text-4xl drop-shadow-lg" />
               </div>
               <h3 className="text-2xl font-black text-indigo-950 dark:text-white mb-3 tracking-tighter">{feature.title}</h3>
-              <p className="text-black leading-relaxed font-bold">{feature.desc}</p>
+              <p className="text-black dark:text-slate-300 leading-relaxed font-bold">{feature.desc}</p>
             </div>
           ))}
         </div>
@@ -513,10 +513,10 @@ const Home = () => {
           <section className="bg-transparent">
             <HowItWorks />
           </section>
-          <section className="py-24 bg-white/30 dark:bg-slate-900/40 backdrop-blur-sm">
+          <section className="py-24 bg-indigo-50/30 dark:bg-slate-800 backdrop-blur-sm">
             <VisualCatalog />
           </section>
-          <section className="bg-indigo-950/[0.06] dark:bg-slate-900/60 backdrop-blur-xl py-20 border-b border-white/20">
+          <section className="bg-indigo-50/50 dark:bg-slate-900 py-20 border-b border-indigo-100 dark:border-slate-800">
             <Testimonials />
           </section>
           <section className="bg-transparent">
